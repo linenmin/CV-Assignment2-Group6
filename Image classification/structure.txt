@@ -1,0 +1,9 @@
+Image classification/
+├── shared.py            # 共享常量、load_module、NegativeSmoothBCELoss
+├── 01_explore_data.py   # 数据探索 + PNG 转换
+├── 02_dataset.py        # VOCDataset（库模块）
+├── 03_model.py          # ResNet-50（库模块）
+├── 04_train.py          # 两阶段训练
+├── 05_evaluate.py       # mAP 评估 + 最优阈值
+├── 06_predict.py        # 测试集推理 + 生成 CSV
+└── run_pipeline.py      # 一键从头跑到尾 ← 新增

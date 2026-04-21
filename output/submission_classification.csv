@@ -1,0 +1,751 @@
+Id,Predicted
+0_classification,15 1 20 1
+1_classification,9 1 11 1 16 1 18 1
+2_classification,9 1 18 1
+3_classification,2 1
+4_classification,9 1 11 1 15 1
+5_classification,20 1
+6_classification,4 1
+7_classification,13 1 15 1
+8_classification,15 1
+9_classification,14 1
+10_classification,16 1
+11_classification,13 1
+12_classification,8 1
+13_classification,13 1 15 1
+14_classification,13 1
+15_classification,
+16_classification,19 1
+17_classification,6 1
+18_classification,12 1
+19_classification,7 1
+20_classification,14 1
+21_classification,19 1
+22_classification,3 1
+23_classification,20 1
+24_classification,5 1
+25_classification,4 1
+26_classification,7 1 14 1
+27_classification,6 1
+28_classification,10 1 12 1
+29_classification,1 1
+30_classification,9 1 11 1
+31_classification,2 1
+32_classification,14 2
+33_classification,2 1
+34_classification,3 1
+35_classification,15 1
+36_classification,2 1 14 2
+37_classification,15 2
+38_classification,12 1
+39_classification,6 2
+40_classification,19 1
+41_classification,3 1
+42_classification,7 1
+43_classification,1 1
+44_classification,4 1
+45_classification,3 1
+46_classification,13 1 15 1
+47_classification,5 1 11 1
+48_classification,1 1
+49_classification,8 1
+50_classification,7 1 14 2
+51_classification,19 1
+52_classification,8 1
+53_classification,10 1
+54_classification,17 1
+55_classification,5 1 15 1
+56_classification,12 2 15 1
+57_classification,15 1
+58_classification,9 1 18 1 20 1
+59_classification,13 1
+60_classification,14 2
+61_classification,12 1
+62_classification,20 1
+63_classification,8 1
+64_classification,13 1 15 1
+65_classification,3 1
+66_classification,3 1 15 1
+67_classification,9 1 11 1
+68_classification,9 1 11 1
+69_classification,15 1
+70_classification,20 1
+71_classification,4 1
+72_classification,15 1
+73_classification,4 1
+74_classification,17 1
+75_classification,12 1
+76_classification,2 1 7 1 14 2
+77_classification,6 2
+78_classification,2 1 7 1
+79_classification,19 1
+80_classification,
+81_classification,14 2
+82_classification,5 1
+83_classification,20 1
+84_classification,5 1
+85_classification,9 1 11 1
+86_classification,13 1
+87_classification,14 1
+88_classification,12 2
+89_classification,14 2
+90_classification,6 1
+91_classification,4 1
+92_classification,15 1
+93_classification,6 1
+94_classification,4 1
+95_classification,16 1
+96_classification,1 1 4 1
+97_classification,4 1
+98_classification,13 1
+99_classification,15 1
+100_classification,1 1
+101_classification,6 1
+102_classification,8 1
+103_classification,20 1
+104_classification,17 1
+105_classification,3 1
+106_classification,5 1 15 1
+107_classification,3 1
+108_classification,20 1
+109_classification,13 1
+110_classification,8 1
+111_classification,9 1 11 1 16 1 18 1
+112_classification,16 1
+113_classification,1 1
+114_classification,19 2
+115_classification,10 1 16 1
+116_classification,13 1
+117_classification,20 1
+118_classification,13 1
+119_classification,3 1
+120_classification,8 1
+121_classification,20 1
+122_classification,1 1
+123_classification,10 1
+124_classification,7 1
+125_classification,14 1
+126_classification,
+127_classification,19 1
+128_classification,9 1 11 1 16 1 18 1
+129_classification,4 1
+130_classification,14 1 16 1
+131_classification,5 1 11 1 15 1
+132_classification,14 2
+133_classification,9 1 11 1 18 1
+134_classification,1 1
+135_classification,8 1 12 1
+136_classification,5 1 11 1 15 1
+137_classification,2 1 15 1
+138_classification,
+139_classification,8 1
+140_classification,2 1 15 1
+141_classification,15 1
+142_classification,3 1
+143_classification,6 1
+144_classification,10 1 17 1
+145_classification,11 1 15 1
+146_classification,13 1 15 1
+147_classification,10 1 13 1
+148_classification,20 1
+149_classification,1 1
+150_classification,16 1
+151_classification,6 1
+152_classification,4 1 7 1
+153_classification,18 1
+154_classification,5 1
+155_classification,6 2
+156_classification,14 1 19 1
+157_classification,17 1
+158_classification,15 1
+159_classification,4 1
+160_classification,15 1
+161_classification,19 1
+162_classification,4 1
+163_classification,1 1 3 1
+164_classification,10 1 13 1
+165_classification,15 1
+166_classification,13 1 15 1
+167_classification,2 1 7 1 15 1
+168_classification,8 1
+169_classification,15 1
+170_classification,15 1
+171_classification,10 1
+172_classification,3 1
+173_classification,12 1
+174_classification,13 1
+175_classification,3 1
+176_classification,8 1
+177_classification,11 1 15 1
+178_classification,6 1
+179_classification,6 2
+180_classification,2 1
+181_classification,14 2
+182_classification,19 1
+183_classification,4 1
+184_classification,1 1 4 1
+185_classification,8 1
+186_classification,12 2
+187_classification,10 1 13 1
+188_classification,1 1
+189_classification,2 1 15 1
+190_classification,7 1
+191_classification,19 1
+192_classification,11 1 20 1
+193_classification,9 1 11 1 20 1
+194_classification,7 1
+195_classification,15 1
+196_classification,17 1
+197_classification,13 1 15 1
+198_classification,10 1
+199_classification,9 1 11 1 15 1
+200_classification,14 2
+201_classification,9 1 11 1 18 1 20 1
+202_classification,2 1
+203_classification,15 1
+204_classification,1 1
+205_classification,8 1
+206_classification,4 1
+207_classification,13 1 15 1
+208_classification,9 1 18 1
+209_classification,14 1
+210_classification,14 2
+211_classification,3 1
+212_classification,6 2
+213_classification,5 1 7 1
+214_classification,10 1 12 1
+215_classification,9 1 18 1
+216_classification,19 1
+217_classification,4 1 16 1 19 1
+218_classification,4 1
+219_classification,4 1 16 1
+220_classification,
+221_classification,1 1
+222_classification,9 1 18 1 20 1
+223_classification,3 1
+224_classification,10 1
+225_classification,20 1
+226_classification,14 1
+227_classification,3 1
+228_classification,
+229_classification,7 1
+230_classification,14 2
+231_classification,12 2
+232_classification,4 1
+233_classification,19 1
+234_classification,10 1 13 1
+235_classification,8 1
+236_classification,13 1 15 1
+237_classification,4 1
+238_classification,16 1
+239_classification,15 1
+240_classification,20 1
+241_classification,6 1
+242_classification,13 1
+243_classification,12 1
+244_classification,4 1
+245_classification,1 1
+246_classification,12 1
+247_classification,8 1
+248_classification,3 1
+249_classification,4 1 11 1
+250_classification,3 1 5 1
+251_classification,12 1 15 1
+252_classification,3 1
+253_classification,19 1
+254_classification,13 1 15 1
+255_classification,20 1
+256_classification,8 1
+257_classification,7 1
+258_classification,11 1 15 1
+259_classification,7 1
+260_classification,6 1 15 1
+261_classification,5 1 11 1
+262_classification,3 1
+263_classification,
+264_classification,9 1 11 1 15 1
+265_classification,10 1 13 1 15 1
+266_classification,5 1
+267_classification,19 1
+268_classification,
+269_classification,19 1
+270_classification,1 1
+271_classification,1 1
+272_classification,9 1 18 1
+273_classification,15 1
+274_classification,12 2 15 1
+275_classification,5 1
+276_classification,20 1
+277_classification,3 1
+278_classification,12 1
+279_classification,9 1 11 1 14 1
+280_classification,7 1
+281_classification,13 1
+282_classification,2 1 15 1
+283_classification,3 1
+284_classification,14 2
+285_classification,5 1 11 1 15 1
+286_classification,16 1
+287_classification,2 1
+288_classification,13 1
+289_classification,20 1
+290_classification,9 1 11 1 18 1
+291_classification,10 1 13 1
+292_classification,19 1
+293_classification,10 1 13 1
+294_classification,16 1
+295_classification,3 1
+296_classification,12 1
+297_classification,6 1
+298_classification,9 1 11 1 15 1
+299_classification,3 1
+300_classification,7 1 15 1
+301_classification,14 1
+302_classification,17 1
+303_classification,19 1
+304_classification,13 1
+305_classification,12 1
+306_classification,13 1
+307_classification,2 1 15 1
+308_classification,12 1
+309_classification,3 1
+310_classification,9 1 18 1
+311_classification,4 1
+312_classification,15 1
+313_classification,20 1
+314_classification,5 1
+315_classification,15 1
+316_classification,3 1
+317_classification,10 1 17 1
+318_classification,10 1 13 1
+319_classification,15 2
+320_classification,15 1
+321_classification,6 1
+322_classification,6 2
+323_classification,12 1
+324_classification,2 1
+325_classification,12 1
+326_classification,17 1
+327_classification,1 1
+328_classification,3 1
+329_classification,20 1
+330_classification,3 1 12 1
+331_classification,5 1
+332_classification,3 1 12 1
+333_classification,19 1
+334_classification,6 2 19 1
+335_classification,20 1
+336_classification,14 2
+337_classification,11 1 15 1
+338_classification,10 1 13 1
+339_classification,3 1 17 1
+340_classification,16 1
+341_classification,5 1 11 1
+342_classification,7 1 19 1
+343_classification,4 1
+344_classification,9 1 18 1
+345_classification,12 2 15 1
+346_classification,15 1
+347_classification,3 1
+348_classification,10 1 13 1
+349_classification,12 1
+350_classification,10 1 13 1
+351_classification,7 1 13 1
+352_classification,13 1
+353_classification,19 1
+354_classification,2 1 14 2
+355_classification,4 1
+356_classification,10 1
+357_classification,8 1
+358_classification,6 2
+359_classification,5 1 11 1
+360_classification,20 1
+361_classification,16 1
+362_classification,12 1
+363_classification,3 1
+364_classification,2 1
+365_classification,2 1 7 1
+366_classification,19 1
+367_classification,7 1
+368_classification,1 1
+369_classification,1 1
+370_classification,3 1
+371_classification,13 1 15 1
+372_classification,3 1
+373_classification,8 1
+374_classification,6 2 19 1
+375_classification,9 1 11 1 15 1 20 1
+376_classification,7 1 14 2
+377_classification,14 2
+378_classification,1 1
+379_classification,9 1 11 2 15 1
+380_classification,3 1
+381_classification,1 1
+382_classification,16 1
+383_classification,20 1
+384_classification,8 1 12 1
+385_classification,
+386_classification,19 1
+387_classification,20 1
+388_classification,1 1
+389_classification,6 1
+390_classification,11 1 15 1
+391_classification,19 1
+392_classification,6 1
+393_classification,4 1
+394_classification,8 1
+395_classification,7 1
+396_classification,9 1 18 1
+397_classification,3 1
+398_classification,17 1
+399_classification,16 1 20 1
+400_classification,6 1 19 1
+401_classification,11 1 15 1
+402_classification,7 1 14 2
+403_classification,5 1 15 1
+404_classification,
+405_classification,7 1
+406_classification,7 1 10 1
+407_classification,15 1
+408_classification,9 1 11 1 15 1
+409_classification,8 1
+410_classification,1 1
+411_classification,8 1
+412_classification,5 1
+413_classification,
+414_classification,5 1
+415_classification,19 1
+416_classification,2 1 5 1 15 1
+417_classification,11 1
+418_classification,19 1
+419_classification,6 1
+420_classification,19 1
+421_classification,16 1
+422_classification,17 1
+423_classification,17 1
+424_classification,1 1
+425_classification,6 2
+426_classification,19 1
+427_classification,16 1 20 1
+428_classification,1 1 3 1
+429_classification,10 1
+430_classification,13 1
+431_classification,15 1
+432_classification,15 1
+433_classification,9 1 18 1 20 1
+434_classification,8 1
+435_classification,1 1
+436_classification,
+437_classification,12 1
+438_classification,3 1
+439_classification,4 1
+440_classification,
+441_classification,15 1
+442_classification,3 1
+443_classification,8 1
+444_classification,
+445_classification,8 1
+446_classification,8 1
+447_classification,9 1 18 1
+448_classification,2 1 15 1
+449_classification,18 1
+450_classification,3 1 12 2
+451_classification,3 1
+452_classification,14 1
+453_classification,8 1 12 1 14 1
+454_classification,8 1
+455_classification,7 1
+456_classification,8 1 12 1
+457_classification,14 1
+458_classification,9 1 15 1 18 1
+459_classification,14 1
+460_classification,4 1
+461_classification,14 2
+462_classification,2 1 14 1
+463_classification,9 1 11 1 18 1
+464_classification,7 1
+465_classification,15 1
+466_classification,13 1
+467_classification,13 1
+468_classification,10 1 13 1 15 1
+469_classification,19 1
+470_classification,19 1
+471_classification,1 1
+472_classification,18 1
+473_classification,1 1
+474_classification,13 1
+475_classification,8 1
+476_classification,12 1
+477_classification,4 1 11 1
+478_classification,10 1
+479_classification,3 1
+480_classification,5 1 11 1
+481_classification,
+482_classification,20 1
+483_classification,14 1
+484_classification,1 1
+485_classification,8 1
+486_classification,17 1
+487_classification,15 1 20 1
+488_classification,7 1 14 1
+489_classification,3 1
+490_classification,7 1 10 1
+491_classification,9 1 14 2
+492_classification,12 1
+493_classification,3 1
+494_classification,3 1
+495_classification,3 1
+496_classification,8 1
+497_classification,6 1
+498_classification,6 1
+499_classification,8 1
+500_classification,10 1 13 1
+501_classification,9 1 11 1
+502_classification,2 1 15 1
+503_classification,1 1
+504_classification,19 1
+505_classification,4 1
+506_classification,15 1
+507_classification,7 1
+508_classification,5 1 11 1 15 1
+509_classification,13 1
+510_classification,3 1
+511_classification,1 1
+512_classification,13 1 15 1
+513_classification,8 1
+514_classification,2 1 7 1 15 1
+515_classification,19 1
+516_classification,13 1
+517_classification,19 1
+518_classification,13 1
+519_classification,9 1 18 1
+520_classification,19 1
+521_classification,2 1 15 1
+522_classification,11 1 15 1
+523_classification,14 1 19 1
+524_classification,8 1
+525_classification,19 1
+526_classification,2 1 7 1
+527_classification,4 1
+528_classification,10 1
+529_classification,12 1
+530_classification,10 1
+531_classification,3 2
+532_classification,15 1
+533_classification,1 1
+534_classification,5 1 11 1 15 1
+535_classification,12 1
+536_classification,14 1
+537_classification,5 1 11 1
+538_classification,8 1
+539_classification,3 1
+540_classification,18 1
+541_classification,10 1
+542_classification,13 1
+543_classification,18 1
+544_classification,12 1
+545_classification,12 1
+546_classification,9 1 18 1
+547_classification,2 1
+548_classification,9 1 11 1 20 1
+549_classification,20 1
+550_classification,17 1
+551_classification,9 1 11 1 15 1
+552_classification,15 1
+553_classification,11 1 15 1
+554_classification,9 1 18 1
+555_classification,4 1
+556_classification,14 2
+557_classification,3 1
+558_classification,6 1
+559_classification,5 1 11 1
+560_classification,1 1
+561_classification,12 2 15 1
+562_classification,19 1
+563_classification,20 1
+564_classification,5 1
+565_classification,2 1 15 1
+566_classification,15 1
+567_classification,3 1
+568_classification,9 1 18 1
+569_classification,8 1
+570_classification,13 1 15 1
+571_classification,3 1
+572_classification,12 1
+573_classification,12 1
+574_classification,17 1
+575_classification,13 1
+576_classification,14 2
+577_classification,12 1
+578_classification,12 1
+579_classification,8 1 12 1
+580_classification,15 1
+581_classification,17 1
+582_classification,15 1
+583_classification,9 1 11 1 18 1
+584_classification,5 1
+585_classification,
+586_classification,6 1
+587_classification,8 1
+588_classification,
+589_classification,12 1
+590_classification,5 1 11 1
+591_classification,4 1
+592_classification,9 1 11 1
+593_classification,1 1
+594_classification,15 1
+595_classification,6 1
+596_classification,4 1 19 1
+597_classification,2 1
+598_classification,10 1 15 1
+599_classification,19 1
+600_classification,4 1
+601_classification,17 1
+602_classification,1 1
+603_classification,3 1
+604_classification,3 1
+605_classification,10 1
+606_classification,2 1 16 1
+607_classification,7 1
+608_classification,12 1
+609_classification,11 1 15 1
+610_classification,19 1
+611_classification,12 1
+612_classification,8 1
+613_classification,6 2
+614_classification,10 1
+615_classification,
+616_classification,2 1 11 1 15 1
+617_classification,5 1
+618_classification,1 1
+619_classification,1 1
+620_classification,3 1
+621_classification,2 1 20 1
+622_classification,5 1
+623_classification,4 1
+624_classification,9 1 11 1
+625_classification,2 1 14 2
+626_classification,10 1 13 1
+627_classification,9 1 11 1 16 1
+628_classification,10 1 12 2
+629_classification,17 1
+630_classification,12 1
+631_classification,2 1
+632_classification,19 1
+633_classification,17 1
+634_classification,8 1 12 1
+635_classification,16 1
+636_classification,15 1
+637_classification,6 1
+638_classification,5 1
+639_classification,4 1
+640_classification,2 1 15 1
+641_classification,15 1
+642_classification,5 1
+643_classification,2 1 15 1
+644_classification,12 1
+645_classification,3 1
+646_classification,11 1
+647_classification,19 1
+648_classification,5 1
+649_classification,9 1 18 1
+650_classification,2 1 14 2
+651_classification,
+652_classification,13 1
+653_classification,5 1
+654_classification,11 1 15 1
+655_classification,19 1
+656_classification,15 1
+657_classification,13 1
+658_classification,20 1
+659_classification,8 1
+660_classification,9 1 18 1
+661_classification,6 2
+662_classification,3 1
+663_classification,17 1
+664_classification,13 1
+665_classification,5 1 11 1 15 1
+666_classification,18 1
+667_classification,7 1
+668_classification,5 1 15 1
+669_classification,12 2 15 1
+670_classification,19 1
+671_classification,15 1
+672_classification,1 1
+673_classification,11 1 16 1
+674_classification,10 1 13 1
+675_classification,14 2
+676_classification,2 1 14 1
+677_classification,9 1 11 1 18 1 20 1
+678_classification,19 1
+679_classification,3 1
+680_classification,3 1
+681_classification,3 1
+682_classification,20 1
+683_classification,1 1
+684_classification,10 1 13 1
+685_classification,9 1 11 1 15 2
+686_classification,10 1 15 1
+687_classification,
+688_classification,15 1
+689_classification,2 1 20 1
+690_classification,20 1
+691_classification,12 2
+692_classification,8 1
+693_classification,4 1
+694_classification,10 1 13 1
+695_classification,14 2
+696_classification,20 1
+697_classification,15 1
+698_classification,15 2
+699_classification,19 1
+700_classification,11 1 15 1
+701_classification,13 3
+702_classification,14 2
+703_classification,11 1 15 1
+704_classification,8 1
+705_classification,1 1
+706_classification,2 1 15 2
+707_classification,
+708_classification,20 1
+709_classification,15 1
+710_classification,8 1 12 1
+711_classification,2 1 14 1 20 1
+712_classification,10 1 13 1
+713_classification,
+714_classification,
+715_classification,12 1
+716_classification,19 1
+717_classification,4 1
+718_classification,7 1 14 1
+719_classification,19 1
+720_classification,12 1
+721_classification,5 1
+722_classification,18 1
+723_classification,1 1
+724_classification,11 1 15 1
+725_classification,13 1 15 1
+726_classification,7 1
+727_classification,14 1 19 1
+728_classification,9 1 11 1
+729_classification,8 1
+730_classification,12 1
+731_classification,11 1 15 1
+732_classification,10 1 12 1
+733_classification,6 2
+734_classification,1 1
+735_classification,10 1 13 1 15 1
+736_classification,9 1 11 1
+737_classification,
+738_classification,6 1
+739_classification,9 1 11 1 15 1 20 1
+740_classification,10 1
+741_classification,6 1
+742_classification,5 1 11 1 15 1
+743_classification,14 1
+744_classification,2 1
+745_classification,10 1 12 2
+746_classification,8 1
+747_classification,3 1
+748_classification,11 1 15 1
+749_classification,16 1
