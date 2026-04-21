@@ -24,6 +24,7 @@ def register_project_modules() -> None:
 
     # Import custom dataset and transforms so custom_imports are not the only
     # registration path. This keeps tests and local scripts consistent.
+    import ga2_seg.early_stopping  # noqa: F401
     import ga2_seg.mmseg_dataset  # noqa: F401
     import ga2_seg.mmseg_transforms  # noqa: F401
 

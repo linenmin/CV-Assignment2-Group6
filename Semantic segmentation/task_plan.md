@@ -34,6 +34,7 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
   Rationale: keeps a compliant lower-assumption baseline for comparison if ADE20K initialization underperforms or raises policy questions later.
 - Training control: best-checkpoint selection plus conservative early stopping
   Rationale: segmentation curves often improve late; aggressive stopping is counterproductive.
+  Default policy: begin checking after `5` validations, then stop after `6` non-improving `mIoU` validations with `min_delta=0.1`.
 - Git workflow: work on branch `segmentation`
   Rationale: isolates semantic segmentation work from the rest of the repository.
 
@@ -53,4 +54,4 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 
 ## Status
 
-**Currently in Phase 8** - Submission export is in place, the ADE20K sanity run completed, and the first full training run is next.
+**Currently in Phase 8** - Submission export is in place, delayed early stopping is wired in, and the first full training run is next.

@@ -69,10 +69,18 @@
   - command: `python .\scripts\train.py --max-iters 2 --val-interval 1 --batch-size 2 --num-workers 0 --work-dir .\outputs\logs\exp_v1_ade20k_sanity`
   - result: training completed and saved `best_mIoU_iter_2.pth`
   - implication: the official `ADE20K` checkpoint loads correctly in the current environment and the project is ready for the first long run
+- Implemented conservative delayed early stopping for long runs:
+  - hook: `DelayedEarlyStoppingHook`
+  - activation: start checking after `5` validation records
+  - stop rule: no `mIoU` improvement larger than `0.1` for `6` validations
+  - reason: preserve late-improvement headroom while still preventing unproductive full-length runs
+- Re-ran the pretrained sanity training with the early-stopping hook enabled:
+  - command: `python .\scripts\train.py --max-iters 2 --val-interval 1 --batch-size 2 --num-workers 0 --work-dir .\outputs\logs\exp_v1_ade20k_sanity_earlystop`
+  - result: training still completed successfully and saved `best_mIoU_iter_2.pth`
 
 ## Current Focus
 
-- Commit the updated plan state, push `segmentation`, then launch the first ADE20K-initialized long run.
+- Commit the early-stopping update, push `segmentation`, then launch the first ADE20K-initialized long run.
 
 ## Verification Notes
 
@@ -83,6 +91,7 @@
   - `python .\\scripts\\build_splits.py`
   - `python .\\scripts\\train.py --max-iters 1 --val-interval 1 --batch-size 1 --num-workers 0 --no-pretrained --work-dir .\\outputs\\logs\\smoke_train`
   - `python .\\scripts\\train.py --max-iters 2 --val-interval 1 --batch-size 2 --num-workers 0 --work-dir .\\outputs\\logs\\exp_v1_ade20k_sanity`
+  - `python .\\scripts\\train.py --max-iters 2 --val-interval 1 --batch-size 2 --num-workers 0 --work-dir .\\outputs\\logs\\exp_v1_ade20k_sanity_earlystop`
   - `python .\\scripts\\validate.py --checkpoint .\\outputs\\logs\\smoke_train\\best_mIoU_iter_1.pth --num-workers 0`
   - `python .\\scripts\\predict_test_segmentation.py --checkpoint .\\outputs\\logs\\smoke_train\\best_mIoU_iter_1.pth --output-dir .\\outputs\\predictions\\test_smoke_submission`
   - `python .\\scripts\\export_submission.py --prediction-dir .\\outputs\\predictions\\test_smoke_submission --output-path .\\outputs\\submissions\\submission.csv --classification-fill 0`

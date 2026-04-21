@@ -74,6 +74,10 @@
   - checkpoint download and initialization succeeded
   - a 2-iteration training run produced a valid best checkpoint
   - this removes the main remaining uncertainty before the first long run
+- The project now contains a local delayed early-stopping hook for iterative training.
+  - default policy: wait for `5` validations before activation
+  - stop only after `6` non-improving `mIoU` validations with `min_delta=0.1`
+  - this matches the agreed training strategy better than relying on `save_best` alone
 - Current repository state is good enough for:
   - project structure
   - data analysis and visualization

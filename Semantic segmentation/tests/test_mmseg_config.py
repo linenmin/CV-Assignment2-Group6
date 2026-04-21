@@ -22,3 +22,16 @@ def test_dataset_config_uses_custom_npy_transforms():
     second_train_transform = cfg.train_dataloader.dataset.pipeline[1]["type"]
     assert first_train_transform == "LoadNpyImageFromFile"
     assert second_train_transform == "LoadNpySegAnnotations"
+
+
+def test_runtime_config_enables_delayed_early_stopping():
+    config_path = (
+        r"D:\BaiduNetdiskWorkspace\Leuven\8th\Computer Vision\assignment\Group2\Semantic segmentation"
+        r"\configs\experiments\segnext_s_512x512_adamw_poly_v1.py"
+    )
+    cfg = Config.fromfile(config_path)
+    early_stop_hook = cfg.custom_hooks[0]
+    assert early_stop_hook["type"] == "DelayedEarlyStoppingHook"
+    assert early_stop_hook["monitor"] == "mIoU"
+    assert early_stop_hook["begin"] == 5
+    assert early_stop_hook["patience"] == 6

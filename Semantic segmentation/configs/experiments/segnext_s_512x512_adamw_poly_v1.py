@@ -1,5 +1,6 @@
 custom_imports = dict(
     imports=[
+        "ga2_seg.early_stopping",
         "ga2_seg.mmseg_dataset",
         "ga2_seg.mmseg_transforms",
     ],
@@ -36,4 +37,17 @@ param_scheduler = [
 ]
 
 randomness = dict(seed=42)
+
+custom_hooks = [
+    dict(
+        type="DelayedEarlyStoppingHook",
+        monitor="mIoU",
+        rule="greater",
+        min_delta=0.1,
+        patience=6,
+        begin=5,
+        strict=False,
+    ),
+]
+
 work_dir = "./outputs/logs/segnext_s_512x512_adamw_poly_v1"
