@@ -1,6 +1,9 @@
 numpy
+numpy<2
+setuptools<81
+mmengine==0.10.7
+mmsegmentation==1.2.2
 pandas
 matplotlib
 opencv-python
 pytest
-

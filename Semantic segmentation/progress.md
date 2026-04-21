@@ -6,7 +6,7 @@
 
 - Created branch `segmentation`.
 - Confirmed the user-approved baseline direction: `MMSegmentation + SegNeXt-S`.
-- Verified `gpu_env` is the correct execution environment for this project.
+- Built and validated a dedicated `seg_gpu_env` for this project.
 - Confirmed official `SegNeXt` sources provide:
   - `IN-1K` pretrained `MSCAN-S` backbone weights
   - `ADE20K` full segmentation checkpoints in MMSegmentation
@@ -35,16 +35,29 @@
   - `mmcv-lite`
   - `ftfy`
 - Added `SegNeXt-S` experiment config using the official `ADE20K` checkpoint as the default initialization.
-- Confirmed current blocker:
-  - `Config.fromfile(...)` works
-  - `mmseg` dataset build still fails on Windows because `mmseg.datasets` imports `mmcv.ops`, which expects `mmcv._ext`
+- Added shared runtime compatibility helpers for:
+  - `mmseg` module registration
+  - Windows OpenMP duplicate-runtime handling
+  - Windows `mmengine collect_env` locale decoding fallback
+- Added maintainable entrypoints:
+  - `scripts/train.py`
+  - `scripts/validate.py`
+- Fixed the validation pipeline shape mismatch by removing `Resize` from the val/test pipeline.
+- Verified in `seg_gpu_env`:
+  - full pytest suite passes
+  - `analyze_dataset.py`, `visualize_samples.py`, and `build_splits.py` run successfully
+  - a one-iteration training smoke run completes and writes checkpoints
+  - validation from the same training run reports metrics successfully
 
 ## Current Focus
 
-- Package the working progress into a clean branch commit, while clearly recording the current `mmcv._ext` blocker for the next iteration.
+- Package the working progress into a clean branch commit, push the branch, and notify via Discord.
 
 ## Verification Notes
 
-- Fresh verification required before commit and push:
-  - full pytest suite in `Semantic segmentation/tests`
-  - smoke runs of `analyze_dataset.py`, `visualize_samples.py`, and `build_splits.py`
+- Latest verification completed in `seg_gpu_env`:
+  - `python -m pytest .\\tests -v`
+  - `python .\\scripts\\analyze_dataset.py`
+  - `python .\\scripts\\visualize_samples.py --num-samples 2`
+  - `python .\\scripts\\build_splits.py`
+  - `python .\\scripts\\train.py --max-iters 1 --val-interval 1 --batch-size 1 --num-workers 0 --no-pretrained --work-dir .\\outputs\\logs\\smoke_train`

@@ -1,5 +1,9 @@
 from pathlib import Path
 
+from .runtime_compat import configure_windows_runtime
+
+configure_windows_runtime()
+
 import matplotlib
 
 matplotlib.use("Agg")
@@ -107,4 +111,3 @@ def save_transform_preview(output_path: Path, sample_index: int = 0) -> Path:
     fig.savefig(output_path, dpi=160)
     plt.close(fig)
     return output_path
-

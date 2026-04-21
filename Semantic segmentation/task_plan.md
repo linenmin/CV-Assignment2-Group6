@@ -9,9 +9,9 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - [x] Phase 1: Research candidate models and verify official pretrained support
 - [x] Phase 2: Inspect dataset structure and identify preprocessing risks
 - [x] Phase 3: Review design and directory structure
-- [ ] Phase 4: Implement data analysis and visualization scripts
-- [ ] Phase 5: Implement custom dataset conversion / config / training entrypoints
-- [ ] Phase 6: Run baseline training and validate outputs
+- [x] Phase 4: Implement data analysis and visualization scripts
+- [x] Phase 5: Implement custom dataset conversion / config / training entrypoints
+- [x] Phase 6: Run baseline training and validate outputs
 - [ ] Phase 7: Commit, push branch, and notify via Discord
 
 ## Key Questions
@@ -39,10 +39,15 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 ## Errors Encountered
 
 - Base Python environment has a broken `numpy/pandas` binary combination.
-  Resolution: all analysis and training work must run through `conda run -n gpu_env ...` or `conda activate gpu_env`.
-- `mmseg` dataset construction currently fails on Windows with `ModuleNotFoundError: No module named 'mmcv._ext'`.
-  Resolution: not yet resolved in this session; current checkpoint stops before training loop startup and records the blocker for the next iteration.
+  Resolution: use the dedicated `seg_gpu_env` instead of the base environment.
+- Windows training hit three framework/runtime issues:
+  - missing `mmcv._ext` in the old environment
+  - `OpenMP` duplicate runtime crashes in plotting
+  - `mmengine` locale decode failure while collecting compiler info
+  Resolution: use `seg_gpu_env` with full `mmcv`, add a Windows compatibility layer, and patch `mmengine collect_env` narrowly in project runtime code.
+- Validation originally resized masks before evaluation, which broke `IoUMetric` shape alignment.
+  Resolution: keep val/test samples at original resolution.
 
 ## Status
 
-**Currently in Phase 5** - Packaging the working data-analysis and config progress, with the `mmcv._ext` runtime blocker documented for the next implementation pass.
+**Currently in Phase 7** - Finalizing commit, push, and Discord notification after verified smoke training.

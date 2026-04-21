@@ -1,6 +1,6 @@
 import numpy as np
 from mmcv.transforms import BaseTransform
-from mmseg.registry import TRANSFORMS
+from mmengine.registry import TRANSFORMS
 
 
 @TRANSFORMS.register_module()
@@ -20,4 +20,3 @@ class LoadNpySegAnnotations(BaseTransform):
         results["gt_seg_map"] = seg_map
         results.setdefault("seg_fields", []).append("gt_seg_map")
         return results
-

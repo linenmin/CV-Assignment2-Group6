@@ -16,7 +16,6 @@ train_pipeline = [
 test_pipeline = [
     dict(type="LoadNpyImageFromFile"),
     dict(type="LoadNpySegAnnotations"),
-    dict(type="Resize", scale=(1024, 512), keep_ratio=True),
     dict(type="PackSegInputs"),
 ]
 

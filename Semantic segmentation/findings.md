@@ -45,10 +45,27 @@
 ## Engineering Findings
 
 - The base Python environment is broken for `numpy/pandas`.
-- `gpu_env` is healthy and should be the only environment used for analysis and training.
+- A dedicated `seg_gpu_env` is the stable execution environment for this project.
+- `seg_gpu_env` requires:
+  - `python 3.11`
+  - full `mmcv 2.1.0` wheel matching `torch 2.1 + cu121`
+  - `numpy<2`
+  - `setuptools<81`
 - Because the dataset is small and imbalanced, the first implementation milestone should validate preprocessing visually before any long run.
-- `MMSegmentation` config loading works with the current local project configs and custom imports.
-- On this Windows + Python 3.12 environment, actual dataset building through `mmseg` still triggers a `mmcv._ext` import path via `mmseg.datasets`, which blocks full training startup for now.
-- This means the current repository state is:
-  - good enough for project structure, data analysis, visualization, split generation, and config definition
-  - not yet good enough for an end-to-end `mmseg` training launch
+- `MMSegmentation` config loading works with the local project configs and custom imports.
+- The repository now contains a shared runtime helper that:
+  - registers `mmseg` plus project-specific modules
+  - patches the Windows `mmengine collect_env` locale issue
+  - gives consistent behavior for tests and CLI scripts
+- Windows-specific runtime issues resolved in this session:
+  - `mmcv._ext` blocker avoided by moving to `seg_gpu_env` with full `mmcv`
+  - `OpenMP` duplicate runtime crash handled by a small compatibility layer
+  - `mmengine` compiler-probe decode failure handled by a narrow runtime patch
+- Validation/test pipeline should not resize masks before evaluation on this dataset.
+  - Keeping original spatial resolution avoids `pred/label` shape mismatches during `IoUMetric`.
+- Current repository state is good enough for:
+  - project structure
+  - data analysis and visualization
+  - split generation
+  - config definition
+  - one-iteration training and validation smoke runs
