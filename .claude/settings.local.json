@@ -9,7 +9,8 @@
       "Bash(D:/ProgramData/anaconda3/python.exe -c \"import torch; print\\('torch', torch.__version__\\)\")",
       "Bash(D:/ProgramData/anaconda3/envs)",
       "Read(//c/Users/31667/.conda/envs/biometrics/Lib/site-packages//**)",
-      "Bash(/c/Users/31667/.conda/envs/biometrics/python.exe -c ' *)"
+      "Bash(/c/Users/31667/.conda/envs/biometrics/python.exe -c ' *)",
+      "Bash(/c/Users/31667/.conda/envs/biometrics/python.exe \"Image classification/merge_submission.py\")"
     ]
   }
 }
