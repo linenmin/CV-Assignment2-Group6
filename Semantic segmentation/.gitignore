@@ -5,4 +5,5 @@ data/metadata/resources.json
 outputs/checkpoints/
 outputs/logs/
 outputs/predictions/
-outputs/submissions/
+outputs/submissions/*
+!outputs/submissions/*.csv
