@@ -35,3 +35,15 @@ def test_runtime_config_enables_delayed_early_stopping():
     assert early_stop_hook["monitor"] == "mIoU"
     assert early_stop_hook["begin"] == 5
     assert early_stop_hook["patience"] == 6
+
+
+def test_v2_rare_focus_config_uses_custom_split_and_crop():
+    config_path = (
+        r"D:\BaiduNetdiskWorkspace\Leuven\8th\Computer Vision\assignment\Group2\Semantic segmentation"
+        r"\configs\experiments\segnext_s_512x512_adamw_poly_v2_rare_focus.py"
+    )
+    cfg = Config.fromfile(config_path)
+    crop_transform = cfg.train_dataloader.dataset.pipeline[3]
+    assert cfg.train_dataloader.dataset.ann_file.endswith(r"train_rare_focus_v2.txt")
+    assert crop_transform["type"] == "RareClassFocusedCrop"
+    assert crop_transform["cat_max_ratio"] == 0.65

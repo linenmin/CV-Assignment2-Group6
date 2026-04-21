@@ -90,10 +90,33 @@
   - public score: `0.36281`
   - tracker file: `kaggle_scores.md`
   - interpretation: this is a usable segmentation baseline, but the score is bottlenecked by placeholder classification outputs
+- Implemented the second-round rare-focus experiment without changing backbone or pretrained initialization:
+  - duplicated training samples that contain `bicycle`, `chair`, `cow`, `sheep`, or `pottedplant`
+  - generated `data/splits/train_rare_focus_v2.txt` with `811` entries from the original `637` train ids
+  - replaced plain random crop with a rare-class-focused crop that uses the same crop size but can center on weak-class pixels
+  - tightened the single-category crop ratio from `0.75` to `0.65`
+- Verified the second-round pipeline before the long run:
+  - `python .\scripts\build_rare_focus_split.py`
+  - `python -m pytest .\tests -q`
+  - `python .\scripts\train.py --config .\configs\experiments\segnext_s_512x512_adamw_poly_v2_rare_focus.py --max-iters 1 --val-interval 1 --batch-size 1 --num-workers 0 --work-dir .\outputs\logs\smoke_v2_rare_focus`
+- Completed the second-round rare-focus training run:
+  - command: `python .\scripts\train.py --config .\configs\experiments\segnext_s_512x512_adamw_poly_v2_rare_focus.py --num-workers 0 --work-dir .\outputs\logs\exp_v2_rare_focus`
+  - stop condition: delayed early stopping triggered after the validation at `11000` iterations
+  - best checkpoint: `outputs/logs/exp_v2_rare_focus/best_mIoU_iter_4000.pth`
+  - best validation metric: `mIoU=60.29`
+  - comparison to V1: `-2.17 mIoU` versus the `62.46` baseline
+- Exported the second-round leaderboard-facing submission candidate:
+  - prediction directory: `outputs/predictions/exp_v2_rare_focus_test`
+  - submission file: `outputs/submissions/submission_exp_v2_rare_focus.csv`
+  - classification mode: placeholder `0`
+- Attempted to prepare direct Kaggle submission from this host:
+  - installed the `kaggle` CLI in `seg_gpu_env`
+  - local authentication currently returns `401 Unauthorized`
+  - implication: the V2 submission file is ready, but the Kaggle score still needs manual upload from a valid Kaggle session
 
 ## Current Focus
 
-- Maintain the Kaggle score table and plan the next iteration around real classification outputs plus segmentation refinements.
+- Record the V2 result, wait for a manual Kaggle upload, and plan a less aggressive third-round segmentation iteration.
 
 ## Verification Notes
 
@@ -106,6 +129,11 @@
   - `python .\\scripts\\train.py --max-iters 2 --val-interval 1 --batch-size 2 --num-workers 0 --work-dir .\\outputs\\logs\\exp_v1_ade20k_sanity`
   - `python .\\scripts\\train.py --max-iters 2 --val-interval 1 --batch-size 2 --num-workers 0 --work-dir .\\outputs\\logs\\exp_v1_ade20k_sanity_earlystop`
   - `python .\\scripts\\train.py --batch-size 2 --num-workers 0 --work-dir .\\outputs\\logs\\exp_v1_ade20k_main`
+  - `python .\\scripts\\build_rare_focus_split.py`
+  - `python .\\scripts\\train.py --config .\\configs\\experiments\\segnext_s_512x512_adamw_poly_v2_rare_focus.py --max-iters 1 --val-interval 1 --batch-size 1 --num-workers 0 --work-dir .\\outputs\\logs\\smoke_v2_rare_focus`
+  - `python .\\scripts\\train.py --config .\\configs\\experiments\\segnext_s_512x512_adamw_poly_v2_rare_focus.py --num-workers 0 --work-dir .\\outputs\\logs\\exp_v2_rare_focus`
   - `python .\\scripts\\validate.py --checkpoint .\\outputs\\logs\\smoke_train\\best_mIoU_iter_1.pth --num-workers 0`
   - `python .\\scripts\\predict_test_segmentation.py --checkpoint .\\outputs\\logs\\smoke_train\\best_mIoU_iter_1.pth --output-dir .\\outputs\\predictions\\test_smoke_submission`
   - `python .\\scripts\\export_submission.py --prediction-dir .\\outputs\\predictions\\test_smoke_submission --output-path .\\outputs\\submissions\\submission.csv --classification-fill 0`
+  - `python .\\scripts\\predict_test_segmentation.py --config .\\configs\\experiments\\segnext_s_512x512_adamw_poly_v2_rare_focus.py --checkpoint .\\outputs\\logs\\exp_v2_rare_focus\\best_mIoU_iter_4000.pth --output-dir .\\outputs\\predictions\\exp_v2_rare_focus_test`
+  - `python .\\scripts\\export_submission.py --prediction-dir .\\outputs\\predictions\\exp_v2_rare_focus_test --output-path .\\outputs\\submissions\\submission_exp_v2_rare_focus.csv --classification-fill 0`

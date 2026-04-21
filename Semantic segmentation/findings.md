@@ -86,11 +86,30 @@
   - submission source: `submission_exp_v1_ade20k_main.csv`
   - this score should not be interpreted as a pure segmentation ceiling because `classification` was still exported as all-zero placeholder values
   - the leaderboard gap is therefore partly a modeling gap and partly an intentionally incomplete submission pipeline
+- The second-round rare-focus experiment did not outperform the first baseline.
+  - best validation checkpoint: `best_mIoU_iter_4000.pth`
+  - best validation score: `mIoU=60.29`
+  - delta versus V1: `-2.17 mIoU`
+- The second-round tradeoff was uneven across the weak classes when comparing best checkpoints.
+  - `bicycle`: `17.83 -> 15.37`
+  - `chair`: `41.60 -> 32.05`
+  - `cow`: `18.13 -> 10.88`
+  - `pottedplant`: `44.53 -> 44.08`
+  - `sheep`: `31.98 -> 25.85`
+  - this indicates the current weak-class oversampling and focused cropping settings were too strong to improve the targeted classes reliably
+- Some non-target classes remained stable or improved, but the overall balance was worse than V1.
+  - examples of classes that stayed competitive or improved include `boat`, `car`, and `tvmonitor`
+  - the larger loss came from broad regression on several classes rather than a single collapse
+- A second-round submission candidate has been exported:
+  - submission source: `submission_exp_v2_rare_focus.csv`
+  - local Kaggle API calls currently fail with `401 Unauthorized`
+  - consequence: leaderboard comparison for V2 still requires a manual upload from a valid Kaggle session
 - Current repository state is good enough for:
   - project structure
   - data analysis and visualization
   - split generation
   - config definition
   - one-iteration training and validation smoke runs
+  - second-round rare-focus split generation and focused-crop training
   - test-time inference over the whole test set
   - `submission.csv` generation for manual Kaggle upload

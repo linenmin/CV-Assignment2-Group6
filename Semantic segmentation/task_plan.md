@@ -14,7 +14,8 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - [x] Phase 6: Run baseline training and validate outputs
 - [x] Phase 7: Commit, push branch, and notify via Discord
 - [x] Phase 8: Launch the first full ADE20K-initialized training run and capture the result
-- [ ] Phase 9: Track Kaggle leaderboard submissions and iterate from the first baseline
+- [x] Phase 9: Track Kaggle leaderboard submissions and iterate from the first baseline
+- [x] Phase 10: Execute the second-round rare-focus sampling and cropping experiment
 
 ## Key Questions
 
@@ -55,4 +56,11 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 
 ## Status
 
-**Currently in Phase 9** - The first Kaggle baseline is recorded, and the next iterations should improve on the `0.36281` submission by replacing placeholder classification and refining segmentation experiments.
+**Currently after Phase 10** - The second-round rare-focus experiment finished, exported a new submission candidate, and needs a manual Kaggle upload because local Kaggle API authentication is currently failing.
+
+## Current Diagnosis
+
+- From the near-best validation checkpoints, the weakest categories remain `bicycle`, `chair`, `cow`, `sheep`, and `pottedplant`.
+  This indicates the current main segmentation bottleneck is insufficient learning on low-frequency or small-object categories rather than a clear failure of the backbone itself.
+- The second-round rare-focus strategy improved exposure to weak classes but did not beat the first baseline overall.
+  The best `mIoU` dropped from `62.46` in V1 to `60.29` in V2, which suggests the current oversampling and focused cropping settings are too aggressive for preserving full-scene balance.
