@@ -78,6 +78,10 @@
   - default policy: wait for `5` validations before activation
   - stop only after `6` non-improving `mIoU` validations with `min_delta=0.1`
   - this matches the agreed training strategy better than relying on `save_best` alone
+- The first full `ADE20K`-initialized run completed successfully on this host.
+  - best validation checkpoint: `best_mIoU_iter_8000.pth`
+  - best validation score: `mIoU=62.46`
+  - training stopped at `14000` iterations due to the configured delayed early stopping
 - Current repository state is good enough for:
   - project structure
   - data analysis and visualization

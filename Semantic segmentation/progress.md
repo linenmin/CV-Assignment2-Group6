@@ -77,10 +77,16 @@
 - Re-ran the pretrained sanity training with the early-stopping hook enabled:
   - command: `python .\scripts\train.py --max-iters 2 --val-interval 1 --batch-size 2 --num-workers 0 --work-dir .\outputs\logs\exp_v1_ade20k_sanity_earlystop`
   - result: training still completed successfully and saved `best_mIoU_iter_2.pth`
+- Completed the first full ADE20K-initialized training run:
+  - command: `python .\scripts\train.py --batch-size 2 --num-workers 0 --work-dir .\outputs\logs\exp_v1_ade20k_main`
+  - stop condition: delayed early stopping triggered after the validation at `14000` iterations
+  - best checkpoint: `outputs/logs/exp_v1_ade20k_main/best_mIoU_iter_8000.pth`
+  - best validation metric: `mIoU=62.46`
+  - last validation before stop: `mIoU=60.39` at `14000` iterations
 
 ## Current Focus
 
-- Commit the early-stopping update, push `segmentation`, then launch the first ADE20K-initialized long run.
+- Archive the training result in docs and use the best checkpoint for the next submission export cycle.
 
 ## Verification Notes
 
@@ -92,6 +98,7 @@
   - `python .\\scripts\\train.py --max-iters 1 --val-interval 1 --batch-size 1 --num-workers 0 --no-pretrained --work-dir .\\outputs\\logs\\smoke_train`
   - `python .\\scripts\\train.py --max-iters 2 --val-interval 1 --batch-size 2 --num-workers 0 --work-dir .\\outputs\\logs\\exp_v1_ade20k_sanity`
   - `python .\\scripts\\train.py --max-iters 2 --val-interval 1 --batch-size 2 --num-workers 0 --work-dir .\\outputs\\logs\\exp_v1_ade20k_sanity_earlystop`
+  - `python .\\scripts\\train.py --batch-size 2 --num-workers 0 --work-dir .\\outputs\\logs\\exp_v1_ade20k_main`
   - `python .\\scripts\\validate.py --checkpoint .\\outputs\\logs\\smoke_train\\best_mIoU_iter_1.pth --num-workers 0`
   - `python .\\scripts\\predict_test_segmentation.py --checkpoint .\\outputs\\logs\\smoke_train\\best_mIoU_iter_1.pth --output-dir .\\outputs\\predictions\\test_smoke_submission`
   - `python .\\scripts\\export_submission.py --prediction-dir .\\outputs\\predictions\\test_smoke_submission --output-path .\\outputs\\submissions\\submission.csv --classification-fill 0`
