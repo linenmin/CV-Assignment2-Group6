@@ -104,6 +104,29 @@
   - submission source: `submission_exp_v2_rare_focus.csv`
   - local Kaggle API calls currently fail with `401 Unauthorized`
   - consequence: leaderboard comparison for V2 still requires a manual upload from a valid Kaggle session
+- The manual Kaggle result for V2 is now recorded:
+  - submission source: `submission_exp_v2_rare_focus.csv`
+  - public score: `0.3583`
+  - interpretation: the leaderboard drop matches the local `mIoU` drop, so the second-round regression was real rather than a local-only metric artifact
+- The third-round region-rebalance experiment recovered the second-round loss and slightly exceeded the first baseline locally.
+  - best validation checkpoint: `best_mIoU_iter_5000.pth`
+  - best validation score: `mIoU=62.54`
+  - delta versus V1: `+0.08 mIoU`
+  - delta versus V2: `+2.25 mIoU`
+- The third-round result supports the high-level strategy change away from input-side long-tail correction.
+  - V3 kept the original V1 sampling and crop pipeline
+  - V3 added a training-only regional auxiliary branch instead of repeating weak-class oversampling and focused cropping
+  - this is the first evidence in this project that moving the long-tail intervention from data sampling into the optimization objective is a more stable direction
+- Training logs confirm the regional auxiliary branch was genuinely active.
+  - `decode.loss_region_rebalance` stayed non-zero across the long run
+  - this rules out the trivial failure mode where the extra branch is configured but contributes no optimization signal
+- The third-round gain is real but still modest.
+  - it is enough to reject the claim that the second-round failure means all long-tail strategies are bad
+  - it is not yet strong enough to claim a decisive new leaderboard improvement without the Kaggle result
+- A third-round submission candidate has been exported:
+  - submission source: `submission_exp_v3_region_rebalance.csv`
+  - classification is still placeholder `0`
+  - manual Kaggle upload is required to determine whether the small local gain transfers to the leaderboard
 - Current repository state is good enough for:
   - project structure
   - data analysis and visualization
@@ -111,5 +134,6 @@
   - config definition
   - one-iteration training and validation smoke runs
   - second-round rare-focus split generation and focused-crop training
+  - third-round region-rebalance training with a training-only auxiliary branch
   - test-time inference over the whole test set
   - `submission.csv` generation for manual Kaggle upload

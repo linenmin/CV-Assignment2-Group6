@@ -16,7 +16,8 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - [x] Phase 8: Launch the first full ADE20K-initialized training run and capture the result
 - [x] Phase 9: Track Kaggle leaderboard submissions and iterate from the first baseline
 - [x] Phase 10: Execute the second-round rare-focus sampling and cropping experiment
-- [ ] Phase 11: 执行第三轮“区域再平衡辅助分支”实验
+- [x] Phase 11: 执行第三轮“区域再平衡辅助分支”实验
+- [ ] Phase 12: 上传第三轮提交并记录 Kaggle 分数
 
 ## Key Questions
 
@@ -57,7 +58,7 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 
 ## Status
 
-**Currently in Phase 11** - 本轮将停止继续调样本重采样与聚焦裁剪，改为实现训练期“区域再平衡辅助分支”，验证是否能在不破坏整图分布的前提下改善长尾类别学习。
+**Currently in Phase 12** - 第三轮区域再平衡实验已完成，本地结果已生成；下一步是人工上传 `submission_exp_v3_region_rebalance.csv` 并记录 Kaggle 分数。
 
 ## Current Diagnosis
 
@@ -66,8 +67,10 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - 这说明当前主瓶颈更像是低频类别或小目标类别学习不足，而不是主干网络整体失效。
 - 第二轮“弱类重采样 + 聚焦裁剪”没有超过第一轮基线。
   最佳 `mIoU` 从 V1 的 `62.46` 降到 V2 的 `60.29`，说明输入侧强行改分布的副作用已经超过收益。
-- 第三轮策略需要把“长尾修正”从输入采样侧转移到训练目标侧。
-  当前工作假设是：增加训练期区域再平衡辅助分支，有机会在不破坏整图上下文的前提下，增强弱类监督信号。
+- 第三轮已经把“长尾修正”从输入采样侧转移到了训练目标侧。
+  当前结果显示：区域再平衡辅助分支至少没有像第二轮那样明显破坏整体分布，本地最佳 `mIoU` 提升到 `62.54`，略高于第一轮 `62.46`，明显高于第二轮 `60.29`。
+- 训练日志确认辅助损失持续参与优化。
+  在第三轮正式训练中，`decode.loss_region_rebalance` 在多个训练步上持续非零，说明区域再平衡分支不是空转配置，而是真正参与了梯度更新。
 
 ## Phase 11 Plan
 
@@ -80,3 +83,15 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
   - 配置与单元测试通过
   - 烟雾训练可跑通，并在日志中出现区域再平衡辅助损失
   - 完成一轮正式训练，并与 V1/V2 比较 `mIoU` 与 Kaggle 分数
+
+## Phase 11 Result
+
+- 正式训练已完成：
+  - 最佳 checkpoint：`outputs/logs/exp_v3_region_rebalance/best_mIoU_iter_5000.pth`
+  - 最佳验证 `mIoU`：`62.54`
+  - 早停轮次：`11000`
+- 与前两轮对比：
+  - 相比 V1：`62.46 -> 62.54`，本地 `mIoU` 小幅上升 `0.08`
+  - 相比 V2：`60.29 -> 62.54`，本地 `mIoU` 明显回升 `2.25`
+- 提交文件已导出：
+  - `outputs/submissions/submission_exp_v3_region_rebalance.csv`

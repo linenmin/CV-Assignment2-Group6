@@ -113,10 +113,35 @@
   - installed the `kaggle` CLI in `seg_gpu_env`
   - local authentication currently returns `401 Unauthorized`
   - implication: the V2 submission file is ready, but the Kaggle score still needs manual upload from a valid Kaggle session
+- Implemented the third-round region-rebalance experiment as a strategy change rather than another input-pipeline tweak:
+  - restored the V1 training split and standard random-crop pipeline
+  - added a training-only `RegionRebalanceLightHamHead`
+  - added class-frequency-aware regional auxiliary classification on top of the decode features
+  - kept inference on the standard segmentation output, so test-time complexity stayed effectively unchanged
+- Verified the third-round pipeline before the long run:
+  - `python -m pytest .\tests -q`
+  - `python .\scripts\train.py --config .\configs\experiments\segnext_s_512x512_adamw_poly_v3_region_rebalance.py --max-iters 1 --val-interval 1 --batch-size 1 --num-workers 0 --work-dir .\outputs\logs\smoke_v3_region_rebalance`
+  - smoke run confirmed `decode.loss_region_rebalance` appears in the training scalars
+- Completed the third-round region-rebalance training run:
+  - command: `python .\scripts\train.py --config .\configs\experiments\segnext_s_512x512_adamw_poly_v3_region_rebalance.py --num-workers 0 --work-dir .\outputs\logs\exp_v3_region_rebalance`
+  - stop condition: delayed early stopping triggered after the validation at `11000` iterations
+  - best checkpoint: `outputs/logs/exp_v3_region_rebalance/best_mIoU_iter_5000.pth`
+  - best validation metric: `mIoU=62.54`
+  - comparison to V1: `+0.08 mIoU`
+  - comparison to V2: `+2.25 mIoU`
+- Exported the third-round leaderboard-facing submission candidate:
+  - prediction directory: `outputs/predictions/exp_v3_region_rebalance_test`
+  - submission file: `outputs/submissions/submission_exp_v3_region_rebalance.csv`
+  - classification mode: placeholder `0`
+- Generated third-round training analysis artifacts:
+  - `outputs/logs/exp_v3_region_rebalance/analysis/training_curves.png`
+  - `outputs/logs/exp_v3_region_rebalance/analysis/runtime_diagnostics.png`
+  - `outputs/logs/exp_v3_region_rebalance/analysis/validation_metrics.csv`
+  - `outputs/logs/exp_v3_region_rebalance/analysis/summary.md`
 
 ## Current Focus
 
-- Record the V2 result, wait for a manual Kaggle upload, and plan a less aggressive third-round segmentation iteration.
+- Wait for a manual Kaggle upload of the V3 submission, then compare leaderboard response against V1 and V2 before deciding the next high-level strategy.
 
 ## Verification Notes
 
@@ -137,3 +162,8 @@
   - `python .\\scripts\\export_submission.py --prediction-dir .\\outputs\\predictions\\test_smoke_submission --output-path .\\outputs\\submissions\\submission.csv --classification-fill 0`
   - `python .\\scripts\\predict_test_segmentation.py --config .\\configs\\experiments\\segnext_s_512x512_adamw_poly_v2_rare_focus.py --checkpoint .\\outputs\\logs\\exp_v2_rare_focus\\best_mIoU_iter_4000.pth --output-dir .\\outputs\\predictions\\exp_v2_rare_focus_test`
   - `python .\\scripts\\export_submission.py --prediction-dir .\\outputs\\predictions\\exp_v2_rare_focus_test --output-path .\\outputs\\submissions\\submission_exp_v2_rare_focus.csv --classification-fill 0`
+  - `python .\\scripts\\train.py --config .\\configs\\experiments\\segnext_s_512x512_adamw_poly_v3_region_rebalance.py --max-iters 1 --val-interval 1 --batch-size 1 --num-workers 0 --work-dir .\\outputs\\logs\\smoke_v3_region_rebalance`
+  - `python .\\scripts\\train.py --config .\\configs\\experiments\\segnext_s_512x512_adamw_poly_v3_region_rebalance.py --num-workers 0 --work-dir .\\outputs\\logs\\exp_v3_region_rebalance`
+  - `python .\\scripts\\predict_test_segmentation.py --config .\\configs\\experiments\\segnext_s_512x512_adamw_poly_v3_region_rebalance.py --checkpoint .\\outputs\\logs\\exp_v3_region_rebalance\\best_mIoU_iter_5000.pth --output-dir .\\outputs\\predictions\\exp_v3_region_rebalance_test`
+  - `python .\\scripts\\export_submission.py --prediction-dir .\\outputs\\predictions\\exp_v3_region_rebalance_test --output-path .\\outputs\\submissions\\submission_exp_v3_region_rebalance.csv --classification-fill 0`
+  - `python .\\scripts\\analyze_training_run.py --work-dir .\\outputs\\logs\\exp_v3_region_rebalance --submission-file submission_exp_v3_region_rebalance.csv`
