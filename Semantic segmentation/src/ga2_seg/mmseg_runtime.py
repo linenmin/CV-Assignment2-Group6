@@ -27,6 +27,7 @@ def register_project_modules() -> None:
     import ga2_seg.early_stopping  # noqa: F401
     import ga2_seg.mmseg_dataset  # noqa: F401
     import ga2_seg.mmseg_transforms  # noqa: F401
+    import ga2_seg.region_rebalance_head  # noqa: F401
 
 
 def resolve_config_path(config_path: str | Path | None = None) -> Path:

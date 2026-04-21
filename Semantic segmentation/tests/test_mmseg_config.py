@@ -47,3 +47,15 @@ def test_v2_rare_focus_config_uses_custom_split_and_crop():
     assert cfg.train_dataloader.dataset.ann_file.endswith(r"train_rare_focus_v2.txt")
     assert crop_transform["type"] == "RareClassFocusedCrop"
     assert crop_transform["cat_max_ratio"] == 0.65
+
+
+def test_v3_region_rebalance_config_uses_region_branch_head():
+    config_path = (
+        r"D:\BaiduNetdiskWorkspace\Leuven\8th\Computer Vision\assignment\Group2\Semantic segmentation"
+        r"\configs\experiments\segnext_s_512x512_adamw_poly_v3_region_rebalance.py"
+    )
+    cfg = Config.fromfile(config_path)
+    decode_head = cfg.model.decode_head
+    assert decode_head["type"] == "RegionRebalanceLightHamHead"
+    assert decode_head["region_loss_weight"] == 0.5
+    assert len(decode_head["region_class_frequencies"]) == 20

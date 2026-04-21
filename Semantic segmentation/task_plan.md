@@ -2,7 +2,7 @@
 
 ## Goal
 
-Build a maintainable `Semantic segmentation` project around `MMSegmentation + SegNeXt-S` with validated data analysis, preprocessing visualization, pretrained initialization, and a first training baseline suitable for leaderboard iteration.
+Build a maintainable `Semantic segmentation` project around `MMSegmentation + SegNeXt-S` with validated data analysis, preprocessing visualization, pretrained initialization, and iterative leaderboard experiments.
 
 ## Phases
 
@@ -16,6 +16,7 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - [x] Phase 8: Launch the first full ADE20K-initialized training run and capture the result
 - [x] Phase 9: Track Kaggle leaderboard submissions and iterate from the first baseline
 - [x] Phase 10: Execute the second-round rare-focus sampling and cropping experiment
+- [ ] Phase 11: 执行第三轮“区域再平衡辅助分支”实验
 
 ## Key Questions
 
@@ -56,11 +57,26 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 
 ## Status
 
-**Currently after Phase 10** - The second-round rare-focus experiment finished, exported a new submission candidate, and needs a manual Kaggle upload because local Kaggle API authentication is currently failing.
+**Currently in Phase 11** - 本轮将停止继续调样本重采样与聚焦裁剪，改为实现训练期“区域再平衡辅助分支”，验证是否能在不破坏整图分布的前提下改善长尾类别学习。
 
 ## Current Diagnosis
 
-- From the near-best validation checkpoints, the weakest categories remain `bicycle`, `chair`, `cow`, `sheep`, and `pottedplant`.
-  This indicates the current main segmentation bottleneck is insufficient learning on low-frequency or small-object categories rather than a clear failure of the backbone itself.
-- The second-round rare-focus strategy improved exposure to weak classes but did not beat the first baseline overall.
-  The best `mIoU` dropped from `62.46` in V1 to `60.29` in V2, which suggests the current oversampling and focused cropping settings are too aggressive for preserving full-scene balance.
+- 从接近最优的验证轮次看，当前最差的类别持续集中在 `bicycle`、`chair`、`cow`、`sheep`、`pottedplant`。
+  这个问题是通过验证日志中的分类别交并比表定位出来的：这些类别在多次验证中长期低于主流类别，且波动明显更大。
+- 这说明当前主瓶颈更像是低频类别或小目标类别学习不足，而不是主干网络整体失效。
+- 第二轮“弱类重采样 + 聚焦裁剪”没有超过第一轮基线。
+  最佳 `mIoU` 从 V1 的 `62.46` 降到 V2 的 `60.29`，说明输入侧强行改分布的副作用已经超过收益。
+- 第三轮策略需要把“长尾修正”从输入采样侧转移到训练目标侧。
+  当前工作假设是：增加训练期区域再平衡辅助分支，有机会在不破坏整图上下文的前提下，增强弱类监督信号。
+
+## Phase 11 Plan
+
+- 目标：在保持第一轮数据管线不变的前提下，只引入训练期区域再平衡辅助分支，做一次高层策略替换实验。
+- 代码改动：
+  - 新增区域再平衡辅助头
+  - 新增第三轮实验配置
+  - 将训练集类别频次接入辅助分支
+- 验证标准：
+  - 配置与单元测试通过
+  - 烟雾训练可跑通，并在日志中出现区域再平衡辅助损失
+  - 完成一轮正式训练，并与 V1/V2 比较 `mIoU` 与 Kaggle 分数
