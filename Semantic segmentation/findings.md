@@ -70,6 +70,10 @@
   - available RAM was low (`2.29 GB`)
   - GPU memory headroom was moderate (about `5.6 GB` free on the `RTX 4060 Laptop GPU`)
   - this host should prefer `num_workers=0` and conservative launch settings for long training jobs
+- The official `ADE20K` SegNeXt-S checkpoint has now been exercised end-to-end in a short sanity run.
+  - checkpoint download and initialization succeeded
+  - a 2-iteration training run produced a valid best checkpoint
+  - this removes the main remaining uncertainty before the first long run
 - Current repository state is good enough for:
   - project structure
   - data analysis and visualization

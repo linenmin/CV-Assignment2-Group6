@@ -65,10 +65,14 @@
   - `work_dir`: `outputs/logs/exp_v1_ade20k_main`
   - `num_workers=0`
   - conservative batch setting for the first full launch to reduce failure risk on this host
+- Completed a pretrained sanity run:
+  - command: `python .\scripts\train.py --max-iters 2 --val-interval 1 --batch-size 2 --num-workers 0 --work-dir .\outputs\logs\exp_v1_ade20k_sanity`
+  - result: training completed and saved `best_mIoU_iter_2.pth`
+  - implication: the official `ADE20K` checkpoint loads correctly in the current environment and the project is ready for the first long run
 
 ## Current Focus
 
-- Commit and push the submission-export pipeline, then launch the first ADE20K-initialized training run.
+- Commit the updated plan state, push `segmentation`, then launch the first ADE20K-initialized long run.
 
 ## Verification Notes
 
@@ -78,6 +82,7 @@
   - `python .\\scripts\\visualize_samples.py --num-samples 2`
   - `python .\\scripts\\build_splits.py`
   - `python .\\scripts\\train.py --max-iters 1 --val-interval 1 --batch-size 1 --num-workers 0 --no-pretrained --work-dir .\\outputs\\logs\\smoke_train`
+  - `python .\\scripts\\train.py --max-iters 2 --val-interval 1 --batch-size 2 --num-workers 0 --work-dir .\\outputs\\logs\\exp_v1_ade20k_sanity`
   - `python .\\scripts\\validate.py --checkpoint .\\outputs\\logs\\smoke_train\\best_mIoU_iter_1.pth --num-workers 0`
   - `python .\\scripts\\predict_test_segmentation.py --checkpoint .\\outputs\\logs\\smoke_train\\best_mIoU_iter_1.pth --output-dir .\\outputs\\predictions\\test_smoke_submission`
   - `python .\\scripts\\export_submission.py --prediction-dir .\\outputs\\predictions\\test_smoke_submission --output-path .\\outputs\\submissions\\submission.csv --classification-fill 0`

@@ -13,7 +13,7 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - [x] Phase 5: Implement custom dataset conversion / config / training entrypoints
 - [x] Phase 6: Run baseline training and validate outputs
 - [x] Phase 7: Commit, push branch, and notify via Discord
-- [ ] Phase 8: Commit submission-export pipeline, push branch, and launch first full training run
+- [ ] Phase 8: Launch the first full ADE20K-initialized training run and capture the result
 
 ## Key Questions
 
@@ -53,4 +53,4 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 
 ## Status
 
-**Currently in Phase 8** - Finalizing the submission-export pipeline commit and launching the first ADE20K-initialized training run.
+**Currently in Phase 8** - Submission export is in place, the ADE20K sanity run completed, and the first full training run is next.
