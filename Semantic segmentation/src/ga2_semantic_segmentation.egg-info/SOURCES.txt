@@ -1,0 +1,12 @@
+README.md
+pyproject.toml
+src/ga2_seg/__init__.py
+src/ga2_seg/labels.py
+src/ga2_seg/paths.py
+src/ga2_seg/split.py
+src/ga2_semantic_segmentation.egg-info/PKG-INFO
+src/ga2_semantic_segmentation.egg-info/SOURCES.txt
+src/ga2_semantic_segmentation.egg-info/dependency_links.txt
+src/ga2_semantic_segmentation.egg-info/top_level.txt
+tests/test_metadata.py
+tests/test_paths.py

@@ -1,0 +1,38 @@
+model = dict(
+    type="EncoderDecoder",
+    data_preprocessor=dict(
+        type="SegDataPreProcessor",
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        bgr_to_rgb=False,
+        pad_val=0,
+        seg_pad_val=0,
+        size=(512, 512),
+    ),
+    pretrained=None,
+    backbone=dict(
+        type="MSCAN",
+        embed_dims=[64, 128, 320, 512],
+        depths=[2, 2, 4, 2],
+        mlp_ratios=[8, 8, 4, 4],
+        drop_rate=0.0,
+        drop_path_rate=0.1,
+        norm_cfg=dict(type="BN", requires_grad=True),
+    ),
+    decode_head=dict(
+        type="LightHamHead",
+        in_channels=[128, 320, 512],
+        in_index=[1, 2, 3],
+        channels=256,
+        ham_channels=256,
+        ham_kwargs=dict(MD_R=16),
+        dropout_ratio=0.1,
+        num_classes=21,
+        norm_cfg=dict(type="GN", num_groups=32, requires_grad=True),
+        align_corners=False,
+        loss_decode=dict(type="CrossEntropyLoss", use_sigmoid=False, loss_weight=1.0),
+    ),
+    train_cfg=dict(),
+    test_cfg=dict(mode="whole"),
+)
+
