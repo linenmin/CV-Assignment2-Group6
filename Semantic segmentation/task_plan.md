@@ -17,7 +17,8 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - [x] Phase 9: Track Kaggle leaderboard submissions and iterate from the first baseline
 - [x] Phase 10: Execute the second-round rare-focus sampling and cropping experiment
 - [x] Phase 11: 执行第三轮“区域再平衡辅助分支”实验
-- [ ] Phase 12: 上传第三轮提交并记录 Kaggle 分数
+- [x] Phase 12: 上传第三轮提交并记录 Kaggle 分数
+- [x] Phase 13: 清理历史冗余权重，仅保留 `best` 与 `last`
 
 ## Key Questions
 
@@ -58,7 +59,7 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 
 ## Status
 
-**Currently in Phase 12** - 第三轮区域再平衡实验已完成，本地结果已生成；下一步是人工上传 `submission_exp_v3_region_rebalance.csv` 并记录 Kaggle 分数。
+**Currently in Phase 13** - 第三轮 Kaggle 分数已经记录，当前进入磁盘清理阶段：删除中间 checkpoint 和无用烟雾/预热权重，只保留主实验的 `best` 与 `last`。
 
 ## Current Diagnosis
 
@@ -95,3 +96,41 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
   - 相比 V2：`60.29 -> 62.54`，本地 `mIoU` 明显回升 `2.25`
 - 提交文件已导出：
   - `outputs/submissions/submission_exp_v3_region_rebalance.csv`
+
+## Phase 12 Result
+
+- 第三轮 Kaggle 分数：`0.36011`
+- 与前两轮对比：
+  - 相比 V1：`0.36281 -> 0.36011`，下降 `0.00270`
+  - 相比 V2：`0.3583 -> 0.36011`，回升 `0.00181`
+- 当前结论：
+  - 第三轮确实修复了第二轮的明显退化
+  - 但本地 `mIoU` 的微小提升没有稳定转化为 Kaggle 提升
+  - 因此区域再平衡方向“可行但收益有限”，还不足以单独带来榜单突破
+
+## Phase 13 Plan
+
+- 保留三轮主实验的：
+  - `best_mIoU_iter_*.pth`
+  - 最后一轮 `iter_*.pth`
+- 删除三轮主实验的其余中间 `iter_*.pth`
+- 删除烟雾训练与预热训练目录中的权重文件
+- 更新文档记录清理前后的空间变化
+
+## Phase 13 Result
+
+- 已保留的主实验权重：
+  - V1：`best_mIoU_iter_8000.pth`，`iter_14000.pth`
+  - V2：`best_mIoU_iter_4000.pth`，`iter_11000.pth`
+  - V3：`best_mIoU_iter_5000.pth`，`iter_11000.pth`
+- 已删除内容：
+  - 三轮主实验的所有中间 `iter_*.pth`
+  - `exp_v1_ade20k_sanity`
+  - `exp_v1_ade20k_sanity_earlystop`
+  - `smoke_train`
+  - `smoke_v2_rare_focus`
+  - `smoke_v3_region_rebalance`
+- 空间变化：
+  - 清理前权重总量：`6.938 GB`
+  - 清理后权重总量：`0.629 GB`
+  - 释放空间：`6.309 GB`

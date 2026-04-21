@@ -138,10 +138,22 @@
   - `outputs/logs/exp_v3_region_rebalance/analysis/runtime_diagnostics.png`
   - `outputs/logs/exp_v3_region_rebalance/analysis/validation_metrics.csv`
   - `outputs/logs/exp_v3_region_rebalance/analysis/summary.md`
+- Recorded the manual Kaggle result for the third-round submission:
+  - public score: `0.36011`
+  - comparison to V1: `-0.00270`
+  - comparison to V2: `+0.00181`
+- Started storage cleanup after the third-round comparison:
+  - target policy: keep only `best` and `last` checkpoints for each main experiment
+  - remove intermediate `iter_*.pth` files and smoke/sanity weights
+- Completed checkpoint cleanup:
+  - kept `6` checkpoint files across the three main experiments
+  - removed all intermediate checkpoints plus smoke/sanity weight directories
+  - weight storage reduced from `6.938 GB` to `0.629 GB`
+  - reclaimed disk space: `6.309 GB`
 
 ## Current Focus
 
-- Wait for a manual Kaggle upload of the V3 submission, then compare leaderboard response against V1 and V2 before deciding the next high-level strategy.
+- Finish checkpoint cleanup and keep the repository storage footprint under control while preserving the reproducible main experiment artifacts.
 
 ## Verification Notes
 

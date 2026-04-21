@@ -127,6 +127,28 @@
   - submission source: `submission_exp_v3_region_rebalance.csv`
   - classification is still placeholder `0`
   - manual Kaggle upload is required to determine whether the small local gain transfers to the leaderboard
+- The manual Kaggle result for V3 is now available:
+  - submission source: `submission_exp_v3_region_rebalance.csv`
+  - public score: `0.36011`
+  - versus V1: `0.36281 -> 0.36011`
+  - versus V2: `0.3583 -> 0.36011`
+- This resolves the main uncertainty around V3:
+  - the third-round strategy did recover the V2 failure
+  - but the gain stayed too small and too validation-specific to beat V1 on Kaggle
+  - the most plausible interpretation is not “method invalid”, but “effect size too small relative to split variance and test-distribution mismatch”
+- Why V3 did not beat V1 on Kaggle, despite slightly higher local `mIoU`:
+  - local improvement was only `+0.08 mIoU`, which is within the range where validation-split variance can dominate
+  - `classification` is still all-zero placeholder output, so the leaderboard still compresses the visible impact of pure segmentation gains
+  - V3 improved some weak categories locally, but not uniformly enough to guarantee a global test-set Dice improvement
+  - the hidden test distribution is likely not aligned tightly enough with the current validation split for such a small local gain to transfer reliably
+- Current strategic conclusion:
+  - V2 taught that input-side long-tail correction was too destructive
+  - V3 shows optimization-side long-tail correction is more stable
+  - but V3 does not yet justify claiming a leaderboard-winning segmentation upgrade over the original V1 baseline
+- Storage cleanup is now complete:
+  - only `best` and `last` checkpoints are kept for V1, V2, and V3
+  - smoke and sanity weight directories were removed
+  - checkpoint storage dropped from `6.938 GB` to `0.629 GB`
 - Current repository state is good enough for:
   - project structure
   - data analysis and visualization
