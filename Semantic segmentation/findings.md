@@ -82,6 +82,10 @@
   - best validation checkpoint: `best_mIoU_iter_8000.pth`
   - best validation score: `mIoU=62.46`
   - training stopped at `14000` iterations due to the configured delayed early stopping
+- The first Kaggle submission from this run scored `0.36281`.
+  - submission source: `submission_exp_v1_ade20k_main.csv`
+  - this score should not be interpreted as a pure segmentation ceiling because `classification` was still exported as all-zero placeholder values
+  - the leaderboard gap is therefore partly a modeling gap and partly an intentionally incomplete submission pipeline
 - Current repository state is good enough for:
   - project structure
   - data analysis and visualization

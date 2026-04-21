@@ -14,6 +14,7 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - [x] Phase 6: Run baseline training and validate outputs
 - [x] Phase 7: Commit, push branch, and notify via Discord
 - [x] Phase 8: Launch the first full ADE20K-initialized training run and capture the result
+- [ ] Phase 9: Track Kaggle leaderboard submissions and iterate from the first baseline
 
 ## Key Questions
 
@@ -54,4 +55,4 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 
 ## Status
 
-**Phase 8 complete** - The first full ADE20K-initialized training run finished successfully with early stopping and produced a best checkpoint for downstream submission generation.
+**Currently in Phase 9** - The first Kaggle baseline is recorded, and the next iterations should improve on the `0.36281` submission by replacing placeholder classification and refining segmentation experiments.

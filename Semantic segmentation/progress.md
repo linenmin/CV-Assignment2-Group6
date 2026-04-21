@@ -83,10 +83,17 @@
   - best checkpoint: `outputs/logs/exp_v1_ade20k_main/best_mIoU_iter_8000.pth`
   - best validation metric: `mIoU=62.46`
   - last validation before stop: `mIoU=60.39` at `14000` iterations
+- Exported the first leaderboard-facing submission from the best checkpoint:
+  - submission file: `outputs/submissions/submission_exp_v1_ade20k_main.csv`
+  - classification mode: placeholder `0`
+- Recorded the first Kaggle result:
+  - public score: `0.36281`
+  - tracker file: `kaggle_scores.md`
+  - interpretation: this is a usable segmentation baseline, but the score is bottlenecked by placeholder classification outputs
 
 ## Current Focus
 
-- Archive the training result in docs and use the best checkpoint for the next submission export cycle.
+- Maintain the Kaggle score table and plan the next iteration around real classification outputs plus segmentation refinements.
 
 ## Verification Notes
 
