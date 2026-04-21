@@ -1,6 +1,8 @@
 __pycache__/
 .pytest_cache/
 src/*.egg-info/
+data/metadata/resources.json
 outputs/checkpoints/
 outputs/logs/
 outputs/predictions/
+outputs/submissions/

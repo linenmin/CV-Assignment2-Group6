@@ -63,9 +63,18 @@
   - `mmengine` compiler-probe decode failure handled by a narrow runtime patch
 - Validation/test pipeline should not resize masks before evaluation on this dataset.
   - Keeping original spatial resolution avoids `pred/label` shape mismatches during `IoUMetric`.
+- The repository now has a local path to generate a Kaggle-ready `submission.csv`.
+  - `classification` rows can be exported with placeholder defaults.
+  - `segmentation` rows are encoded from per-image predicted masks using the same RLE scheme as the teacher notebook.
+- Host resource probe before the first long run:
+  - available RAM was low (`2.29 GB`)
+  - GPU memory headroom was moderate (about `5.6 GB` free on the `RTX 4060 Laptop GPU`)
+  - this host should prefer `num_workers=0` and conservative launch settings for long training jobs
 - Current repository state is good enough for:
   - project structure
   - data analysis and visualization
   - split generation
   - config definition
   - one-iteration training and validation smoke runs
+  - test-time inference over the whole test set
+  - `submission.csv` generation for manual Kaggle upload

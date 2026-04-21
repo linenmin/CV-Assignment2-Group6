@@ -12,7 +12,8 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - [x] Phase 4: Implement data analysis and visualization scripts
 - [x] Phase 5: Implement custom dataset conversion / config / training entrypoints
 - [x] Phase 6: Run baseline training and validate outputs
-- [ ] Phase 7: Commit, push branch, and notify via Discord
+- [x] Phase 7: Commit, push branch, and notify via Discord
+- [ ] Phase 8: Commit submission-export pipeline, push branch, and launch first full training run
 
 ## Key Questions
 
@@ -47,7 +48,9 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
   Resolution: use `seg_gpu_env` with full `mmcv`, add a Windows compatibility layer, and patch `mmengine collect_env` narrowly in project runtime code.
 - Validation originally resized masks before evaluation, which broke `IoUMetric` shape alignment.
   Resolution: keep val/test samples at original resolution.
+- Resource probing before the first full run showed only `2.29 GB` free RAM on the host.
+  Resolution: use a conservative launch profile for the first long run with `num_workers=0`, dedicated `work_dir`, and a short pretrained sanity check before the main run.
 
 ## Status
 
-**Currently in Phase 7** - Finalizing commit, push, and Discord notification after verified smoke training.
+**Currently in Phase 8** - Finalizing the submission-export pipeline commit and launching the first ADE20K-initialized training run.

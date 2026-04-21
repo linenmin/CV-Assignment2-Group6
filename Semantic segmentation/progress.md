@@ -42,16 +42,33 @@
 - Added maintainable entrypoints:
   - `scripts/train.py`
   - `scripts/validate.py`
+- Added maintainable test-time utilities:
+  - `scripts/predict_test_segmentation.py`
+  - `scripts/export_submission.py`
+- Added reusable inference and submission modules:
+  - `src/ga2_seg/inference.py`
+  - `src/ga2_seg/submission.py`
 - Fixed the validation pipeline shape mismatch by removing `Resize` from the val/test pipeline.
 - Verified in `seg_gpu_env`:
   - full pytest suite passes
   - `analyze_dataset.py`, `visualize_samples.py`, and `build_splits.py` run successfully
   - a one-iteration training smoke run completes and writes checkpoints
   - validation from the same training run reports metrics successfully
+  - test-time segmentation prediction runs across all `750` test images
+  - `submission.csv` export works with placeholder classification labels
+- Probed local resources before the first long run:
+  - CPU: `28` logical cores
+  - RAM available at probe time: `2.29 GB`
+  - GPU: `RTX 4060 Laptop GPU`, `8188 MB` total, about `5592 MB` free
+- Decided launch profile for the first long run:
+  - initialization: official `ADE20K` checkpoint
+  - `work_dir`: `outputs/logs/exp_v1_ade20k_main`
+  - `num_workers=0`
+  - conservative batch setting for the first full launch to reduce failure risk on this host
 
 ## Current Focus
 
-- Package the working progress into a clean branch commit, push the branch, and notify via Discord.
+- Commit and push the submission-export pipeline, then launch the first ADE20K-initialized training run.
 
 ## Verification Notes
 
@@ -61,3 +78,6 @@
   - `python .\\scripts\\visualize_samples.py --num-samples 2`
   - `python .\\scripts\\build_splits.py`
   - `python .\\scripts\\train.py --max-iters 1 --val-interval 1 --batch-size 1 --num-workers 0 --no-pretrained --work-dir .\\outputs\\logs\\smoke_train`
+  - `python .\\scripts\\validate.py --checkpoint .\\outputs\\logs\\smoke_train\\best_mIoU_iter_1.pth --num-workers 0`
+  - `python .\\scripts\\predict_test_segmentation.py --checkpoint .\\outputs\\logs\\smoke_train\\best_mIoU_iter_1.pth --output-dir .\\outputs\\predictions\\test_smoke_submission`
+  - `python .\\scripts\\export_submission.py --prediction-dir .\\outputs\\predictions\\test_smoke_submission --output-path .\\outputs\\submissions\\submission.csv --classification-fill 0`
