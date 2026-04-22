@@ -19,6 +19,8 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - [x] Phase 11: 执行第三轮“区域再平衡辅助分支”实验
 - [x] Phase 12: 上传第三轮提交并记录 Kaggle 分数
 - [x] Phase 13: 清理历史冗余权重，仅保留 `best` 与 `last`
+- [ ] Phase 14: 執行第四輪 OHEM (Online Hard Example Mining) 實驗
+- [ ] Phase 15: 上傳第四輪提交並紀錄 Kaggle 分數
 
 ## Key Questions
 
@@ -59,7 +61,7 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 
 ## Status
 
-**Currently in Phase 13** - 第三轮 Kaggle 分数已经记录，当前进入磁盘清理阶段：删除中间 checkpoint 和无用烟雾/预热权重，只保留主实验的 `best` 与 `last`。
+**Currently in Phase 14** - 第四輪 OHEM 實驗已啟動，目標是透過修改採樣器來專注困難樣本。
 
 ## Current Diagnosis
 
@@ -140,3 +142,14 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
   - `scripts/train.py` 训练完成后默认执行 checkpoint 清理
   - 默认策略为仅保留 `best` 与 `last`
   - 如需保留全部中间权重，可显式传入 `--checkpoint-retention all`
+
+## Phase 14 Plan
+
+- 目標：引入 OHEM (Online Hard Example Mining) 機制，解決模型對小物件或困難陷阱辨識率不佳的問題。
+- 代碼改動：
+  - 新增 V4 實驗配置：`configs/experiments/segnext_s_512x512_adamw_poly_v4_ohem.py`
+  - 在 `train_cfg` 中覆寫 `sampler` 為 `OHEMPixelSampler`
+- 驗證標準：
+  - 順利跑通 Smoke Test 並成功生成 `best_mIoU_iter_*.pth`
+  - 本地 Validation 中針對特定弱勢類別（如 bicycle, sheep）的 IoU 應有顯著提升
+  - 產生 V4 的 `submission.csv` 與訓練曲線圖表

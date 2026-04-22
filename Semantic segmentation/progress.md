@@ -179,3 +179,11 @@
   - `python .\\scripts\\predict_test_segmentation.py --config .\\configs\\experiments\\segnext_s_512x512_adamw_poly_v3_region_rebalance.py --checkpoint .\\outputs\\logs\\exp_v3_region_rebalance\\best_mIoU_iter_5000.pth --output-dir .\\outputs\\predictions\\exp_v3_region_rebalance_test`
   - `python .\\scripts\\export_submission.py --prediction-dir .\\outputs\\predictions\\exp_v3_region_rebalance_test --output-path .\\outputs\\submissions\\submission_exp_v3_region_rebalance.csv --classification-fill 0`
   - `python .\\scripts\\analyze_training_run.py --work-dir .\\outputs\\logs\\exp_v3_region_rebalance --submission-file submission_exp_v3_region_rebalance.csv`
+
+### 2026-04-22 (V4 Experiment)
+
+- Analyzed dataset "traps" (extreme scale variation, multi-label/co-occurrence confusion).
+- Confirmed the dataset integrity (no corruptions, no duplicates) via `check_dataset_anomalies.py`.
+- Formulated V4 strategy: introduce `OHEMPixelSampler` to force the network to focus on hard, rare, or small examples (e.g., bicycles, sheep).
+- Created V4 config `segnext_s_512x512_adamw_poly_v4_ohem.py` inheriting from V1 and overriding `train_cfg`.
+- Executed strict SOP before training (updated `task_plan.md`, `progress.md`, `findings.md`, and prepared for `git push`).

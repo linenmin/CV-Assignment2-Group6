@@ -159,3 +159,10 @@
   - third-round region-rebalance training with a training-only auxiliary branch
   - test-time inference over the whole test set
   - `submission.csv` generation for manual Kaggle upload
+
+## New Findings (V4 Prep)
+
+- Teammate analysis correctly identified severe scale variation ("person very large, object very small") and co-occurrence traps ("bus vs bicycle").
+- Dataset integrity check confirmed 0 corrupted files and 0 duplicates across train/test splits.
+- Purely input-side fixes (like V2) or auxiliary classification losses (like V3) struggled to solve the scale variation fundamentally.
+- Modifying the pixel sampler (OHEM) or the base loss function (Dice Loss) is identified as the next strongest theoretical intervention to force the network to learn hard, small objects instead of optimizing for large background/dominant classes.
