@@ -19,7 +19,7 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - [x] Phase 11: 执行第三轮“区域再平衡辅助分支”实验
 - [x] Phase 12: 上传第三轮提交并记录 Kaggle 分数
 - [x] Phase 13: 清理历史冗余权重，仅保留 `best` 与 `last`
-- [ ] Phase 14: 執行第四輪 OHEM (Online Hard Example Mining) 實驗
+- [x] Phase 14: 執行第四輪 OHEM (Online Hard Example Mining) 實驗
 - [ ] Phase 15: 上傳第四輪提交並紀錄 Kaggle 分數
 
 ## Key Questions
@@ -61,7 +61,7 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 
 ## Status
 
-**Currently in Phase 14** - 第四輪 OHEM 實驗已啟動，目標是透過修改採樣器來專注困難樣本。
+**Currently in Phase 15** - V4 OHEM has completed locally; the next step is manual Kaggle upload or team submission merge with the classification output.
 
 ## Current Diagnosis
 
@@ -153,3 +153,30 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
   - 順利跑通 Smoke Test 並成功生成 `best_mIoU_iter_*.pth`
   - 本地 Validation 中針對特定弱勢類別（如 bicycle, sheep）的 IoU 應有顯著提升
   - 產生 V4 的 `submission.csv` 與訓練曲線圖表
+
+## Phase 14 Result
+
+- V4 OHEM training completed successfully on Colab L4.
+  - config: `configs/experiments/segnext_s_512x512_adamw_poly_v4_ohem.py`
+  - training command: `python scripts/train.py --config configs/experiments/segnext_s_512x512_adamw_poly_v4_ohem.py --num-workers 4 --batch-size 2 --work-dir outputs/logs/exp_v4_ohem`
+  - stop condition: delayed early stopping after the monitored `mIoU` stopped improving for `6` validation records
+  - best checkpoint: `outputs/logs/exp_v4_ohem/best_mIoU_iter_13000.pth`
+  - best validation metric: `mIoU=63.90`
+- Comparison against previous rounds:
+  - V1: `62.46 -> 63.90`, `+1.44 mIoU`
+  - V2: `60.29 -> 63.90`, `+3.61 mIoU`
+  - V3: `62.54 -> 63.90`, `+1.36 mIoU`
+- Leaderboard-facing artifacts were generated:
+  - prediction directory: `outputs/predictions/exp_v4_ohem_test`
+  - submission file: `outputs/submissions/submission_exp_v4_ohem.csv`
+  - classification mode: placeholder `0`, pending merge with the classification teammate output
+  - analysis directory: `outputs/logs/exp_v4_ohem/analysis`
+- Notebook/runtime issue resolved:
+  - Colab pandas raised an `AssertionError` when indexing classification columns with the `CLASS_NAMES` tuple.
+  - `src/ga2_seg/submission.py` now converts `CLASS_NAMES` to `list(CLASS_NAMES)` before DataFrame selection.
+
+## Phase 15 Plan
+
+- Manually upload or merge `submission_exp_v4_ohem.csv` with the classification teammate output.
+- Record the Kaggle public score once available.
+- Use V4 as the current segmentation baseline for the next iteration because it is the strongest local validation result so far.

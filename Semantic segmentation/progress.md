@@ -187,3 +187,29 @@
 - Formulated V4 strategy: introduce `OHEMPixelSampler` to force the network to focus on hard, rare, or small examples (e.g., bicycles, sheep).
 - Created V4 config `segnext_s_512x512_adamw_poly_v4_ohem.py` inheriting from V1 and overriding `train_cfg`.
 - Executed strict SOP before training (updated `task_plan.md`, `progress.md`, `findings.md`, and prepared for `git push`).
+- Completed the fourth-round OHEM training run on Colab L4:
+  - command: `python scripts/train.py --config configs/experiments/segnext_s_512x512_adamw_poly_v4_ohem.py --num-workers 4 --batch-size 2 --work-dir outputs/logs/exp_v4_ohem`
+  - stop condition: delayed early stopping triggered after the monitored `mIoU` did not improve for `6` validation records
+  - best checkpoint: `outputs/logs/exp_v4_ohem/best_mIoU_iter_13000.pth`
+  - best validation metric: `mIoU=63.90`
+  - comparison to V1: `+1.44 mIoU`
+  - comparison to V2: `+3.61 mIoU`
+  - comparison to V3: `+1.36 mIoU`
+- Exported the fourth-round leaderboard-facing submission candidate:
+  - prediction directory: `outputs/predictions/exp_v4_ohem_test`
+  - predictions written: `750`
+  - submission file: `outputs/submissions/submission_exp_v4_ohem.csv`
+  - submission rows: `1500`
+  - classification mode: placeholder `0`
+- Generated fourth-round training analysis artifacts:
+  - `outputs/logs/exp_v4_ohem/analysis/training_curves.png`
+  - `outputs/logs/exp_v4_ohem/analysis/runtime_diagnostics.png`
+  - `outputs/logs/exp_v4_ohem/analysis/validation_metrics.csv`
+  - `outputs/logs/exp_v4_ohem/analysis/summary.md`
+- Fixed Colab submission export compatibility:
+  - `src/ga2_seg/submission.py` now uses `df.loc[idx, list(CLASS_NAMES)]`
+  - `train_v4_colab.ipynb` includes a runtime patch before `export_submission.py` for cloned Colab checkouts
+- Current V4 status:
+  - local validation result is recorded
+  - submission file is generated
+  - Kaggle score is pending manual upload or merge with the classification teammate output

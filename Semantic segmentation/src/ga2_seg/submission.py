@@ -66,7 +66,7 @@ def rle_encode(img: np.ndarray) -> str:
 def build_submission_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     df_dict = {"Id": [], "Predicted": []}
     for idx in df.index.tolist():
-        class_prediction = np.asarray(df.loc[idx, CLASS_NAMES], dtype=np.uint8)
+        class_prediction = np.asarray(df.loc[idx, list(CLASS_NAMES)], dtype=np.uint8)
         seg_prediction = np.asarray(df.loc[idx, "seg"], dtype=np.uint8)
 
         df_dict["Id"].append(f"{idx}_classification")

@@ -166,3 +166,24 @@
 - Dataset integrity check confirmed 0 corrupted files and 0 duplicates across train/test splits.
 - Purely input-side fixes (like V2) or auxiliary classification losses (like V3) struggled to solve the scale variation fundamentally.
 - Modifying the pixel sampler (OHEM) or the base loss function (Dice Loss) is identified as the next strongest theoretical intervention to force the network to learn hard, small objects instead of optimizing for large background/dominant classes.
+
+## V4 OHEM Findings
+
+- The fourth-round OHEM experiment is now the strongest local validation result in the segmentation track.
+  - config: `configs/experiments/segnext_s_512x512_adamw_poly_v4_ohem.py`
+  - best validation checkpoint: `best_mIoU_iter_13000.pth`
+  - best validation score: `mIoU=63.90`
+  - delta versus V1: `+1.44 mIoU`
+  - delta versus V2: `+3.61 mIoU`
+  - delta versus V3: `+1.36 mIoU`
+- This result is stronger than the V3 gain and supports the hypothesis that pixel-level hard-example selection is a better intervention than input-side oversampling for this dataset.
+- A fourth-round submission candidate has been exported:
+  - submission source: `submission_exp_v4_ohem.csv`
+  - prediction directory: `outputs/predictions/exp_v4_ohem_test`
+  - classification is still placeholder `0`
+  - manual Kaggle upload or team merge with the classification output is still required before interpreting leaderboard score
+- Training analysis artifacts were generated under `outputs/logs/exp_v4_ohem/analysis`.
+- A Colab/Pandas export compatibility issue was found and fixed:
+  - error: `AssertionError` from `df.loc[idx, CLASS_NAMES]`
+  - resolution: use `df.loc[idx, list(CLASS_NAMES)]`
+  - affected file: `src/ga2_seg/submission.py`
