@@ -22,3 +22,71 @@ Core notes:
 - data analysis and preprocessing visualization
 - MMSegmentation-based training configs
 - train / validate scripts
+
+## Training
+
+Default training entrypoint:
+
+```powershell
+conda activate seg_gpu_env
+cd "D:\BaiduNetdiskWorkspace\Leuven\8th\Computer Vision\assignment\Group2\Semantic segmentation"
+python .\scripts\train.py
+```
+
+Useful options:
+
+```powershell
+python .\scripts\train.py --config .\configs\experiments\segnext_s_512x512_adamw_poly_v3_region_rebalance.py
+python .\scripts\train.py --max-iters 3000 --val-interval 500
+python .\scripts\train.py --checkpoint-retention all
+```
+
+Checkpoint retention policy:
+
+- default is `best_last`
+- after training, the script keeps only:
+  - `best_*.pth`
+  - the checkpoint referenced by `last_checkpoint`
+- use `--checkpoint-retention all` if you explicitly want to keep every intermediate checkpoint
+
+## Validation
+
+```powershell
+python .\scripts\validate.py --checkpoint .\outputs\logs\exp_v1_ade20k_main\best_mIoU_iter_8000.pth
+```
+
+## Training Analysis
+
+Generate training curves, runtime diagnostics, and a markdown summary:
+
+```powershell
+python .\scripts\analyze_training_run.py --work-dir .\outputs\logs\exp_v3_region_rebalance --submission-file submission_exp_v3_region_rebalance.csv
+```
+
+This writes:
+
+- `analysis/training_curves.png`
+- `analysis/runtime_diagnostics.png`
+- `analysis/validation_metrics.csv`
+- `analysis/summary.md`
+
+## Test Prediction
+
+Generate predicted segmentation masks for the full test set:
+
+```powershell
+python .\scripts\predict_test_segmentation.py --config .\configs\experiments\segnext_s_512x512_adamw_poly_v3_region_rebalance.py --checkpoint .\outputs\logs\exp_v3_region_rebalance\best_mIoU_iter_5000.pth --output-dir .\outputs\predictions\exp_v3_region_rebalance_test
+```
+
+## Submission Export
+
+Export a Kaggle-ready `submission.csv` from predicted test masks:
+
+```powershell
+python .\scripts\export_submission.py --prediction-dir .\outputs\predictions\exp_v3_region_rebalance_test --output-path .\outputs\submissions\submission_exp_v3_region_rebalance.csv --classification-fill 0
+```
+
+Notes:
+
+- `classification-fill 0` is only a placeholder workflow for segmentation-only iteration
+- final leaderboard interpretation must consider whether classification is still placeholder output

@@ -3,6 +3,7 @@ from pathlib import Path
 
 from mmengine.runner import Runner
 
+from ga2_seg.checkpoint_cleanup import prune_checkpoints
 from ga2_seg.mmseg_runtime import load_config
 
 
@@ -30,6 +31,12 @@ def parse_args() -> argparse.Namespace:
         help="Disable the default ADE20K checkpoint for smoke tests.",
     )
     parser.add_argument("--resume", action="store_true", help="Resume training from work_dir.")
+    parser.add_argument(
+        "--checkpoint-retention",
+        choices=["best_last", "all"],
+        default="best_last",
+        help="Checkpoint retention policy after training finishes.",
+    )
     return parser.parse_args()
 
 
@@ -83,6 +90,12 @@ def main() -> None:
 
     runner = Runner.from_cfg(cfg)
     runner.train()
+
+    if args.checkpoint_retention == "best_last":
+        result = prune_checkpoints(cfg.work_dir)
+        print(f"checkpoint_retention={args.checkpoint_retention}")
+        print(f"checkpoint_deleted={len(result['deleted'])}")
+        print(f"checkpoint_freed_bytes={result['freed_bytes']}")
 
 
 if __name__ == "__main__":

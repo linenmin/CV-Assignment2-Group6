@@ -116,6 +116,8 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - 删除三轮主实验的其余中间 `iter_*.pth`
 - 删除烟雾训练与预热训练目录中的权重文件
 - 更新文档记录清理前后的空间变化
+- 将“只保留 `best` 和 `last`”的逻辑集成到训练脚本默认行为中
+- 更新 README，补充训练分析图与 `submission.csv` 导出流程
 
 ## Phase 13 Result
 
@@ -134,3 +136,7 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
   - 清理前权重总量：`6.938 GB`
   - 清理后权重总量：`0.629 GB`
   - 释放空间：`6.309 GB`
+- 训练脚本默认行为已更新：
+  - `scripts/train.py` 训练完成后默认执行 checkpoint 清理
+  - 默认策略为仅保留 `best` 与 `last`
+  - 如需保留全部中间权重，可显式传入 `--checkpoint-retention all`
