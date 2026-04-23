@@ -20,7 +20,7 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - [x] Phase 12: 上传第三轮提交并记录 Kaggle 分数
 - [x] Phase 13: 清理历史冗余权重，仅保留 `best` 与 `last`
 - [x] Phase 14: 執行第四輪 OHEM (Online Hard Example Mining) 實驗
-- [ ] Phase 15: 上傳第四輪提交並紀錄 Kaggle 分數
+- [x] Phase 15: 上傳第四輪提交並紀錄 Kaggle 分數
 
 ## Key Questions
 
@@ -61,7 +61,7 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 
 ## Status
 
-**Currently in Phase 15** - V4 OHEM has completed locally; the next step is manual Kaggle upload or team submission merge with the classification output.
+**Currently after Phase 15** - V4 OHEM has completed locally and its public Kaggle score has been recorded. The next iteration should investigate why the local `mIoU` gain did not transfer to the leaderboard.
 
 ## Current Diagnosis
 
@@ -180,3 +180,18 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - Manually upload or merge `submission_exp_v4_ohem.csv` with the classification teammate output.
 - Record the Kaggle public score once available.
 - Use V4 as the current segmentation baseline for the next iteration because it is the strongest local validation result so far.
+
+## Phase 15 Result
+
+- V4 OHEM Kaggle public score was recorded:
+  - submission file: `outputs/submissions/submission_exp_v4_ohem.csv`
+  - public score: `0.35237`
+  - classification mode: placeholder `0`
+- Comparison against previous public submissions:
+  - V1: `0.36281 -> 0.35237`, `-0.01044`
+  - V2: `0.3583 -> 0.35237`, `-0.00593`
+  - V3: `0.36011 -> 0.35237`, `-0.00774`
+- Interpretation:
+  - V4 is the strongest local validation run (`mIoU=63.90`) but the weakest public leaderboard submission so far.
+  - This suggests the OHEM improvement is validation-specific, changes the mask distribution in a way the hidden test score dislikes, or is being masked by the still-placeholder classification output.
+  - V4 should remain useful as an experiment record, but it should not replace V1 as the leaderboard baseline until a merged classification submission or additional validation confirms transfer.

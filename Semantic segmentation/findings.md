@@ -187,3 +187,17 @@
   - error: `AssertionError` from `df.loc[idx, CLASS_NAMES]`
   - resolution: use `df.loc[idx, list(CLASS_NAMES)]`
   - affected file: `src/ga2_seg/submission.py`
+- The manual Kaggle result for V4 is now available:
+  - submission source: `submission_exp_v4_ohem.csv`
+  - public score: `0.35237`
+  - versus V1: `0.36281 -> 0.35237`
+  - versus V2: `0.3583 -> 0.35237`
+  - versus V3: `0.36011 -> 0.35237`
+- This creates a local/leaderboard mismatch:
+  - local validation improved from V3 `62.54` to V4 `63.90`
+  - public score dropped from V3 `0.36011` to V4 `0.35237`
+  - the likely explanation is validation split mismatch, OHEM overfitting to validation-hard pixels, altered mask calibration on hidden test images, or the still-placeholder classification output compressing pure segmentation gains
+- Strategic conclusion after V4:
+  - OHEM is a valuable local experiment but should not replace the best leaderboard-facing baseline yet
+  - future segmentation changes need stronger cross-checks than one validation split before assuming Kaggle transfer
+  - V1 remains the best public leaderboard segmentation-only submission in the tracker

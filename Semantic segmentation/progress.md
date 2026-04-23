@@ -213,3 +213,9 @@
   - local validation result is recorded
   - submission file is generated
   - Kaggle score is pending manual upload or merge with the classification teammate output
+- Recorded the manual Kaggle result for the fourth-round OHEM submission:
+  - public score: `0.35237`
+  - comparison to V1: `-0.01044`
+  - comparison to V2: `-0.00593`
+  - comparison to V3: `-0.00774`
+  - interpretation: V4 has the best local validation `mIoU`, but the public score regressed, so it should be kept as an experiment record rather than promoted as the leaderboard baseline
