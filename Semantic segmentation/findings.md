@@ -201,3 +201,25 @@
   - OHEM is a valuable local experiment but should not replace the best leaderboard-facing baseline yet
   - future segmentation changes need stronger cross-checks than one validation split before assuming Kaggle transfer
   - V1 remains the best public leaderboard segmentation-only submission in the tracker
+
+## V5 CE + Dice Findings
+
+- The fifth-round CE + Dice experiment produced the second-best local validation result so far.
+  - config: `configs/experiments/segnext_s_512x512_adamw_poly_v5_ce_dice.py`
+  - best validation checkpoint: `best_mIoU_iter_7000.pth`
+  - best validation score: `mIoU=63.62`
+  - delta versus V1: `+1.16 mIoU`
+  - delta versus V3: `+1.08 mIoU`
+  - delta versus V4: `-0.28 mIoU`
+- A fifth-round submission candidate has been exported:
+  - submission source: `submission_exp_v5_ce_dice.csv`
+  - analysis artifacts: `outputs/logs/exp_v5_ce_dice/analysis`
+  - classification is still placeholder `0`
+- The manual Kaggle result for V5 is now available:
+  - public score: `0.35553`
+  - versus V1: `0.36281 -> 0.35553`
+  - versus V4: `0.35237 -> 0.35553`
+- Interpretation:
+  - CE + Dice is less harmful than OHEM on the public leaderboard, but it still does not recover the original V1 public score.
+  - Since both V4 and V5 improve local validation while regressing on Kaggle, the current validation split is not reliable enough to choose leaderboard submissions by local `mIoU` alone.
+  - V1 remains the best public segmentation-only submission in the tracker; V5 should be kept as a useful experiment record, not promoted as the final baseline.

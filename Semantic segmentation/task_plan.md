@@ -21,6 +21,7 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - [x] Phase 13: 清理历史冗余权重，仅保留 `best` 与 `last`
 - [x] Phase 14: 執行第四輪 OHEM (Online Hard Example Mining) 實驗
 - [x] Phase 15: 上傳第四輪提交並紀錄 Kaggle 分數
+- [x] Phase 16: 執行第五輪 CE + Dice loss 實驗並紀錄 Kaggle 分數
 
 ## Key Questions
 
@@ -61,7 +62,7 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 
 ## Status
 
-**Currently after Phase 15** - V4 OHEM has completed locally and its public Kaggle score has been recorded. The next iteration should investigate why the local `mIoU` gain did not transfer to the leaderboard.
+**Currently after Phase 16** - V5 CE + Dice has completed locally and its public Kaggle score has been recorded. The next iteration should prioritize validation/test mismatch analysis, classification merge, or conservative ensembling rather than simply chasing higher local `mIoU`.
 
 ## Current Diagnosis
 
@@ -195,3 +196,27 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
   - V4 is the strongest local validation run (`mIoU=63.90`) but the weakest public leaderboard submission so far.
   - This suggests the OHEM improvement is validation-specific, changes the mask distribution in a way the hidden test score dislikes, or is being masked by the still-placeholder classification output.
   - V4 should remain useful as an experiment record, but it should not replace V1 as the leaderboard baseline until a merged classification submission or additional validation confirms transfer.
+
+## Phase 16 Result
+
+- V5 CE + Dice training completed successfully on Colab T4.
+  - config: `configs/experiments/segnext_s_512x512_adamw_poly_v5_ce_dice.py`
+  - method: V1 baseline with `CrossEntropyLoss` plus `DiceLoss(loss_weight=0.5)`
+  - best checkpoint: `outputs/logs/exp_v5_ce_dice/best_mIoU_iter_7000.pth`
+  - best validation metric: `mIoU=63.62`
+  - stop step: `13000`
+- Comparison against previous local validation runs:
+  - V1: `62.46 -> 63.62`, `+1.16 mIoU`
+  - V3: `62.54 -> 63.62`, `+1.08 mIoU`
+  - V4: `63.90 -> 63.62`, `-0.28 mIoU`
+- Leaderboard-facing artifacts were generated:
+  - submission file: `outputs/submissions/submission_exp_v5_ce_dice.csv`
+  - analysis directory: `outputs/logs/exp_v5_ce_dice/analysis`
+  - classification mode: placeholder `0`
+- V5 Kaggle public score was recorded:
+  - public score: `0.35553`
+  - versus V1: `0.36281 -> 0.35553`, `-0.00728`
+  - versus V4: `0.35237 -> 0.35553`, `+0.00316`
+- Interpretation:
+  - CE + Dice is more stable than V4 OHEM on the public leaderboard, but it still does not beat V1.
+  - The repeated local/Kaggle mismatch indicates that future work should focus on better validation, classification merge, or ensembling rather than only increasing local `mIoU`.

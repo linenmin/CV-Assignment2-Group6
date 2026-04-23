@@ -219,3 +219,31 @@
   - comparison to V2: `-0.00593`
   - comparison to V3: `-0.00774`
   - interpretation: V4 has the best local validation `mIoU`, but the public score regressed, so it should be kept as an experiment record rather than promoted as the leaderboard baseline
+
+### 2026-04-23 (V5 Experiment)
+
+- Implemented the fifth-round CE + Dice experiment from the V1 baseline:
+  - config: `configs/experiments/segnext_s_512x512_adamw_poly_v5_ce_dice.py`
+  - notebook: `train_v5_colab.ipynb`
+  - objective: `CrossEntropyLoss(loss_weight=1.0) + DiceLoss(loss_weight=0.5)`
+- Completed the fifth-round CE + Dice training run on Colab T4:
+  - command: `python scripts/train.py --config configs/experiments/segnext_s_512x512_adamw_poly_v5_ce_dice.py --num-workers 4 --batch-size 2 --work-dir outputs/logs/exp_v5_ce_dice`
+  - stop condition: delayed early stopping triggered after the validation at `13000` iterations
+  - best checkpoint: `outputs/logs/exp_v5_ce_dice/best_mIoU_iter_7000.pth`
+  - best validation metric: `mIoU=63.62`
+  - comparison to V1: `+1.16 mIoU`
+  - comparison to V3: `+1.08 mIoU`
+  - comparison to V4: `-0.28 mIoU`
+- Exported the fifth-round leaderboard-facing submission candidate:
+  - submission file: `outputs/submissions/submission_exp_v5_ce_dice.csv`
+  - classification mode: placeholder `0`
+- Generated fifth-round training analysis artifacts:
+  - `outputs/logs/exp_v5_ce_dice/analysis/training_curves.png`
+  - `outputs/logs/exp_v5_ce_dice/analysis/runtime_diagnostics.png`
+  - `outputs/logs/exp_v5_ce_dice/analysis/validation_metrics.csv`
+  - `outputs/logs/exp_v5_ce_dice/analysis/summary.md`
+- Recorded the manual Kaggle result for the fifth-round CE + Dice submission:
+  - public score: `0.35553`
+  - comparison to V1: `-0.00728`
+  - comparison to V4: `+0.00316`
+  - interpretation: V5 is locally strong and better than V4 on public Kaggle, but it still does not beat the V1 public baseline
