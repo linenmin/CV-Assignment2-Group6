@@ -252,3 +252,31 @@
 - Practical conclusion:
   - Promote V6 as the current leaderboard-facing segmentation baseline.
   - Keep V4 and V5 as useful ablation records, but do not prefer them over V6 for public submission unless classification merge or further validation changes the ranking.
+
+## V7 SegFormer-B3 Findings
+
+- The seventh-round experiment kept the successful V6 recipe and only scaled the SegFormer backbone from MiT-B2 to MiT-B3.
+  - config: `configs/experiments/segformer_b3_512x512_adamw_poly_v7.py`
+  - notebook: `train_v7_colab.ipynb`
+  - comparison target: V6 SegFormer-B2 baseline
+  - pretrained backbone: SegFormer MiT-B3
+- Local validation result:
+  - best checkpoint: `best_mIoU_iter_8000.pth`
+  - best validation score: `mIoU=64.72`
+  - stop step: `14000`
+  - versus V1: `+2.26 mIoU`
+  - versus V6: `+1.26 mIoU`
+  - versus V4: `+0.82 mIoU`
+- Leaderboard result:
+  - submission source: `submission_exp_v7_segformer_b3.csv`
+  - public score: `0.38084`
+  - versus V1: `+0.01803`
+  - versus V6: `+0.00736`
+  - versus V5: `+0.02531`
+- Key finding:
+  - V7 is the first run in this project that clearly improves both local validation and public Kaggle score over all previous versions.
+  - This strongly reduces the chance that the V6 gain was a one-off validation/public mismatch.
+  - The current highest-ROI direction is therefore still model-family scaling inside SegFormer, not additional loss engineering on SegNeXt-S.
+- Practical conclusion:
+  - Promote V7 as the new segmentation baseline for leaderboard-facing submissions.
+  - Keep V6 as the direct ablation proving that SegFormer works; keep V4 and V5 as supporting negative/partial results.

@@ -260,3 +260,41 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
   - SegFormer-B3 if compute budget allows
   - test-time augmentation or ensemble with the best SegNeXt-S runs
   - merge segmentation predictions with the classification teammate output before final Kaggle interpretation
+
+## Phase 18 Result
+
+- V7 SegFormer-B3 baseline training completed successfully on Colab L4.
+  - config: `configs/experiments/segformer_b3_512x512_adamw_poly_v7.py`
+  - notebook: `train_v7_colab.ipynb`
+  - method: keep the V6 SegFormer training recipe fixed and scale the model family from MiT-B2 to MiT-B3
+  - training command: `python scripts/train.py --config configs/experiments/segformer_b3_512x512_adamw_poly_v7.py --num-workers 4 --batch-size 2 --work-dir outputs/logs/exp_v7_segformer_b3`
+  - stop condition: delayed early stopping after the monitored `mIoU` did not improve for `6` validation records
+  - best checkpoint: `outputs/logs/exp_v7_segformer_b3/best_mIoU_iter_8000.pth`
+  - best validation metric: `mIoU=64.72`
+  - stop step: `14000`
+- Comparison against previous local validation runs:
+  - V1: `62.46 -> 64.72`, `+2.26 mIoU`
+  - V6: `63.46 -> 64.72`, `+1.26 mIoU`
+  - V4: `63.90 -> 64.72`, `+0.82 mIoU`
+- Leaderboard-facing artifacts were generated:
+  - submission file: `outputs/submissions/submission_exp_v7_segformer_b3.csv`
+  - submission rows: `1500`
+  - analysis directory: `outputs/logs/exp_v7_segformer_b3/analysis`
+  - classification mode: placeholder `0`
+- V7 Kaggle public score was recorded:
+  - public score: `0.38084`
+  - versus V1: `0.36281 -> 0.38084`, `+0.01803`
+  - versus V6: `0.37348 -> 0.38084`, `+0.00736`
+  - versus V5: `0.35553 -> 0.38084`, `+0.02531`
+- Interpretation:
+  - V7 is now the strongest local validation run and the strongest public leaderboard result in the segmentation track.
+  - The V6 -> V7 transition is a clean confirmation that the SegFormer family is the most productive direction so far.
+  - V7 should replace V6 as the current leaderboard-facing segmentation baseline.
+
+## Phase 19 Plan
+
+- Preserve V7 as the new baseline by updating repository records before the next experiment.
+- Candidate next experiments:
+  - merge V7 segmentation with the best classification submission before final leaderboard interpretation
+  - SegFormer-B4/B5 only if compute budget and Colab stability are acceptable
+  - B2/B3 or V6/V7 ensemble and test-time augmentation after the single-model baseline is fully recorded

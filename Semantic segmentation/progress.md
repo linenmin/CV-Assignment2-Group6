@@ -280,3 +280,35 @@
   - interpretation: V6 is the best public leaderboard result so far and should become the current segmentation baseline for the next round
 - Repository maintenance note:
   - V6 analysis artifacts are under an ignored `outputs/logs` path, so they were intentionally staged with `git add -f`
+
+### 2026-04-24 (V7 Experiment)
+
+- Implemented the seventh-round SegFormer-B3 baseline:
+  - config: `configs/experiments/segformer_b3_512x512_adamw_poly_v7.py`
+  - notebook: `train_v7_colab.ipynb`
+  - experiment basis: keep the V6 SegFormer-B2 recipe fixed and scale the backbone from MiT-B2 to MiT-B3
+  - reason: V6 established that changing the model family improved public generalization, so the next clean step was capacity scaling inside the same family
+- Completed the seventh-round training run on Colab L4:
+  - command: `python scripts/train.py --config configs/experiments/segformer_b3_512x512_adamw_poly_v7.py --num-workers 4 --batch-size 2 --work-dir outputs/logs/exp_v7_segformer_b3`
+  - stop condition: delayed early stopping after the monitored `mIoU` did not improve for `6` validation records
+  - best checkpoint: `outputs/logs/exp_v7_segformer_b3/best_mIoU_iter_8000.pth`
+  - best validation metric: `mIoU=64.72`
+  - stop step: `14000`
+- Exported the seventh-round leaderboard-facing submission candidate:
+  - submission file: `outputs/submissions/submission_exp_v7_segformer_b3.csv`
+  - submission rows: `1500`
+  - classification mode: placeholder `0`
+- Generated seventh-round training analysis artifacts:
+  - `outputs/logs/exp_v7_segformer_b3/analysis/training_curves.png`
+  - `outputs/logs/exp_v7_segformer_b3/analysis/runtime_diagnostics.png`
+  - `outputs/logs/exp_v7_segformer_b3/analysis/validation_metrics.csv`
+  - `outputs/logs/exp_v7_segformer_b3/analysis/summary.md`
+- Recorded the manual Kaggle result for the seventh-round SegFormer-B3 submission:
+  - public score: `0.38084`
+  - comparison to V1: `+0.01803`
+  - comparison to V6: `+0.00736`
+  - comparison to V5: `+0.02531`
+  - interpretation: V7 is the best public leaderboard result so far and becomes the new segmentation baseline for the next round
+- Repository maintenance note:
+  - V7 analysis artifacts are under an ignored `outputs/logs` path, so they were intentionally staged with `git add -f`
+  - `outputs/logs/exp_v7_segformer_b3/analysis/summary.md` had a stale Kaggle score and was corrected to the actual public result `0.38084` before recording
