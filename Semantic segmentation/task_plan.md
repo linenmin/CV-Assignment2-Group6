@@ -298,3 +298,41 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
   - merge V7 segmentation with the best classification submission before final leaderboard interpretation
   - SegFormer-B4/B5 only if compute budget and Colab stability are acceptable
   - B2/B3 or V6/V7 ensemble and test-time augmentation after the single-model baseline is fully recorded
+
+## Phase 19 Result
+
+- V8 SegFormer-B5 baseline training completed successfully on Colab L4.
+  - config: `configs/experiments/segformer_b5_512x512_adamw_poly_v8.py`
+  - notebook: `train_v8_colab.ipynb`
+  - method: keep the V7 SegFormer recipe fixed and scale the backbone from MiT-B3 to MiT-B5
+  - training command: `python scripts/train.py --config configs/experiments/segformer_b5_512x512_adamw_poly_v8.py --num-workers 4 --batch-size 2 --work-dir outputs/logs/exp_v8_segformer_b5`
+  - stop condition: delayed early stopping after the monitored `mIoU` did not improve for `6` validation records
+  - best checkpoint: `outputs/logs/exp_v8_segformer_b5/best_mIoU_iter_11000.pth`
+  - best validation metric: `mIoU=68.97`
+  - stop step: `17000`
+- Comparison against previous local validation runs:
+  - V1: `62.46 -> 68.97`, `+6.51 mIoU`
+  - V7: `64.72 -> 68.97`, `+4.25 mIoU`
+  - V6: `63.46 -> 68.97`, `+5.51 mIoU`
+- Leaderboard-facing artifacts were generated:
+  - submission file: `outputs/submissions/submission_exp_v8_segformer_b5.csv`
+  - submission rows: `1500`
+  - analysis directory: `outputs/logs/exp_v8_segformer_b5/analysis`
+  - classification mode: placeholder `0`
+- V8 Kaggle public score was recorded:
+  - public score: `0.38567`
+  - versus V1: `0.36281 -> 0.38567`, `+0.02286`
+  - versus V7: `0.38084 -> 0.38567`, `+0.00483`
+  - versus V6: `0.37348 -> 0.38567`, `+0.01219`
+- Interpretation:
+  - V8 is now the strongest local validation run and the strongest public leaderboard result in the segmentation track.
+  - The SegFormer scaling trend remains positive from B2 -> B3 -> B5, so the core strategy is still working.
+  - V8 should replace V7 as the current leaderboard-facing segmentation baseline.
+
+## Phase 20 Plan
+
+- Preserve V8 as the new single-model baseline by updating repository records before any further experiments.
+- Candidate next experiments:
+  - merge V8 segmentation with the best classification submission and measure the combined Kaggle gain
+  - lightweight B3/B5 ensemble or test-time augmentation before attempting even heavier single models
+  - only consider further model scaling if the extra compute still gives a worthwhile public-score return

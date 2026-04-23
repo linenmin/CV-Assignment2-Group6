@@ -312,3 +312,35 @@
 - Repository maintenance note:
   - V7 analysis artifacts are under an ignored `outputs/logs` path, so they were intentionally staged with `git add -f`
   - `outputs/logs/exp_v7_segformer_b3/analysis/summary.md` had a stale Kaggle score and was corrected to the actual public result `0.38084` before recording
+
+### 2026-04-24 (V8 Experiment)
+
+- Implemented the eighth-round SegFormer-B5 baseline:
+  - config: `configs/experiments/segformer_b5_512x512_adamw_poly_v8.py`
+  - notebook: `train_v8_colab.ipynb`
+  - experiment basis: keep the V7 SegFormer-B3 recipe fixed and scale the backbone from MiT-B3 to MiT-B5
+  - reason: V6 and V7 showed a consistent gain from SegFormer scaling, so the next clean step was to test whether a larger backbone would still transfer to Kaggle
+- Completed the eighth-round training run on Colab L4:
+  - command: `python scripts/train.py --config configs/experiments/segformer_b5_512x512_adamw_poly_v8.py --num-workers 4 --batch-size 2 --work-dir outputs/logs/exp_v8_segformer_b5`
+  - stop condition: delayed early stopping after the monitored `mIoU` did not improve for `6` validation records
+  - best checkpoint: `outputs/logs/exp_v8_segformer_b5/best_mIoU_iter_11000.pth`
+  - best validation metric: `mIoU=68.97`
+  - stop step: `17000`
+- Exported the eighth-round leaderboard-facing submission candidate:
+  - submission file: `outputs/submissions/submission_exp_v8_segformer_b5.csv`
+  - submission rows: `1500`
+  - classification mode: placeholder `0`
+- Generated eighth-round training analysis artifacts:
+  - `outputs/logs/exp_v8_segformer_b5/analysis/training_curves.png`
+  - `outputs/logs/exp_v8_segformer_b5/analysis/runtime_diagnostics.png`
+  - `outputs/logs/exp_v8_segformer_b5/analysis/validation_metrics.csv`
+  - `outputs/logs/exp_v8_segformer_b5/analysis/summary.md`
+- Recorded the manual Kaggle result for the eighth-round SegFormer-B5 submission:
+  - public score: `0.38567`
+  - comparison to V1: `+0.02286`
+  - comparison to V7: `+0.00483`
+  - comparison to V6: `+0.01219`
+  - interpretation: V8 is the best public leaderboard result so far and becomes the new segmentation baseline for the next round
+- Repository maintenance note:
+  - V8 analysis artifacts are under an ignored `outputs/logs` path, so they were intentionally staged with `git add -f`
+  - `outputs/logs/exp_v8_segformer_b5/analysis/summary.md` was updated to include the actual public result `0.38567`

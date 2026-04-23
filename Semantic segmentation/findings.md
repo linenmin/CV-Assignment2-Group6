@@ -280,3 +280,31 @@
 - Practical conclusion:
   - Promote V7 as the new segmentation baseline for leaderboard-facing submissions.
   - Keep V6 as the direct ablation proving that SegFormer works; keep V4 and V5 as supporting negative/partial results.
+
+## V8 SegFormer-B5 Findings
+
+- The eighth-round experiment kept the V7 training recipe fixed and scaled the SegFormer backbone again, from MiT-B3 to MiT-B5.
+  - config: `configs/experiments/segformer_b5_512x512_adamw_poly_v8.py`
+  - notebook: `train_v8_colab.ipynb`
+  - comparison target: V7 SegFormer-B3 baseline
+  - pretrained backbone: SegFormer MiT-B5
+- Local validation result:
+  - best checkpoint: `best_mIoU_iter_11000.pth`
+  - best validation score: `mIoU=68.97`
+  - stop step: `17000`
+  - versus V1: `+6.51 mIoU`
+  - versus V7: `+4.25 mIoU`
+  - versus V6: `+5.51 mIoU`
+- Leaderboard result:
+  - submission source: `submission_exp_v8_segformer_b5.csv`
+  - public score: `0.38567`
+  - versus V1: `+0.02286`
+  - versus V7: `+0.00483`
+  - versus V6: `+0.01219`
+- Key finding:
+  - V8 keeps the SegFormer improvement trend alive on both local validation and public Kaggle.
+  - The gain from B3 to B5 is smaller than the earlier B2 -> B3 jump on the public leaderboard, but it is still real and meaningful.
+  - This suggests the team is now in a regime where model scaling still helps, but the return per extra unit of compute is starting to diminish.
+- Practical conclusion:
+  - Promote V8 as the new best single-model segmentation baseline.
+  - Use V8 as the reference point for any classification merge, ensemble, or TTA experiments.
