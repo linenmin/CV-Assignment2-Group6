@@ -223,3 +223,32 @@
   - CE + Dice is less harmful than OHEM on the public leaderboard, but it still does not recover the original V1 public score.
   - Since both V4 and V5 improve local validation while regressing on Kaggle, the current validation split is not reliable enough to choose leaderboard submissions by local `mIoU` alone.
   - V1 remains the best public segmentation-only submission in the tracker; V5 should be kept as a useful experiment record, not promoted as the final baseline.
+
+## V6 SegFormer-B2 Findings
+
+- The sixth-round experiment changed the model family rather than adding another loss or sampler on top of SegNeXt-S.
+  - base comparison target: V1 clean baseline
+  - config: `configs/experiments/segformer_b2_512x512_adamw_poly_v6.py`
+  - notebook: `train_v6_colab.ipynb`
+  - pretrained backbone: SegFormer MiT-B2
+  - data split, augmentation style, optimizer family, validation cadence, and early stopping policy stayed aligned with the earlier baseline workflow
+- Local validation result:
+  - best checkpoint: `best_mIoU_iter_14000.pth`
+  - best validation score: `mIoU=63.46`
+  - stop step: `20000`
+  - versus V1: `+1.00 mIoU`
+  - versus V4: `-0.44 mIoU`
+  - versus V5: `-0.16 mIoU`
+- Leaderboard result:
+  - submission source: `submission_exp_v6_segformer_b2.csv`
+  - public score: `0.37348`
+  - versus V1: `+0.01067`
+  - versus V4: `+0.02111`
+  - versus V5: `+0.01795`
+- Key finding:
+  - V6 is the strongest public Kaggle result so far despite not being the strongest local validation run.
+  - This strengthens the evidence that the current validation split is imperfect for public-score selection.
+  - It also suggests that SegFormer-B2 generalizes better to the hidden/public test distribution than the SegNeXt-S variants tried in V1, V4, and V5.
+- Practical conclusion:
+  - Promote V6 as the current leaderboard-facing segmentation baseline.
+  - Keep V4 and V5 as useful ablation records, but do not prefer them over V6 for public submission unless classification merge or further validation changes the ranking.

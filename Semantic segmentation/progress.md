@@ -247,3 +247,36 @@
   - comparison to V1: `-0.00728`
   - comparison to V4: `+0.00316`
   - interpretation: V5 is locally strong and better than V4 on public Kaggle, but it still does not beat the V1 public baseline
+
+### 2026-04-24 (V6 Experiment)
+
+- Implemented the sixth-round SegFormer-B2 baseline:
+  - config: `configs/experiments/segformer_b2_512x512_adamw_poly_v6.py`
+  - notebook: `train_v6_colab.ipynb`
+  - experiment basis: return to the V1 clean baseline workflow and replace the SegNeXt-S model family with SegFormer-B2 / MiT-B2
+  - reason: V4 and V5 improved local validation but failed to beat V1 on Kaggle, so the next meaningful variable was hidden-test generalization from a different model family
+- Completed the sixth-round training run on Colab L4:
+  - command: `python scripts/train.py --config configs/experiments/segformer_b2_512x512_adamw_poly_v6.py --num-workers 4 --batch-size 2 --work-dir outputs/logs/exp_v6_segformer_b2`
+  - stop condition: delayed early stopping after the monitored `mIoU` did not improve for `6` validation records
+  - best checkpoint: `outputs/logs/exp_v6_segformer_b2/best_mIoU_iter_14000.pth`
+  - best validation metric: `mIoU=63.46`
+  - stop step: `20000`
+- Exported the sixth-round leaderboard-facing submission candidate:
+  - prediction directory: `outputs/predictions/exp_v6_segformer_b2_test`
+  - predictions written: `750`
+  - submission file: `outputs/submissions/submission_exp_v6_segformer_b2.csv`
+  - submission rows: `1500`
+  - classification mode: placeholder `0`
+- Generated sixth-round training analysis artifacts:
+  - `outputs/logs/exp_v6_segformer_b2/analysis/training_curves.png`
+  - `outputs/logs/exp_v6_segformer_b2/analysis/runtime_diagnostics.png`
+  - `outputs/logs/exp_v6_segformer_b2/analysis/validation_metrics.csv`
+  - `outputs/logs/exp_v6_segformer_b2/analysis/summary.md`
+- Recorded the manual Kaggle result for the sixth-round SegFormer-B2 submission:
+  - public score: `0.37348`
+  - comparison to V1: `+0.01067`
+  - comparison to V4: `+0.02111`
+  - comparison to V5: `+0.01795`
+  - interpretation: V6 is the best public leaderboard result so far and should become the current segmentation baseline for the next round
+- Repository maintenance note:
+  - V6 analysis artifacts are under an ignored `outputs/logs` path, so they were intentionally staged with `git add -f`

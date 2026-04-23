@@ -220,3 +220,43 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - Interpretation:
   - CE + Dice is more stable than V4 OHEM on the public leaderboard, but it still does not beat V1.
   - The repeated local/Kaggle mismatch indicates that future work should focus on better validation, classification merge, or ensembling rather than only increasing local `mIoU`.
+
+## Phase 17 Result
+
+- V6 SegFormer-B2 baseline training completed successfully on Colab L4.
+  - config: `configs/experiments/segformer_b2_512x512_adamw_poly_v6.py`
+  - notebook: `train_v6_colab.ipynb`
+  - method: return to the V1 clean baseline workflow, then replace the SegNeXt-S model family with SegFormer-B2 / MiT-B2
+  - training command: `python scripts/train.py --config configs/experiments/segformer_b2_512x512_adamw_poly_v6.py --num-workers 4 --batch-size 2 --work-dir outputs/logs/exp_v6_segformer_b2`
+  - stop condition: delayed early stopping after the monitored `mIoU` did not improve for `6` validation records
+  - best checkpoint: `outputs/logs/exp_v6_segformer_b2/best_mIoU_iter_14000.pth`
+  - best validation metric: `mIoU=63.46`
+  - stop step: `20000`
+- Comparison against previous local validation runs:
+  - V1: `62.46 -> 63.46`, `+1.00 mIoU`
+  - V4: `63.90 -> 63.46`, `-0.44 mIoU`
+  - V5: `63.62 -> 63.46`, `-0.16 mIoU`
+- Leaderboard-facing artifacts were generated:
+  - submission file: `outputs/submissions/submission_exp_v6_segformer_b2.csv`
+  - submission rows: `1500`
+  - analysis directory: `outputs/logs/exp_v6_segformer_b2/analysis`
+  - classification mode: placeholder `0`, pending merge with the classification teammate output
+- V6 Kaggle public score was recorded:
+  - public score: `0.37348`
+  - versus V1: `0.36281 -> 0.37348`, `+0.01067`
+  - versus V4: `0.35237 -> 0.37348`, `+0.02111`
+  - versus V5: `0.35553 -> 0.37348`, `+0.01795`
+- Interpretation:
+  - V6 is not the best local validation run, but it is the strongest public leaderboard result so far.
+  - This supports the hypothesis that changing the model family improved hidden-test generalization more than further tuning loss or hard-pixel sampling on SegNeXt-S.
+  - SegFormer-B2 should become the next leaderboard-facing segmentation baseline.
+
+## Phase 18 Plan
+
+- Treat V6 SegFormer-B2 as the current public-score baseline.
+- Before the next round, update the three planning files again and commit/push the repository state.
+- Candidate next experiments:
+  - SegFormer-B2 with stronger regularization only after preserving the clean V6 baseline
+  - SegFormer-B3 if compute budget allows
+  - test-time augmentation or ensemble with the best SegNeXt-S runs
+  - merge segmentation predictions with the classification teammate output before final Kaggle interpretation
