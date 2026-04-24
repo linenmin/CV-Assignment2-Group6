@@ -24,14 +24,15 @@ _here = Path(__file__).parent
 _ds   = load_module("dataset", _here / "02_dataset.py")
 _mdl  = load_module("model",   _here / "03_model.py")
 
-VOCDataset         = _ds.VOCDataset
-load_train_df      = _ds.load_train_df
-get_val_transform  = _ds.get_val_transform
-ResNet50Classifier = _mdl.ResNet50Classifier
+VOCDataset            = _ds.VOCDataset
+load_train_df         = _ds.load_train_df
+get_val_transform     = _ds.get_val_transform
+MultiLabelClassifier  = _mdl.MultiLabelClassifier
 
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
+BACKBONE   = "efficientnet_b3"
 BATCH_SIZE = 32
 VAL_SPLIT   = 0.2
 RANDOM_SEED = 42
@@ -97,7 +98,7 @@ def main(ckpt_path=None):
         print("Run 04_train.py first.")
         return
 
-    model = ResNet50Classifier(num_classes=len(LABELS), pretrained=False).to(device)
+    model = MultiLabelClassifier(backbone=BACKBONE, num_classes=len(LABELS), pretrained=False).to(device)
     model.load_state_dict(torch.load(path, map_location=device))
 
     val_loader = build_val_loader(DATA_DIR)

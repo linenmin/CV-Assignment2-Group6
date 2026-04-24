@@ -10,7 +10,11 @@
       "Bash(D:/ProgramData/anaconda3/envs)",
       "Read(//c/Users/31667/.conda/envs/biometrics/Lib/site-packages//**)",
       "Bash(/c/Users/31667/.conda/envs/biometrics/python.exe -c ' *)",
-      "Bash(/c/Users/31667/.conda/envs/biometrics/python.exe \"Image classification/merge_submission.py\")"
+      "Bash(/c/Users/31667/.conda/envs/biometrics/python.exe \"Image classification/merge_submission.py\")",
+      "WebSearch",
+      "Bash(/c/Users/31667/.conda/envs/biometrics/python.exe -c \"import timm; print\\('timm version:', timm.__version__\\); models = timm.list_models\\('efficientnet_b3*'\\); print\\('efficientnet_b3:', models[:3]\\)\")",
+      "Bash(/c/Users/31667/.conda/envs/biometrics/python.exe -c \"import torchvision; print\\(torchvision.__version__\\); from torchvision.models import efficientnet_b3; print\\('efficientnet_b3 available'\\)\")",
+      "Bash(/c/Users/31667/.conda/envs/biometrics/python.exe \"Image classification/04_train.py\")"
     ]
   }
 }

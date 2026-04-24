@@ -21,18 +21,22 @@ _MEAN = [0.485, 0.456, 0.406]
 _STD  = [0.229, 0.224, 0.225]
 
 
-def get_train_transform(img_size: int = 224) -> T.Compose:
+def get_train_transform(img_size: int = 320) -> T.Compose:
     return T.Compose([
         T.Resize((img_size, img_size)),
         T.RandomHorizontalFlip(),
         T.RandomRotation(15),
-        T.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.1),
+        T.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2, hue=0.05),
         T.ToTensor(),
         T.Normalize(_MEAN, _STD),
+        # RandomErasing: masks random patches → model learns global rather than
+        # local cues; especially helps diningtable/bottle/pottedplant which are
+        # often partially occluded.
+        T.RandomErasing(p=0.3, scale=(0.02, 0.2)),
     ])
 
 
-def get_val_transform(img_size: int = 224) -> T.Compose:
+def get_val_transform(img_size: int = 320) -> T.Compose:
     return T.Compose([
         T.Resize((img_size, img_size)),
         T.ToTensor(),

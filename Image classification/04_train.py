@@ -20,29 +20,35 @@ from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).parent))
-from shared import LABELS, DATA_DIR, OUTPUT_DIR, NUM_WORKERS, load_module, NegativeSmoothBCELoss  # noqa: E402
+from shared import LABELS, DATA_DIR, OUTPUT_DIR, NUM_WORKERS, load_module, AsymmetricLoss  # noqa: E402
 
 _here = Path(__file__).parent
 _ds   = load_module("dataset", _here / "02_dataset.py")
 _mdl  = load_module("model",   _here / "03_model.py")
 
-VOCDataset          = _ds.VOCDataset
-load_train_df       = _ds.load_train_df
-get_train_transform = _ds.get_train_transform
-get_val_transform   = _ds.get_val_transform
-ResNet50Classifier  = _mdl.ResNet50Classifier
+VOCDataset            = _ds.VOCDataset
+load_train_df         = _ds.load_train_df
+get_train_transform   = _ds.get_train_transform
+get_val_transform     = _ds.get_val_transform
+MultiLabelClassifier  = _mdl.MultiLabelClassifier
 
 # ---------------------------------------------------------------------------
 # Hyper-parameters
 # ---------------------------------------------------------------------------
-IMG_SIZE   = 224
-BATCH_SIZE = 32
+BACKBONE   = "efficientnet_b3"  # or "resnet50"
+IMG_SIZE   = 320                # larger input preserves small-object detail
+BATCH_SIZE = 16                 # reduced from 32 to fit 320×320 in GPU memory
 
 STAGE1_EPOCHS = 5
 STAGE1_LR     = 1e-3
 
 STAGE2_EPOCHS = 20
 STAGE2_LR     = 1e-4
+
+# Stage 3: retrain on ALL 750 samples using best weights
+# Gives the final model that 06_predict.py will use
+STAGE3_EPOCHS = 5
+STAGE3_LR     = 5e-5
 
 WEIGHT_DECAY  = 1e-4
 VAL_SPLIT     = 0.2
@@ -144,13 +150,14 @@ def train_stage(model, train_loader, val_loader, criterion,
 def main():
     train_loader, val_loader, pos_weight = build_loaders(DATA_DIR)
 
-    model = ResNet50Classifier(num_classes=len(LABELS), pretrained=True).to(device)
-    criterion = NegativeSmoothBCELoss(neg_smooth=0.05, pos_weight=pos_weight.to(device))
+    model = MultiLabelClassifier(backbone=BACKBONE, num_classes=len(LABELS),
+                                  pretrained=True).to(device)
+    criterion = AsymmetricLoss(gamma_neg=4, gamma_pos=0, clip=0.05)
 
     best_val_loss = float("inf")
 
     # ---- Stage 1: frozen backbone, train head only ----
-    print("\n=== Stage 1: Training classification head (backbone frozen) ===")
+    print(f"\n=== Stage 1: Training classification head (backbone={BACKBONE}, frozen) ===")
     model.freeze_backbone()
     print(f"Trainable params: {model.trainable_params():,}")
     best_val_loss = train_stage(
@@ -169,9 +176,28 @@ def main():
         stage_name="S2", best_val_loss=best_val_loss,
     )
 
-    torch.save(model.state_dict(), CKPT_DIR / "last_model.pth")
+    # ---- Stage 3: retrain on ALL data with best weights ----
+    # Removes the 20% val holdout penalty — gives the model 25% more training signal.
+    # Uses a very low LR to avoid overwriting the well-trained features.
+    print("\n=== Stage 3: Retrain on full dataset (all 750 samples) ===")
+    model.load_state_dict(torch.load(CKPT_DIR / "best_model.pth", map_location=device))
+    full_df = load_train_df(DATA_DIR)
+    full_ds = VOCDataset(full_df, DATA_DIR, split="train",
+                         transform=get_train_transform(IMG_SIZE))
+    full_loader = DataLoader(full_ds, batch_size=BATCH_SIZE, shuffle=True,
+                             num_workers=NUM_WORKERS, pin_memory=True)
+    optimizer3  = torch.optim.AdamW(model.parameters(), lr=STAGE3_LR,
+                                     weight_decay=WEIGHT_DECAY)
+    scheduler3  = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer3,
+                                                               T_max=STAGE3_EPOCHS)
+    for epoch in range(1, STAGE3_EPOCHS + 1):
+        loss = run_epoch(model, full_loader, criterion, optimizer3, train=True)
+        scheduler3.step()
+        print(f"[S3] Epoch {epoch:3d}/{STAGE3_EPOCHS} | full_train_loss={loss:.4f}")
+
+    torch.save(model.state_dict(), CKPT_DIR / "final_model.pth")
     print(f"\nTraining complete. Best val loss: {best_val_loss:.4f}")
-    print(f"Checkpoints saved to {CKPT_DIR}")
+    print(f"Checkpoints: best_model.pth (val-tuned)  final_model.pth (full-data)")
 
 
 if __name__ == "__main__":

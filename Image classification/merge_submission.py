@@ -2,7 +2,7 @@
 Merge classification and segmentation predictions into one Kaggle submission.
 
     classification rows  ← submission_classification.csv
-    segmentation rows    ← submission_exp_v1_ade20k_main.csv
+    segmentation rows    ← submission_exp_v7_segformer_b3.csv
 
 Run from project root:
     python "Image classification/merge_submission.py"
@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from shared import OUTPUT_DIR  # noqa: E402
 
 CLF_CSV = OUTPUT_DIR / "submission_classification.csv"
-SEG_CSV = OUTPUT_DIR / "submission_exp_v1_ade20k_main.csv"
+SEG_CSV = OUTPUT_DIR / "submission_exp_v7_segformer_b3.csv"
 OUT_CSV = OUTPUT_DIR / "submission_final.csv"
 
 

@@ -42,36 +42,57 @@ def load_module(name: str, filepath: Path):
 
 
 # ---------------------------------------------------------------------------
-# Noise-robust loss
+# Asymmetric Loss for Multi-Label Classification (ICCV 2021)
+# Ridnik et al.  https://arxiv.org/abs/2009.14119
 #
-# PASCAL VOC has systematic false-negative noise: objects are physically
-# present in many images but not annotated (the "person in the background"
-# problem visible in the sample grid).  Penalising the model hard for
-# predicting those as positive hurts generalisation.
+# Two-pronged attack on the false-negative noise problem in PASCAL VOC:
 #
-# Fix: smooth only the *negative* targets (0 → neg_smooth).
-# Positive targets stay at 1.0 — VOC positive labels are reliable.
+#   1. Probability shifting (clip):
+#      For negatives, replace p with max(p - clip, 0) before log.
+#      Any prediction below 'clip' contributes zero loss — the model is
+#      not punished for being slightly positive on unlabelled objects.
+#
+#   2. Asymmetric focal decay:
+#      γ_pos=0 (no down-weighting on positives, every TP counts).
+#      γ_neg=4 (aggressively down-weight easy negatives so rare positives
+#               dominate the gradient).
+#
+# Result: diningtable, pottedplant, and other noisy/rare classes
+# receive proportionally stronger gradient signal.
 # ---------------------------------------------------------------------------
-class NegativeSmoothBCELoss(nn.Module):
+class AsymmetricLoss(nn.Module):
     """
-    BCEWithLogitsLoss with one-sided label smoothing on negative targets.
-
     Parameters
     ----------
-    neg_smooth : float
-        Value to replace 0-targets with (e.g. 0.05 means "this class is
-        absent with 95% confidence, not 100%").
-    pos_weight : Tensor or None
-        Per-class positive weights for class-imbalance compensation.
+    gamma_neg : float  Focal exponent for negatives (paper default: 4).
+    gamma_pos : float  Focal exponent for positives (paper default: 0).
+    clip      : float  Probability margin for negatives (paper default: 0.05).
     """
 
-    def __init__(self, neg_smooth: float = 0.05, pos_weight=None):
+    def __init__(self, gamma_neg: float = 4, gamma_pos: float = 0,
+                 clip: float = 0.05, eps: float = 1e-8):
         super().__init__()
-        self.neg_smooth = neg_smooth
-        self.bce = nn.BCEWithLogitsLoss(pos_weight=pos_weight, reduction="mean")
+        self.gamma_neg = gamma_neg
+        self.gamma_pos = gamma_pos
+        self.clip = clip
+        self.eps = eps
 
     def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
-        # Only relax zeros; leave ones untouched
-        soft = targets.clone()
-        soft[targets == 0] = self.neg_smooth
-        return self.bce(logits, soft)
+        probs     = torch.sigmoid(logits)
+        probs_neg = 1.0 - probs
+
+        # Shift negatives: zero loss when predicted prob < clip
+        if self.clip > 0:
+            probs_neg = (probs_neg + self.clip).clamp(max=1.0)
+
+        log_p  = torch.log(probs.clamp(min=self.eps))
+        log_np = torch.log(probs_neg.clamp(min=self.eps))
+        loss   = targets * log_p + (1 - targets) * log_np
+
+        # Asymmetric focal weights (detached — weights are not optimised)
+        with torch.no_grad():
+            w = (targets       * (1 - probs).pow(self.gamma_pos) +
+                 (1 - targets) * probs.pow(self.gamma_neg))
+        loss = loss * w
+
+        return -loss.mean()
