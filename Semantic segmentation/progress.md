@@ -344,3 +344,23 @@
 - Repository maintenance note:
   - V8 analysis artifacts are under an ignored `outputs/logs` path, so they were intentionally staged with `git add -f`
   - `outputs/logs/exp_v8_segformer_b5/analysis/summary.md` was updated to include the actual public result `0.38567`
+
+### 2026-04-24 (V9 Submission Ensemble Candidate)
+
+- Synchronized the Kaggle score tracker with the SegFormer experiments:
+  - V6 SegFormer-B2: `0.37348`
+  - V7 SegFormer-B3: `0.38084`
+  - V8 SegFormer-B5: `0.38567`
+- Added a reusable hard-vote submission ensemble path:
+  - module: `src/ga2_seg/submission_ensemble.py`
+  - script: `scripts/ensemble_submissions.py`
+  - tests: `tests/test_submission_ensemble.py`
+- Generated a V9 candidate without additional training:
+  - command: `python scripts/ensemble_submissions.py --submission outputs/submissions/submission_exp_v6_segformer_b2.csv --submission outputs/submissions/submission_exp_v7_segformer_b3.csv --submission outputs/submissions/submission_exp_v8_segformer_b5.csv --output-path outputs/submissions/submission_exp_v9_segformer_vote_v6_v7_v8.csv --primary-index 2`
+  - output: `outputs/submissions/submission_exp_v9_segformer_vote_v6_v7_v8.csv`
+  - images: `750`
+  - mean changed pixels versus V8: `2.14%`
+  - mean pairwise disagreement across V6/V7/V8: `5.17%`
+- Decision:
+  - V9 is worth a manual Kaggle upload because it is a conservative test-time ensemble candidate and requires no new training run.
+  - If it does not beat V8, the next high-cost experiment should be a model-family upgrade such as SegMAN-B/L rather than another small loss, sampler, or crop modification.

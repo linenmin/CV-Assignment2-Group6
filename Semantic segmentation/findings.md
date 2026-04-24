@@ -308,3 +308,19 @@
 - Practical conclusion:
   - Promote V8 as the new best single-model segmentation baseline.
   - Use V8 as the reference point for any classification merge, ensemble, or TTA experiments.
+
+## V9 SegFormer Hard-Vote Ensemble Findings
+
+- The repository does not currently contain the V6/V7/V8 `.pth` checkpoints locally, so model-level TTA could not be run from this checkout without retrieving those weights from the training environment.
+- A submission-level hard-vote ensemble was generated from the existing V6, V7, and V8 SegFormer submission CSV files.
+  - output: `submission_exp_v9_segformer_vote_v6_v7_v8.csv`
+  - tie-break baseline: V8 SegFormer-B5
+  - mean changed pixels versus V8: `2.14%`
+  - mean pairwise disagreement across V6/V7/V8: `5.17%`
+- Interpretation:
+  - The ensemble is conservative: it keeps most V8 pixels unchanged and only alters regions where the SegFormer models disagree.
+  - Because V6, V7, and V8 all improved public Kaggle performance in sequence, their disagreement is a plausible source of useful corrections.
+  - This candidate is worth a manual Kaggle upload before spending another multi-hour training run.
+- Strategic conclusion:
+  - If V9 beats V8, prioritize lightweight ensemble/TTA around the SegFormer family.
+  - If V9 does not beat V8, the next expensive experiment should be a model-family upgrade such as SegMAN-B/L rather than another local loss, sampler, crop, or early-stopping tweak.

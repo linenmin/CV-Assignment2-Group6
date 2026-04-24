@@ -90,3 +90,17 @@ Notes:
 
 - `classification-fill 0` is only a placeholder workflow for segmentation-only iteration
 - final leaderboard interpretation must consider whether classification is still placeholder output
+
+## Submission Ensemble
+
+Build a hard-vote ensemble directly from existing Kaggle submission CSV files:
+
+```powershell
+python .\scripts\ensemble_submissions.py --submission .\outputs\submissions\submission_exp_v6_segformer_b2.csv --submission .\outputs\submissions\submission_exp_v7_segformer_b3.csv --submission .\outputs\submissions\submission_exp_v8_segformer_b5.csv --output-path .\outputs\submissions\submission_exp_v9_segformer_vote_v6_v7_v8.csv --primary-index 2
+```
+
+Notes:
+
+- pass submissions from weaker to stronger models when using `--primary-index 2` for the V6/V7/V8 setup
+- the primary submission breaks voting ties, so the V9 candidate defaults ties back to V8
+- this path requires no model checkpoint and is useful when only submission CSVs are available

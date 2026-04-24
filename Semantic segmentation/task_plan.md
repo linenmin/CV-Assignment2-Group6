@@ -336,3 +336,20 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
   - merge V8 segmentation with the best classification submission and measure the combined Kaggle gain
   - lightweight B3/B5 ensemble or test-time augmentation before attempting even heavier single models
   - only consider further model scaling if the extra compute still gives a worthwhile public-score return
+
+## Phase 20 Result
+
+- V6/V7/V8 public scores were added to `kaggle_scores.md` so the leaderboard tracker is now aligned with `task_plan.md`, `progress.md`, and `findings.md`.
+- A low-cost V9 hard-vote ensemble candidate was generated from the existing SegFormer submission files:
+  - inputs:
+    - `outputs/submissions/submission_exp_v6_segformer_b2.csv`
+    - `outputs/submissions/submission_exp_v7_segformer_b3.csv`
+    - `outputs/submissions/submission_exp_v8_segformer_b5.csv`
+  - output: `outputs/submissions/submission_exp_v9_segformer_vote_v6_v7_v8.csv`
+  - tie-break baseline: V8 SegFormer-B5
+  - mean changed pixels versus V8: `2.14%`
+  - mean pairwise disagreement across V6/V7/V8: `5.17%`
+- Interpretation:
+  - V9 is a conservative ensemble candidate because it only changes a small fraction of V8 pixels.
+  - It is worth a manual Kaggle upload because it costs no additional training and tests whether the SegFormer family disagreement contains useful corrections.
+  - If V9 does not beat V8, the next expensive training experiment should remain a model-family upgrade such as SegMAN-B/L rather than another local loss or sampler tweak.
