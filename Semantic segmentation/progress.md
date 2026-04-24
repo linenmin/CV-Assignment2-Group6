@@ -482,3 +482,16 @@
   - installs NATTEN with `--trusted-host shi-labs.com`
   - builds `selective_scan` with `--no-build-isolation`
   - downloads only the SegMAN-B encoder checkpoint when missing
+
+### 2026-04-24 (V10 SegMAN-B Training Started)
+
+- Started SegMAN-B training in WSL and fixed two runtime incompatibilities:
+  - MMCV 1.x scatter needed a PyTorch 2.1 device compatibility patch.
+  - SegMAN `selective_scan` needed a local AMP patch to force the scan block to full precision and cast back afterward.
+- Fixed validation/test preprocessing:
+  - added `Pad(size_divisor=32)` because SegMAN decoder uses `pixel_unshuffle` and requires compatible feature dimensions.
+- First successful validation:
+  - best checkpoint: `best_mIoU_iter_5000.pth`
+  - validation: `mIoU=70.75`, `mAcc=84.62`, `aAcc=93.64`
+  - this is above the previous V8 local validation reference (`mIoU=68.97`), so the SegMAN direction is currently promising.
+- The full run was resumed from `latest.pth` in WSL background mode after foreground command timeout.

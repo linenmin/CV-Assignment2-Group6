@@ -74,6 +74,8 @@ fi
 
 cd "${SEG_ROOT}"
 python -m pip install -e .
+python scripts/patch_mmcv_torch21.py
+python scripts/patch_segman_amp.py
 python scripts/prepare_segman_experiment.py \
   --segman-root "${SEG_MAN_ROOT}" \
   --variant b \

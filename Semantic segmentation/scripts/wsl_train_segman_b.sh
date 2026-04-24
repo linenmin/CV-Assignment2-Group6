@@ -30,6 +30,8 @@ if [ ! -f "${ENCODER_CKPT}" ]; then
 fi
 
 cd "${SEG_ROOT}"
+python scripts/patch_mmcv_torch21.py
+python scripts/patch_segman_amp.py
 python scripts/prepare_segman_experiment.py \
   --segman-root "${SEG_MAN_ROOT}" \
   --variant b \
@@ -38,7 +40,11 @@ python scripts/prepare_segman_experiment.py \
   --workers 4
 
 cd "${SEG_MAN_ROOT}/segmentation"
-python tools/train.py local_configs/segman/ga2/segman_b_ga2.py --work-dir outputs/ga2_segman_b
+TRAIN_ARGS=(local_configs/segman/ga2/segman_b_ga2.py --work-dir outputs/ga2_segman_b)
+if [ -f outputs/ga2_segman_b/latest.pth ]; then
+  TRAIN_ARGS+=(--resume-from outputs/ga2_segman_b/latest.pth)
+fi
+python tools/train.py "${TRAIN_ARGS[@]}"
 
 cd "${SEG_ROOT}"
 BEST_CKPT="$(ls -1 "${SEG_MAN_ROOT}/segmentation/outputs/ga2_segman_b"/best_mIoU_*.pth | tail -n 1)"
