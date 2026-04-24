@@ -404,3 +404,24 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - Current blocker before long training:
   - official ImageNet-pretrained SegMAN encoder checkpoint is not present yet at `external/SegMAN/pretrained/SegMAN_Encoder_b.pth.tar`
   - long training should start only after that file and the separate SegMAN environment are ready
+
+## Phase 24 Result
+
+- The existing `gpu_env` was checked first as requested:
+  - Python: `3.12.3`
+  - Torch: `2.5.1+cu121`
+  - CUDA visible: yes, RTX 4060 Laptop GPU
+  - blocker: official SegMAN depends on MMSegmentation 0.30 plus `mmcv-full 1.x`, which is not a safe fit for Python 3.12/Torch 2.5 in the current environment
+- An isolated `segman_env` was created for the official dependency stack:
+  - Python: `3.10`
+  - Torch: `2.1.2+cu121`
+  - CUDA visible: yes
+  - `mmcv-full`: `1.7.2`
+  - `mmsegmentation`: `0.30.0`
+- Windows-specific blocker:
+  - NATTEN official wheel index provides Linux wheels for `torch2.1/cu121`, but no Windows wheel
+  - source build fails locally and also requires CMake/Visual Studio/CUDA compilation support
+  - SegMAN also needs the VMamba selective scan CUDA extension, so full local Windows training remains high-risk
+- Execution path updated:
+  - added `train_v10_segman_colab.ipynb` for Linux GPU/Colab training
+  - added `scripts/predict_segman_test.py` for SegMAN checkpoint inference and Kaggle CSV generation

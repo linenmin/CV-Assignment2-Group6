@@ -352,3 +352,10 @@
 - Current blocker before real training:
   - the official ImageNet-pretrained encoder checkpoint is not available locally yet
   - the separate SegMAN environment has not been installed or smoke-tested
+- Local environment attempt:
+  - `gpu_env` remains a valid Torch GPU environment, but it is not compatible with the old SegMAN dependency stack without risking the current working setup
+  - `segman_env` successfully supports `torch 2.1.2+cu121`, `mmcv-full 1.7.2`, and `mmsegmentation 0.30.0`
+  - Windows remains blocked by NATTEN and selective scan CUDA extension availability
+- Practical conclusion:
+  - V10 should run on Linux GPU/Colab using `train_v10_segman_colab.ipynb`
+  - local Windows can continue to prepare data/configs and export submissions after predictions are available

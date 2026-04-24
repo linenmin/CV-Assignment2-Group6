@@ -407,3 +407,29 @@
 - Current blocker:
   - the ImageNet-pretrained encoder file is not present at `external/SegMAN/pretrained/SegMAN_Encoder_b.pth.tar`
   - the official SegMAN environment still needs to be created separately before smoke training
+
+### 2026-04-24 (V10 Local Environment Attempt)
+
+- Checked `gpu_env` first because it is the existing working Torch GPU chain:
+  - Python `3.12.3`
+  - Torch `2.5.1+cu121`
+  - CUDA available on RTX 4060 Laptop GPU
+  - `mmseg` was present but unusable because `mmcv` was missing
+- Decided not to force old SegMAN dependencies into `gpu_env` because SegMAN targets MMSegmentation 0.30 and `mmcv-full 1.x`; mixing that into Python 3.12/Torch 2.5 would risk breaking the existing working environment.
+- Created an isolated `segman_env`:
+  - Python `3.10`
+  - Torch `2.1.2+cu121`
+  - CUDA available on RTX 4060 Laptop GPU
+  - `mmcv-full 1.7.2`
+  - official SegMAN `mmsegmentation 0.30.0`
+- Installed SegMAN requirements except `triton`, which is not available for Windows in this setup.
+- Tried NATTEN installation:
+  - official wheel command fails because the upstream wheel index only provides Linux wheels for this stack
+  - source build with `--no-build-isolation` fails locally and reports missing CMake; it also warns that Windows + CUDA 12 is a known risk for Torch CMake builds
+- Added Linux GPU execution path:
+  - `train_v10_segman_colab.ipynb`
+  - `scripts/predict_segman_test.py`
+- Validation:
+  - `segman_env` imports `torch`, `mmcv`, and `mmseg` successfully
+  - `python -m py_compile scripts/predict_segman_test.py scripts/prepare_segman_experiment.py` passes
+  - `conda run -n seg_gpu_env python -m pytest .\tests\test_segman_adapter.py .\tests\test_submission_ensemble.py -q` passes with `5 passed`
