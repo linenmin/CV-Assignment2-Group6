@@ -155,10 +155,18 @@ Then run:
 bash scripts/wsl_train_segman_b.sh
 ```
 
+To run in WSL with Discord notification on success or failure:
+
+```bash
+export DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/..."
+nohup bash scripts/wsl_run_segman_b_with_notify.sh > outputs/logs/wsl_segman_b_notify_nohup.log 2>&1 &
+```
+
 Notes:
 
 - the script prepends `/usr/local/cuda/bin` and `/usr/local/cuda/lib64`; if `nvcc` is still missing, install a Linux CUDA toolkit before running the setup script again
 - the expected encoder checkpoint path is `external/SegMAN/pretrained/SegMAN_Encoder_b.pth.tar`
+- `wsl_run_segman_b_with_notify.sh` does not store the webhook URL; it only reads `DISCORD_WEBHOOK_URL` from the WSL environment
 - for faster long training, consider copying the repo and dataset into the WSL filesystem instead of reading many small files through `/mnt/d`
 
 After training, export test predictions and a Kaggle CSV:
