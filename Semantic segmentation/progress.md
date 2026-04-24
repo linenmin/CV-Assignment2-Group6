@@ -433,3 +433,25 @@
   - `segman_env` imports `torch`, `mmcv`, and `mmseg` successfully
   - `python -m py_compile scripts/predict_segman_test.py scripts/prepare_segman_experiment.py` passes
   - `conda run -n seg_gpu_env python -m pytest .\tests\test_segman_adapter.py .\tests\test_submission_ensemble.py -q` passes with `5 passed`
+
+### 2026-04-24 (V10 WSL2 Route)
+
+- Checked WSL2 as the preferred local SegMAN route:
+  - distro: `Ubuntu-22.04`
+  - WSL version: `2`
+  - `nvidia-smi` works inside WSL and sees the RTX 4060 Laptop GPU
+  - Python `3.10.12` is available
+  - gcc `11.4.0` is available
+  - cmake `3.22.1` is available
+  - `nvcc` is not currently available inside WSL
+- Removed the native Windows `segman_env` as requested.
+  - confirmed remaining Windows conda envs include `gpu_env` and `seg_gpu_env`, but no `segman_env`
+- Added WSL helper scripts:
+  - `scripts/wsl_setup_segman.sh`
+  - `scripts/wsl_train_segman_b.sh`
+- Validation:
+  - `bash -n scripts/wsl_setup_segman.sh`
+  - `bash -n scripts/wsl_train_segman_b.sh`
+- Current blocker:
+  - WSL needs CUDA toolkit / `nvcc` before building the SegMAN selective scan extension
+  - once `nvcc` is installed, `wsl_setup_segman.sh` should install the isolated Linux `segman` conda env and prepare the GA2 SegMAN config

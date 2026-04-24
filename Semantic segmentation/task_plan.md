@@ -425,3 +425,22 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - Execution path updated:
   - added `train_v10_segman_colab.ipynb` for Linux GPU/Colab training
   - added `scripts/predict_segman_test.py` for SegMAN checkpoint inference and Kaggle CSV generation
+
+## Phase 25 Result
+
+- WSL2 feasibility was checked:
+  - distro: `Ubuntu-22.04`
+  - WSL version: `2`
+  - `nvidia-smi` works inside WSL
+  - GPU visible: RTX 4060 Laptop GPU
+  - Python available: `3.10.12`
+  - gcc available: `11.4.0`
+  - cmake available: `3.22.1`
+  - `nvcc` was not found inside WSL yet
+- Native Windows `segman_env` was removed as requested; `gpu_env` and `seg_gpu_env` were left untouched.
+- WSL2 scripts were added:
+  - `scripts/wsl_setup_segman.sh`
+  - `scripts/wsl_train_segman_b.sh`
+- Current WSL blocker:
+  - install CUDA toolkit / `nvcc` inside WSL before building the SegMAN selective scan extension
+  - after `nvcc` is available, run `bash scripts/wsl_setup_segman.sh`, then place the official SegMAN-B encoder checkpoint and run `bash scripts/wsl_train_segman_b.sh`

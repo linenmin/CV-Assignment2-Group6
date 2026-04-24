@@ -136,6 +136,34 @@ Notes:
 - on Windows, `segman_env` can install `torch 2.1.2 + cu121`, `mmcv-full 1.7.2`, and `mmseg 0.30.0`, but NATTEN has no official Windows wheel for this stack
 - use [train_v10_segman_colab.ipynb](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/train_v10_segman_colab.ipynb) for the full Linux GPU training workflow
 
+### WSL2 Route
+
+WSL2 is preferred over native Windows for SegMAN because NATTEN and selective scan are Linux/CUDA extension builds.
+
+From WSL:
+
+```bash
+cd "/mnt/d/BaiduNetdiskWorkspace/Leuven/8th/Computer Vision/assignment/Group2/Semantic segmentation"
+bash scripts/wsl_setup_segman.sh
+```
+
+Before training, place the official encoder checkpoint at:
+
+```text
+external/SegMAN/pretrained/SegMAN_Encoder_b.pth.tar
+```
+
+Then run:
+
+```bash
+bash scripts/wsl_train_segman_b.sh
+```
+
+Notes:
+
+- if `nvcc` is missing in WSL, install a Linux CUDA toolkit before running the setup script again
+- for faster long training, consider copying the repo and dataset into the WSL filesystem instead of reading many small files through `/mnt/d`
+
 After training, export test predictions and a Kaggle CSV:
 
 ```powershell

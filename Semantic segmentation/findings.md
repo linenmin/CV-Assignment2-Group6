@@ -359,3 +359,7 @@
 - Practical conclusion:
   - V10 should run on Linux GPU/Colab using `train_v10_segman_colab.ipynb`
   - local Windows can continue to prepare data/configs and export submissions after predictions are available
+- WSL2 update:
+  - WSL2 can see the NVIDIA GPU and has gcc/cmake, so it is a viable local route for SegMAN
+  - `nvcc` is missing inside WSL, which blocks selective scan compilation for now
+  - native Windows `segman_env` was removed; future SegMAN local training should use the WSL scripts instead
