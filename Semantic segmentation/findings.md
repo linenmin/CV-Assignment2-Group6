@@ -324,3 +324,31 @@
 - Strategic conclusion:
   - If V9 beats V8, prioritize lightweight ensemble/TTA around the SegFormer family.
   - If V9 does not beat V8, the next expensive experiment should be a model-family upgrade such as SegMAN-B/L rather than another local loss, sampler, crop, or early-stopping tweak.
+- Manual Kaggle result:
+  - V9 public score: `0.39064`
+  - versus V8: `+0.00497`
+  - versus V7: `+0.00980`
+  - versus V6: `+0.01716`
+- Updated conclusion:
+  - The SegFormer ensemble direction is now validated, not just hypothesized.
+  - The public-score gain from changing only `2.14%` of V8 pixels implies that the model disagreement regions are high-value correction regions.
+  - Before running another expensive training job, the team should prioritize retrieving model checkpoints for true TTA, merging real classification outputs, and testing additional diverse SegFormer-style ensemble members.
+
+## V10 SegMAN Preparation Findings
+
+- The team decided to stop the SegFormer ensemble line after V9 and move to the next model-family experiment.
+- SegMAN is a credible next candidate because the official CVPR 2025 repository reports stronger ADE20K segmentation results than the SegFormer-B5 reference point used in this project.
+  - official SegMAN-B ADE20K result: `52.6 mIoU`
+  - official SegMAN-L ADE20K result: `53.2 mIoU`
+- Engineering risk is higher than the existing MMSegmentation 1.x workflow:
+  - SegMAN is based on MMSegmentation 0.30
+  - it requires `natten`
+  - it requires the VMamba selective scan CUDA extension
+  - therefore it should run in an isolated `segman` environment, not in `seg_gpu_env`
+- A project-side adapter is now available to reduce integration risk:
+  - it exports GA2 data to a PNG layout compatible with MMSegmentation 0.30
+  - it writes `CustomDataset` configs for SegMAN-B/L
+  - it keeps background as label `0` and foreground classes as labels `1..20`, matching the existing submission format
+- Current blocker before real training:
+  - the official ImageNet-pretrained encoder checkpoint is not available locally yet
+  - the separate SegMAN environment has not been installed or smoke-tested

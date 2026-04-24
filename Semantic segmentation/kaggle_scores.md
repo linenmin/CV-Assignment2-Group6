@@ -13,6 +13,7 @@ This file records leaderboard-facing submissions for the semantic-segmentation w
 | 2026-04-24 | `outputs/submissions/submission_exp_v6_segformer_b2.csv` | `outputs/logs/exp_v6_segformer_b2/best_mIoU_iter_14000.pth` | `63.46` | `0.37348` | `Yes (all zero)` | Sixth-round SegFormer-B2 baseline. Switching model family improved leaderboard transfer noticeably even though local validation stayed close to the stronger SegNeXt variants. |
 | 2026-04-24 | `outputs/submissions/submission_exp_v7_segformer_b3.csv` | `outputs/logs/exp_v7_segformer_b3/best_mIoU_iter_8000.pth` | `64.72` | `0.38084` | `Yes (all zero)` | Seventh-round SegFormer-B3 scale-up. Both local validation and Kaggle score improved over V6, confirming the new model family generalized better on the hidden test set. |
 | 2026-04-24 | `outputs/submissions/submission_exp_v8_segformer_b5.csv` | `outputs/logs/exp_v8_segformer_b5/best_mIoU_iter_11000.pth` | `68.97` | `0.38567` | `Yes (all zero)` | Eighth-round SegFormer-B5 scale-up. This is the current best single-model segmentation submission and the strongest public leaderboard result so far. |
+| 2026-04-24 | `outputs/submissions/submission_exp_v9_segformer_vote_v6_v7_v8.csv` | `N/A (submission-level ensemble)` | `N/A` | `0.39064` | `Yes (all zero)` | Ninth-round hard-vote ensemble from V6/V7/V8 SegFormer submissions, using V8 as the tie-break baseline. This is the current best public leaderboard result. |
 
 
 ## Usage Notes

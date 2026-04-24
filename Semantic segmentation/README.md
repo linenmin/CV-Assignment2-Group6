@@ -104,3 +104,32 @@ Notes:
 - pass submissions from weaker to stronger models when using `--primary-index 2` for the V6/V7/V8 setup
 - the primary submission breaks voting ties, so the V9 candidate defaults ties back to V8
 - this path requires no model checkpoint and is useful when only submission CSVs are available
+
+## SegMAN V10 Preparation
+
+SegMAN uses the official CVPR 2025 repository and a separate MMSegmentation 0.30 style environment. Keep it isolated from `seg_gpu_env`.
+
+Clone the official repository outside tracked project code:
+
+```powershell
+git clone https://github.com/yunxiangfu2001/SegMAN.git .\external\SegMAN
+```
+
+Prepare the PNG dataset export and write a GA2 config into the cloned SegMAN tree:
+
+```powershell
+python .\scripts\prepare_segman_experiment.py --segman-root .\external\SegMAN --variant b --encoder-checkpoint .\external\SegMAN\pretrained\SegMAN_Encoder_b.pth.tar --batch-size 2 --workers 4
+```
+
+Then run training from the SegMAN environment:
+
+```powershell
+cd .\external\SegMAN\segmentation
+python tools\train.py local_configs\segman\ga2\segman_b_ga2.py --work-dir outputs\ga2_segman_b
+```
+
+Notes:
+
+- `data/segman_ga2/` and `external/` are ignored because they are generated or third-party content
+- start with `SegMAN-B`; move to `SegMAN-L` only after the environment and smoke training are stable
+- official SegMAN requires MMSegmentation 0.30, `natten`, and the VMamba selective scan extension

@@ -364,3 +364,46 @@
 - Decision:
   - V9 is worth a manual Kaggle upload because it is a conservative test-time ensemble candidate and requires no new training run.
   - If it does not beat V8, the next high-cost experiment should be a model-family upgrade such as SegMAN-B/L rather than another small loss, sampler, or crop modification.
+
+### 2026-04-24 (V9 Kaggle Result)
+
+- Recorded the manual Kaggle result for the V9 SegFormer hard-vote ensemble:
+  - submission file: `outputs/submissions/submission_exp_v9_segformer_vote_v6_v7_v8.csv`
+  - public score: `0.39064`
+  - comparison to V8: `+0.00497`
+  - comparison to V7: `+0.00980`
+  - comparison to V6: `+0.01716`
+- Interpretation:
+  - V9 is now the best public leaderboard result in the segmentation track.
+  - The gain confirms that V6/V7/V8 carry complementary errors and that a conservative vote over their disagreement regions improves hidden-test performance.
+  - Because the ensemble changed only `2.14%` of V8 pixels, the result is strong evidence that the next immediate work should focus on better ensemble/TTA around SegFormer before paying for another full training run.
+
+### 2026-04-24 (V10 SegMAN Preparation)
+
+- Shifted the next high-cost experiment to SegMAN after the team decided to stop the SegFormer ensemble line.
+- Verified official SegMAN project facts from the upstream repository:
+  - paper: CVPR 2025
+  - repository: `https://github.com/yunxiangfu2001/SegMAN`
+  - official implementation depends on MMSegmentation 0.30, NATTEN, and VMamba selective scan
+  - official ADE20K table reports SegMAN-B `52.6 mIoU` and SegMAN-L `53.2 mIoU`
+- Cloned the official repository locally under ignored project content:
+  - `Semantic segmentation/external/SegMAN`
+- Added a project-side SegMAN adapter:
+  - `src/ga2_seg/segman_adapter.py`
+  - exports GA2 `.npy` arrays to PNG files for MMSegmentation 0.30
+  - writes GA2 SegMAN-B/L configs into the official repository checkout
+- Added a CLI wrapper:
+  - `scripts/prepare_segman_experiment.py`
+- Exported the dataset for SegMAN:
+  - train: `637`
+  - validation: `112`
+  - test: `750`
+  - export root: `data/segman_ga2`
+- Generated the first V10 config:
+  - `external/SegMAN/segmentation/local_configs/segman/ga2/segman_b_ga2.py`
+- Validation:
+  - `conda run -n seg_gpu_env python -m pytest .\tests\test_segman_adapter.py .\tests\test_submission_ensemble.py -q`
+  - result: `5 passed`
+- Current blocker:
+  - the ImageNet-pretrained encoder file is not present at `external/SegMAN/pretrained/SegMAN_Encoder_b.pth.tar`
+  - the official SegMAN environment still needs to be created separately before smoke training

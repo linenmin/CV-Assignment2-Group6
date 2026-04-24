@@ -353,3 +353,54 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
   - V9 is a conservative ensemble candidate because it only changes a small fraction of V8 pixels.
   - It is worth a manual Kaggle upload because it costs no additional training and tests whether the SegFormer family disagreement contains useful corrections.
   - If V9 does not beat V8, the next expensive training experiment should remain a model-family upgrade such as SegMAN-B/L rather than another local loss or sampler tweak.
+
+## Phase 21 Result
+
+- V9 hard-vote ensemble Kaggle score was recorded:
+  - submission file: `outputs/submissions/submission_exp_v9_segformer_vote_v6_v7_v8.csv`
+  - public score: `0.39064`
+  - versus V8: `0.38567 -> 0.39064`, `+0.00497`
+  - versus V7: `0.38084 -> 0.39064`, `+0.00980`
+  - versus V6: `0.37348 -> 0.39064`, `+0.01716`
+- Interpretation:
+  - The SegFormer family ensemble direction is validated on Kaggle.
+  - The useful signal is in model disagreement, not only in the single strongest B5 model.
+  - Since V9 changed only `2.14%` of V8 pixels but gained almost `0.005` public score, further low-cost ensemble and test-time inference work has higher immediate return than another multi-hour training run.
+
+## Phase 22 Plan
+
+- Prioritize no-training or low-training-cost improvements around the current SegFormer family:
+  - merge V9 segmentation with the teammate's real classification output
+  - retrieve V8 checkpoint and run multi-scale/flip test-time inference if available from Colab
+  - generate additional diverse SegFormer submissions only if they add genuinely different errors, then ensemble them
+- Keep SegMAN-B/L as the next expensive model-family experiment, but do not run it before exhausting the cheaper V9-adjacent options.
+
+## Phase 23 Plan
+
+- Start V10 SegMAN as the next model-family experiment now that the team has decided to stop the SegFormer ensemble line.
+- Use the official CVPR 2025 SegMAN repository, but keep it isolated under ignored `external/SegMAN` because it depends on MMSegmentation 0.30, NATTEN, and the VMamba selective scan extension.
+- Start with `SegMAN-B` rather than `SegMAN-L`:
+  - official ADE20K result is already stronger than SegFormer-B5
+  - compute and dependency risk is lower than `SegMAN-L`
+  - if the environment and smoke training are stable, scale to `SegMAN-L`
+- Prepare project-side assets:
+  - export GA2 `.npy` images and masks into PNG format for MMSegmentation 0.30
+  - generate a GA2 `CustomDataset` config inside the official SegMAN checkout
+  - preserve the current `0..20` label convention with background as class `0`
+
+## Phase 23 Result
+
+- Official SegMAN repository was cloned locally under ignored `Semantic segmentation/external/SegMAN`.
+- GA2 data was exported for SegMAN under ignored `Semantic segmentation/data/segman_ga2`:
+  - train images/masks: `637`
+  - validation images/masks: `112`
+  - test images: `750`
+- A reusable preparation script was added:
+  - `scripts/prepare_segman_experiment.py`
+- A reusable adapter module was added:
+  - `src/ga2_seg/segman_adapter.py`
+- Generated official-repo config:
+  - `external/SegMAN/segmentation/local_configs/segman/ga2/segman_b_ga2.py`
+- Current blocker before long training:
+  - official ImageNet-pretrained SegMAN encoder checkpoint is not present yet at `external/SegMAN/pretrained/SegMAN_Encoder_b.pth.tar`
+  - long training should start only after that file and the separate SegMAN environment are ready
