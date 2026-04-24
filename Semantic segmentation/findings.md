@@ -363,3 +363,9 @@
   - WSL2 can see the NVIDIA GPU and has gcc/cmake, so it is a viable local route for SegMAN
   - `nvcc` is missing inside WSL, which blocks selective scan compilation for now
   - native Windows `segman_env` was removed; future SegMAN local training should use the WSL scripts instead
+- WSL2 resolution:
+  - CUDA Toolkit was already installed in WSL but was missing from PATH; adding `/usr/local/cuda/bin` exposes `nvcc`
+  - Linux WSL can install the official NATTEN wheel for `torch 2.1/cu121`; the upstream SSL issue is handled with `--trusted-host shi-labs.com`
+  - `selective_scan` must be built with `--no-build-isolation` because its setup script imports the active environment's PyTorch
+  - the WSL `segman` environment now imports all critical runtime dependencies and is ready for SegMAN-B smoke/full training
+  - the official SegMAN-B encoder checkpoint is available locally, while larger unused encoder checkpoints were removed to avoid wasting disk space

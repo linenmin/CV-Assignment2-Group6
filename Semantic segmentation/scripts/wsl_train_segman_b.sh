@@ -7,6 +7,13 @@ SEG_ROOT="${REPO_ROOT}/Semantic segmentation"
 SEG_MAN_ROOT="${SEG_ROOT}/external/SegMAN"
 ENCODER_CKPT="${SEG_MAN_ROOT}/pretrained/SegMAN_Encoder_b.pth.tar"
 
+if [ -d /usr/local/cuda/bin ]; then
+  export PATH="/usr/local/cuda/bin:${PATH}"
+fi
+if [ -d /usr/local/cuda/lib64 ]; then
+  export LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH:-}"
+fi
+
 if command -v conda >/dev/null 2>&1; then
   # shellcheck source=/dev/null
   source "$(conda info --base)/etc/profile.d/conda.sh"

@@ -455,3 +455,30 @@
 - Current blocker:
   - WSL needs CUDA toolkit / `nvcc` before building the SegMAN selective scan extension
   - once `nvcc` is installed, `wsl_setup_segman.sh` should install the isolated Linux `segman` conda env and prepare the GA2 SegMAN config
+
+### 2026-04-24 (V10 WSL2 Environment Ready)
+
+- Confirmed WSL2 already has CUDA Toolkit available under `/usr/local/cuda-12.4`; the initial `nvcc` failure was caused by PATH not including `/usr/local/cuda/bin`.
+- Built the isolated WSL `segman` Conda environment:
+  - Python `3.10`
+  - Torch `2.1.2+cu121`
+  - `mmcv-full 1.7.2`
+  - official SegMAN `mmsegmentation 0.30.0`
+  - `natten 0.17.3+torch210cu121`
+  - SegMAN `selective_scan` CUDA extension
+- Validation:
+  - `torch.cuda.is_available()` returns `True`
+  - imports pass for `torch`, `mmcv`, `mmseg`, `natten`, and `selective_scan_cuda_oflex`
+- Downloaded the official SegMAN-B encoder checkpoint:
+  - `external/SegMAN/pretrained/SegMAN_Encoder_b.pth.tar`
+  - size: about `722 MB`
+- Re-generated the GA2 SegMAN-B config:
+  - train: `637`
+  - validation: `112`
+  - test: `750`
+  - config: `external/SegMAN/segmentation/local_configs/segman/ga2/segman_b_ga2.py`
+- Fixed reproducibility issues in the WSL setup script:
+  - adds CUDA Toolkit paths before checking `nvcc`
+  - installs NATTEN with `--trusted-host shi-labs.com`
+  - builds `selective_scan` with `--no-build-isolation`
+  - downloads only the SegMAN-B encoder checkpoint when missing

@@ -6,7 +6,15 @@ PYTHON_VERSION="${PYTHON_VERSION:-3.10}"
 REPO_ROOT="${REPO_ROOT:-/mnt/d/BaiduNetdiskWorkspace/Leuven/8th/Computer Vision/assignment/Group2}"
 SEG_ROOT="${REPO_ROOT}/Semantic segmentation"
 SEG_MAN_ROOT="${SEG_ROOT}/external/SegMAN"
+ENCODER_CKPT="${SEG_MAN_ROOT}/pretrained/SegMAN_Encoder_b.pth.tar"
 MINICONDA_DIR="${HOME}/miniconda3"
+
+if [ -d /usr/local/cuda/bin ]; then
+  export PATH="/usr/local/cuda/bin:${PATH}"
+fi
+if [ -d /usr/local/cuda/lib64 ]; then
+  export LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH:-}"
+fi
 
 if ! command -v nvidia-smi >/dev/null 2>&1; then
   echo "ERROR: nvidia-smi is not available inside WSL. Install/update NVIDIA WSL support first." >&2
@@ -47,7 +55,7 @@ python -m pip install -v -e "${SEG_MAN_ROOT}/segmentation"
 grep -v '^triton==' "${SEG_MAN_ROOT}/requirements.txt" > /tmp/segman_requirements_linux.txt
 python -m pip install -r /tmp/segman_requirements_linux.txt
 
-python -m pip install natten==0.17.3+torch210cu121 -f https://shi-labs.com/natten/wheels/
+python -m pip install natten==0.17.3+torch210cu121 -f https://shi-labs.com/natten/wheels/ --trusted-host shi-labs.com
 
 if ! command -v nvcc >/dev/null 2>&1; then
   echo "ERROR: nvcc is not available inside WSL." >&2
@@ -56,14 +64,20 @@ if ! command -v nvcc >/dev/null 2>&1; then
   exit 2
 fi
 
-python -m pip install "${SEG_MAN_ROOT}/kernels/selective_scan"
+python -m pip install --no-build-isolation "${SEG_MAN_ROOT}/kernels/selective_scan"
+
+if [ ! -f "${ENCODER_CKPT}" ]; then
+  mkdir -p "$(dirname "${ENCODER_CKPT}")"
+  python -m pip install gdown
+  gdown "https://drive.google.com/uc?id=1hI_0Jlni_8fea37PxzrF8NTt8yCvtEhh" -O "${ENCODER_CKPT}"
+fi
 
 cd "${SEG_ROOT}"
 python -m pip install -e .
 python scripts/prepare_segman_experiment.py \
   --segman-root "${SEG_MAN_ROOT}" \
   --variant b \
-  --encoder-checkpoint "${SEG_MAN_ROOT}/pretrained/SegMAN_Encoder_b.pth.tar" \
+  --encoder-checkpoint "${ENCODER_CKPT}" \
   --batch-size 2 \
   --workers 4
 
@@ -73,6 +87,8 @@ print("torch", torch.__version__, "cuda", torch.cuda.is_available())
 print("mmcv", mmcv.__version__)
 print("mmseg", mmseg.__version__)
 print("natten", natten.__version__)
+import selective_scan_cuda_oflex
+print("selective_scan ok")
 PY
 
 echo "SegMAN WSL environment is ready."

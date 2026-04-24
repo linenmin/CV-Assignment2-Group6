@@ -147,11 +147,7 @@ cd "/mnt/d/BaiduNetdiskWorkspace/Leuven/8th/Computer Vision/assignment/Group2/Se
 bash scripts/wsl_setup_segman.sh
 ```
 
-Before training, place the official encoder checkpoint at:
-
-```text
-external/SegMAN/pretrained/SegMAN_Encoder_b.pth.tar
-```
+The setup script creates the isolated `segman` Conda environment, installs the Linux CUDA extensions, downloads the official SegMAN-B encoder checkpoint when missing, exports the GA2 PNG dataset, and writes the local SegMAN-B config.
 
 Then run:
 
@@ -161,7 +157,8 @@ bash scripts/wsl_train_segman_b.sh
 
 Notes:
 
-- if `nvcc` is missing in WSL, install a Linux CUDA toolkit before running the setup script again
+- the script prepends `/usr/local/cuda/bin` and `/usr/local/cuda/lib64`; if `nvcc` is still missing, install a Linux CUDA toolkit before running the setup script again
+- the expected encoder checkpoint path is `external/SegMAN/pretrained/SegMAN_Encoder_b.pth.tar`
 - for faster long training, consider copying the repo and dataset into the WSL filesystem instead of reading many small files through `/mnt/d`
 
 After training, export test predictions and a Kaggle CSV:
