@@ -154,3 +154,13 @@ overwriting each other's checkpoints, metrics, figures, or CSV files.
 - [x] Added experiment names to generated prediction/submission CSV filenames.
 - [x] Updated `Image classification/kaggle_train.ipynb` for Kaggle GPU training
       with experiment-specific output folders and filenames.
+- [x] Fixed prediction index handling in `06_predict.py` and
+      `kaggle_train.ipynb` so test IDs come from `test_ds.indices`, not from the
+      DataLoader batch's second item.
+- [x] Verified `resnet50_224` prediction writes 1500 submission rows.
+
+### Follow-up Errors Encountered
+| Error | Attempt | Resolution |
+|-------|---------|------------|
+| `ValueError: Shape of passed values is (750, 20), indices imply (20, 20)` in `06_predict.py` | Ran `resnet50_224` prediction | `test_set.csv` has `-1` label placeholder columns, so the DataLoader returned labels instead of IDs. Prediction now uses `test_ds.indices` and checks row counts. |
+| Same prediction-index bug present in `kaggle_train.ipynb` | Notebook review | Applied the same `test_ds.indices` pattern to the Kaggle prediction cell. |

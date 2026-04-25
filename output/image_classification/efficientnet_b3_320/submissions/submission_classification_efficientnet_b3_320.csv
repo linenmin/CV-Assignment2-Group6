@@ -1,13 +1,13 @@
 Id,Predicted
-0_classification,15 1 20 1
+0_classification,9 1 15 1 20 1
 0_segmentation,
-1_classification,9 1 16 1
+1_classification,9 1 16 1 18 1
 1_segmentation,
-2_classification,9 1 18 1
+2_classification,9 1 16 1 18 1
 2_segmentation,
 3_classification,2 1
 3_segmentation,
-4_classification,9 1 15 1
+4_classification,9 1 15 2
 4_segmentation,
 5_classification,20 1
 5_segmentation,
@@ -35,7 +35,7 @@ Id,Predicted
 16_segmentation,
 17_classification,6 1
 17_segmentation,
-18_classification,12 1 15 1
+18_classification,12 1
 18_segmentation,
 19_classification,7 1
 19_segmentation,
@@ -45,7 +45,7 @@ Id,Predicted
 21_segmentation,
 22_classification,3 1
 22_segmentation,
-23_classification,8 1 20 1
+23_classification,20 1
 23_segmentation,
 24_classification,5 1
 24_segmentation,
@@ -61,11 +61,11 @@ Id,Predicted
 29_segmentation,
 30_classification,9 1 11 1
 30_segmentation,
-31_classification,2 1
+31_classification,2 1 16 1
 31_segmentation,
 32_classification,7 1 14 2
 32_segmentation,
-33_classification,14 1
+33_classification,2 1
 33_segmentation,
 34_classification,3 1
 34_segmentation,
@@ -93,13 +93,13 @@ Id,Predicted
 45_segmentation,
 46_classification,13 1 15 1
 46_segmentation,
-47_classification,8 2
+47_classification,9 1 11 1
 47_segmentation,
 48_classification,1 1
 48_segmentation,
 49_classification,12 1
 49_segmentation,
-50_classification,14 2
+50_classification,14 1
 50_segmentation,
 51_classification,19 1
 51_segmentation,
@@ -115,17 +115,17 @@ Id,Predicted
 56_segmentation,
 57_classification,15 1
 57_segmentation,
-58_classification,16 1 18 1
+58_classification,9 1 16 1 18 1
 58_segmentation,
 59_classification,10 1 13 1
 59_segmentation,
 60_classification,14 2
 60_segmentation,
-61_classification,8 1 12 1
+61_classification,12 1
 61_segmentation,
-62_classification,15 1 20 1
+62_classification,8 2 15 1 20 1
 62_segmentation,
-63_classification,8 1
+63_classification,8 1 16 1
 63_segmentation,
 64_classification,13 1 15 1
 64_segmentation,
@@ -137,7 +137,7 @@ Id,Predicted
 67_segmentation,
 68_classification,9 1 11 1 18 1
 68_segmentation,
-69_classification,15 1
+69_classification,9 1 15 1
 69_segmentation,
 70_classification,20 1
 70_segmentation,
@@ -149,17 +149,17 @@ Id,Predicted
 73_segmentation,
 74_classification,17 1
 74_segmentation,
-75_classification,8 1
+75_classification,8 1 12 1
 75_segmentation,
 76_classification,2 1 7 1 14 2
 76_segmentation,
-77_classification,7 1
+77_classification,6 2
 77_segmentation,
 78_classification,2 1
 78_segmentation,
 79_classification,19 1
 79_segmentation,
-80_classification,1 1 7 1
+80_classification,6 2
 80_segmentation,
 81_classification,14 2
 81_segmentation,
@@ -171,11 +171,11 @@ Id,Predicted
 84_segmentation,
 85_classification,9 1 11 1 16 1
 85_segmentation,
-86_classification,12 2
+86_classification,12 1
 86_segmentation,
 87_classification,14 1
 87_segmentation,
-88_classification,8 1
+88_classification,8 1 12 1 16 1
 88_segmentation,
 89_classification,14 2
 89_segmentation,
@@ -205,13 +205,13 @@ Id,Predicted
 101_segmentation,
 102_classification,8 1
 102_segmentation,
-103_classification,20 1
+103_classification,9 1 20 1
 103_segmentation,
 104_classification,17 1
 104_segmentation,
 105_classification,3 1
 105_segmentation,
-106_classification,5 1 15 1
+106_classification,15 1
 106_segmentation,
 107_classification,3 1
 107_segmentation,
@@ -219,9 +219,9 @@ Id,Predicted
 108_segmentation,
 109_classification,13 1
 109_segmentation,
-110_classification,8 1
+110_classification,8 1 16 1
 110_segmentation,
-111_classification,9 1 16 1 18 1
+111_classification,5 1 9 1 11 1 18 1
 111_segmentation,
 112_classification,16 1
 112_segmentation,
@@ -229,7 +229,7 @@ Id,Predicted
 113_segmentation,
 114_classification,7 1
 114_segmentation,
-115_classification,10 1 13 1
+115_classification,10 1
 115_segmentation,
 116_classification,13 1
 116_segmentation,
@@ -239,29 +239,29 @@ Id,Predicted
 118_segmentation,
 119_classification,3 1
 119_segmentation,
-120_classification,8 1
+120_classification,8 1 16 1
 120_segmentation,
-121_classification,8 1 20 1
+121_classification,20 1
 121_segmentation,
 122_classification,1 1
 122_segmentation,
-123_classification,3 1 17 1
+123_classification,17 1
 123_segmentation,
 124_classification,7 1
 124_segmentation,
 125_classification,14 1
 125_segmentation,
-126_classification,
+126_classification,12 1
 126_segmentation,
-127_classification,19 1
+127_classification,6 1
 127_segmentation,
-128_classification,9 1 16 1 18 1
+128_classification,12 1 16 1 18 1 20 1
 128_segmentation,
 129_classification,4 1
 129_segmentation,
 130_classification,14 1 16 1
 130_segmentation,
-131_classification,5 1 15 1
+131_classification,5 1 11 1 15 1
 131_segmentation,
 132_classification,14 2
 132_segmentation,
@@ -269,7 +269,7 @@ Id,Predicted
 133_segmentation,
 134_classification,1 1
 134_segmentation,
-135_classification,8 1
+135_classification,8 1 12 1
 135_segmentation,
 136_classification,11 1 15 1
 136_segmentation,
@@ -289,13 +289,13 @@ Id,Predicted
 143_segmentation,
 144_classification,17 1
 144_segmentation,
-145_classification,11 1 15 1
+145_classification,9 1 11 1 15 1
 145_segmentation,
 146_classification,13 1 15 1
 146_segmentation,
 147_classification,10 1
 147_segmentation,
-148_classification,15 1 20 1
+148_classification,20 1
 148_segmentation,
 149_classification,1 1
 149_segmentation,
@@ -303,15 +303,15 @@ Id,Predicted
 150_segmentation,
 151_classification,6 1
 151_segmentation,
-152_classification,4 1 7 1
+152_classification,7 1
 152_segmentation,
-153_classification,
+153_classification,16 1
 153_segmentation,
 154_classification,5 1
 154_segmentation,
 155_classification,6 1
 155_segmentation,
-156_classification,2 1 7 1
+156_classification,2 1
 156_segmentation,
 157_classification,17 1
 157_segmentation,
@@ -331,13 +331,13 @@ Id,Predicted
 164_segmentation,
 165_classification,15 1
 165_segmentation,
-166_classification,13 1 15 1
+166_classification,13 1
 166_segmentation,
 167_classification,2 1 7 1 15 1
 167_segmentation,
-168_classification,8 1
+168_classification,8 1 16 1
 168_segmentation,
-169_classification,15 1
+169_classification,11 1 15 1
 169_segmentation,
 170_classification,15 1
 170_segmentation,
@@ -355,7 +355,7 @@ Id,Predicted
 176_segmentation,
 177_classification,5 1 15 1
 177_segmentation,
-178_classification,6 1 19 1
+178_classification,6 1
 178_segmentation,
 179_classification,6 1
 179_segmentation,
@@ -371,25 +371,25 @@ Id,Predicted
 184_segmentation,
 185_classification,8 1
 185_segmentation,
-186_classification,12 2
+186_classification,10 1 12 1
 186_segmentation,
 187_classification,10 1
 187_segmentation,
 188_classification,1 1
 188_segmentation,
-189_classification,2 1 14 2
+189_classification,14 2
 189_segmentation,
-190_classification,7 1 15 1
+190_classification,7 1
 190_segmentation,
 191_classification,19 1
 191_segmentation,
 192_classification,20 1
 192_segmentation,
-193_classification,9 1 15 2
+193_classification,9 1 15 2 18 1 20 1
 193_segmentation,
 194_classification,7 1
 194_segmentation,
-195_classification,15 1
+195_classification,15 1 18 1
 195_segmentation,
 196_classification,17 1
 196_segmentation,
@@ -401,9 +401,9 @@ Id,Predicted
 199_segmentation,
 200_classification,14 2
 200_segmentation,
-201_classification,9 1
+201_classification,9 1 18 1 20 1
 201_segmentation,
-202_classification,2 1 7 1
+202_classification,2 1
 202_segmentation,
 203_classification,15 1
 203_segmentation,
@@ -413,7 +413,7 @@ Id,Predicted
 205_segmentation,
 206_classification,4 1
 206_segmentation,
-207_classification,13 1 15 1
+207_classification,13 1
 207_segmentation,
 208_classification,9 1 18 1
 208_segmentation,
@@ -429,23 +429,23 @@ Id,Predicted
 213_segmentation,
 214_classification,10 1 17 1
 214_segmentation,
-215_classification,18 1
+215_classification,16 1 18 1
 215_segmentation,
 216_classification,19 1
 216_segmentation,
 217_classification,4 1
 217_segmentation,
-218_classification,4 1
+218_classification,3 2
 218_segmentation,
 219_classification,16 1
 219_segmentation,
-220_classification,15 1
+220_classification,15 1 18 1
 220_segmentation,
 221_classification,1 1
 221_segmentation,
-222_classification,9 1 16 1 18 1
+222_classification,9 1 16 1 18 1 20 1
 222_segmentation,
-223_classification,17 1
+223_classification,10 1 17 1
 223_segmentation,
 224_classification,10 1
 224_segmentation,
@@ -455,7 +455,7 @@ Id,Predicted
 226_segmentation,
 227_classification,3 1
 227_segmentation,
-228_classification,8 1
+228_classification,20 1
 228_segmentation,
 229_classification,7 1 15 1
 229_segmentation,
@@ -463,7 +463,7 @@ Id,Predicted
 230_segmentation,
 231_classification,12 1
 231_segmentation,
-232_classification,1 1 4 1
+232_classification,4 1
 232_segmentation,
 233_classification,19 1
 233_segmentation,
@@ -481,27 +481,27 @@ Id,Predicted
 239_segmentation,
 240_classification,20 1
 240_segmentation,
-241_classification,6 2 15 1
+241_classification,6 1 15 1
 241_segmentation,
-242_classification,10 1 13 1
+242_classification,10 1
 242_segmentation,
-243_classification,12 2
+243_classification,12 1
 243_segmentation,
 244_classification,4 1
 244_segmentation,
-245_classification,1 1 7 1 15 1
+245_classification,1 1 15 1
 245_segmentation,
 246_classification,12 1
 246_segmentation,
-247_classification,8 1
+247_classification,8 1 12 1 16 1
 247_segmentation,
 248_classification,3 1
 248_segmentation,
-249_classification,5 1
+249_classification,5 1 16 1
 249_segmentation,
-250_classification,1 1 5 1
+250_classification,5 1
 250_segmentation,
-251_classification,12 1 15 1
+251_classification,12 1
 251_segmentation,
 252_classification,3 1
 252_segmentation,
@@ -521,15 +521,15 @@ Id,Predicted
 259_segmentation,
 260_classification,6 1 15 1
 260_segmentation,
-261_classification,
+261_classification,3 1
 261_segmentation,
 262_classification,3 1
 262_segmentation,
-263_classification,4 1 16 1 18 1
+263_classification,16 1 18 1
 263_segmentation,
 264_classification,9 1 11 1 15 1
 264_segmentation,
-265_classification,10 1
+265_classification,10 1 16 1
 265_segmentation,
 266_classification,5 1
 266_segmentation,
@@ -543,7 +543,7 @@ Id,Predicted
 270_segmentation,
 271_classification,1 1
 271_segmentation,
-272_classification,18 1
+272_classification,9 1 16 1 18 1
 272_segmentation,
 273_classification,15 1
 273_segmentation,
@@ -581,7 +581,7 @@ Id,Predicted
 289_segmentation,
 290_classification,9 1 16 1 18 1
 290_segmentation,
-291_classification,10 1 13 1
+291_classification,10 1
 291_segmentation,
 292_classification,19 1
 292_segmentation,
@@ -603,11 +603,11 @@ Id,Predicted
 300_segmentation,
 301_classification,4 1
 301_segmentation,
-302_classification,17 1
+302_classification,10 1 17 1
 302_segmentation,
 303_classification,19 1
 303_segmentation,
-304_classification,13 1 15 1
+304_classification,13 1
 304_segmentation,
 305_classification,12 1
 305_segmentation,
@@ -615,17 +615,17 @@ Id,Predicted
 306_segmentation,
 307_classification,2 1 15 1
 307_segmentation,
-308_classification,3 1 12 1
+308_classification,12 1
 308_segmentation,
 309_classification,3 1
 309_segmentation,
-310_classification,18 1
+310_classification,9 1 18 1
 310_segmentation,
 311_classification,4 1
 311_segmentation,
-312_classification,15 1
+312_classification,7 1 15 1
 312_segmentation,
-313_classification,8 1 20 1
+313_classification,20 1
 313_segmentation,
 314_classification,5 1
 314_segmentation,
@@ -633,7 +633,7 @@ Id,Predicted
 315_segmentation,
 316_classification,3 1
 316_segmentation,
-317_classification,10 1
+317_classification,10 1 17 1
 317_segmentation,
 318_classification,10 1
 318_segmentation,
@@ -643,11 +643,11 @@ Id,Predicted
 320_segmentation,
 321_classification,6 1
 321_segmentation,
-322_classification,7 1 15 1
+322_classification,7 1
 322_segmentation,
-323_classification,8 1 12 1
+323_classification,3 1 12 1
 323_segmentation,
-324_classification,2 1 15 1
+324_classification,2 1 7 1 15 1
 324_segmentation,
 325_classification,12 1
 325_segmentation,
@@ -663,7 +663,7 @@ Id,Predicted
 330_segmentation,
 331_classification,5 1
 331_segmentation,
-332_classification,17 1
+332_classification,10 1 17 1
 332_segmentation,
 333_classification,19 1
 333_segmentation,
@@ -675,9 +675,9 @@ Id,Predicted
 336_segmentation,
 337_classification,11 1 15 1
 337_segmentation,
-338_classification,10 1 13 1
+338_classification,10 1
 338_segmentation,
-339_classification,3 1 17 1
+339_classification,3 1 12 1
 339_segmentation,
 340_classification,16 1
 340_segmentation,
@@ -689,13 +689,13 @@ Id,Predicted
 343_segmentation,
 344_classification,9 1 18 1
 344_segmentation,
-345_classification,12 2 15 1
+345_classification,12 1
 345_segmentation,
 346_classification,15 1
 346_segmentation,
-347_classification,1 1 3 1 14 1
+347_classification,3 1 12 1
 347_segmentation,
-348_classification,10 1 13 1
+348_classification,10 1
 348_segmentation,
 349_classification,8 1 12 1
 349_segmentation,
@@ -707,13 +707,13 @@ Id,Predicted
 352_segmentation,
 353_classification,19 1
 353_segmentation,
-354_classification,2 1 14 2
+354_classification,14 2
 354_segmentation,
 355_classification,4 1
 355_segmentation,
 356_classification,10 1
 356_segmentation,
-357_classification,8 1
+357_classification,8 1 12 1
 357_segmentation,
 358_classification,6 1
 358_segmentation,
@@ -721,9 +721,9 @@ Id,Predicted
 359_segmentation,
 360_classification,20 1
 360_segmentation,
-361_classification,15 2
+361_classification,16 1
 361_segmentation,
-362_classification,8 1
+362_classification,8 1 12 1
 362_segmentation,
 363_classification,16 1
 363_segmentation,
@@ -747,17 +747,17 @@ Id,Predicted
 372_segmentation,
 373_classification,8 1
 373_segmentation,
-374_classification,6 2
+374_classification,6 1
 374_segmentation,
-375_classification,11 1 15 1 20 1
+375_classification,9 1 11 1 15 1
 375_segmentation,
-376_classification,7 1 14 2
+376_classification,14 2
 376_segmentation,
 377_classification,14 2
 377_segmentation,
 378_classification,1 1
 378_segmentation,
-379_classification,9 1 15 1
+379_classification,9 1 11 1 15 1
 379_segmentation,
 380_classification,3 1
 380_segmentation,
@@ -779,7 +779,7 @@ Id,Predicted
 388_segmentation,
 389_classification,6 1
 389_segmentation,
-390_classification,11 1 15 1
+390_classification,9 1 11 1 15 1
 390_segmentation,
 391_classification,19 1
 391_segmentation,
@@ -791,9 +791,9 @@ Id,Predicted
 394_segmentation,
 395_classification,7 1
 395_segmentation,
-396_classification,18 1
+396_classification,18 1 20 1
 396_segmentation,
-397_classification,3 1 17 1
+397_classification,3 1
 397_segmentation,
 398_classification,17 1
 398_segmentation,
@@ -805,17 +805,17 @@ Id,Predicted
 401_segmentation,
 402_classification,7 1 14 1
 402_segmentation,
-403_classification,15 1
+403_classification,8 1 15 1
 403_segmentation,
-404_classification,
+404_classification,9 1
 404_segmentation,
 405_classification,7 1
 405_segmentation,
-406_classification,7 1
+406_classification,7 1 10 1 17 1
 406_segmentation,
-407_classification,4 1 15 1
+407_classification,15 1
 407_segmentation,
-408_classification,5 1 11 1 15 1
+408_classification,5 1 9 1 11 1 15 1
 408_segmentation,
 409_classification,8 1
 409_segmentation,
@@ -827,7 +827,7 @@ Id,Predicted
 412_segmentation,
 413_classification,12 1 15 1
 413_segmentation,
-414_classification,1 1 5 1
+414_classification,5 1
 414_segmentation,
 415_classification,19 1
 415_segmentation,
@@ -839,7 +839,7 @@ Id,Predicted
 418_segmentation,
 419_classification,6 1
 419_segmentation,
-420_classification,15 1 19 1
+420_classification,19 1
 420_segmentation,
 421_classification,16 1
 421_segmentation,
@@ -865,7 +865,7 @@ Id,Predicted
 431_segmentation,
 432_classification,15 1
 432_segmentation,
-433_classification,18 1 20 1
+433_classification,9 1 18 1 20 1
 433_segmentation,
 434_classification,8 1
 434_segmentation,
@@ -877,9 +877,9 @@ Id,Predicted
 437_segmentation,
 438_classification,3 1
 438_segmentation,
-439_classification,1 1 4 1 14 1
+439_classification,4 1
 439_segmentation,
-440_classification,4 1
+440_classification,
 440_segmentation,
 441_classification,15 1
 441_segmentation,
@@ -887,19 +887,19 @@ Id,Predicted
 442_segmentation,
 443_classification,8 1
 443_segmentation,
-444_classification,1 1
+444_classification,
 444_segmentation,
-445_classification,8 1
+445_classification,8 1 16 1
 445_segmentation,
 446_classification,8 1
 446_segmentation,
-447_classification,14 1
+447_classification,18 1
 447_segmentation,
 448_classification,2 1 15 1
 448_segmentation,
 449_classification,18 1
 449_segmentation,
-450_classification,13 1
+450_classification,12 1
 450_segmentation,
 451_classification,3 1
 451_segmentation,
@@ -907,7 +907,7 @@ Id,Predicted
 452_segmentation,
 453_classification,8 1
 453_segmentation,
-454_classification,8 1
+454_classification,8 1 16 1
 454_segmentation,
 455_classification,7 1
 455_segmentation,
@@ -915,7 +915,7 @@ Id,Predicted
 456_segmentation,
 457_classification,14 1
 457_segmentation,
-458_classification,9 1 15 1 18 1
+458_classification,9 1 15 1 18 1 20 1
 458_segmentation,
 459_classification,14 1
 459_segmentation,
@@ -923,17 +923,17 @@ Id,Predicted
 460_segmentation,
 461_classification,14 2
 461_segmentation,
-462_classification,2 1 14 2
+462_classification,2 1 15 1
 462_segmentation,
-463_classification,9 1 16 1 18 1
+463_classification,9 1 16 1 18 1 20 1
 463_segmentation,
 464_classification,7 1
 464_segmentation,
 465_classification,8 1 15 1
 465_segmentation,
-466_classification,13 1
+466_classification,10 1 13 1
 466_segmentation,
-467_classification,13 1 17 1
+467_classification,10 1 13 1 17 1
 467_segmentation,
 468_classification,13 1 15 1
 468_segmentation,
@@ -943,17 +943,17 @@ Id,Predicted
 470_segmentation,
 471_classification,1 1
 471_segmentation,
-472_classification,18 1
+472_classification,9 1 18 1
 472_segmentation,
 473_classification,1 1
 473_segmentation,
 474_classification,13 1
 474_segmentation,
-475_classification,8 1
+475_classification,8 1 20 1
 475_segmentation,
-476_classification,12 1
+476_classification,3 1 12 1
 476_segmentation,
-477_classification,1 1 4 1
+477_classification,1 1
 477_segmentation,
 478_classification,10 1
 478_segmentation,
@@ -961,11 +961,11 @@ Id,Predicted
 479_segmentation,
 480_classification,5 1
 480_segmentation,
-481_classification,8 1
+481_classification,8 2 16 1
 481_segmentation,
 482_classification,20 1
 482_segmentation,
-483_classification,14 1
+483_classification,12 1 14 1
 483_segmentation,
 484_classification,1 1
 484_segmentation,
@@ -973,15 +973,15 @@ Id,Predicted
 485_segmentation,
 486_classification,17 1
 486_segmentation,
-487_classification,15 1 20 1
+487_classification,9 1 15 1 18 1 20 1
 487_segmentation,
-488_classification,7 1 14 2
+488_classification,7 1
 488_segmentation,
 489_classification,3 1
 489_segmentation,
-490_classification,10 1 13 1
+490_classification,10 1
 490_segmentation,
-491_classification,15 1
+491_classification,12 1 15 1 18 1 20 1
 491_segmentation,
 492_classification,12 1
 492_segmentation,
@@ -989,7 +989,7 @@ Id,Predicted
 493_segmentation,
 494_classification,3 1
 494_segmentation,
-495_classification,3 1 8 1
+495_classification,3 1
 495_segmentation,
 496_classification,8 1
 496_segmentation,
@@ -997,11 +997,11 @@ Id,Predicted
 497_segmentation,
 498_classification,6 1
 498_segmentation,
-499_classification,8 1
+499_classification,8 1 16 1
 499_segmentation,
 500_classification,10 1 13 1
 500_segmentation,
-501_classification,8 2 11 1 16 1
+501_classification,9 1 11 1 16 1
 501_segmentation,
 502_classification,2 1 15 1
 502_segmentation,
@@ -1009,7 +1009,7 @@ Id,Predicted
 503_segmentation,
 504_classification,
 504_segmentation,
-505_classification,3 2
+505_classification,4 1
 505_segmentation,
 506_classification,15 1
 506_segmentation,
@@ -1031,19 +1031,19 @@ Id,Predicted
 514_segmentation,
 515_classification,19 1
 515_segmentation,
-516_classification,10 1 13 1
+516_classification,10 1
 516_segmentation,
 517_classification,19 1
 517_segmentation,
 518_classification,13 1
 518_segmentation,
-519_classification,18 1
+519_classification,9 1 16 1 18 1
 519_segmentation,
 520_classification,19 1
 520_segmentation,
 521_classification,2 1 15 1
 521_segmentation,
-522_classification,11 1 15 1
+522_classification,5 1 11 1 15 1
 522_segmentation,
 523_classification,19 1
 523_segmentation,
@@ -1061,7 +1061,7 @@ Id,Predicted
 529_segmentation,
 530_classification,10 1
 530_segmentation,
-531_classification,4 1
+531_classification,12 1
 531_segmentation,
 532_classification,15 1
 532_segmentation,
@@ -1069,25 +1069,25 @@ Id,Predicted
 533_segmentation,
 534_classification,11 1 15 1
 534_segmentation,
-535_classification,12 1 15 2 18 1
+535_classification,12 1 18 1
 535_segmentation,
 536_classification,14 2
 536_segmentation,
-537_classification,5 1 9 1 11 1
+537_classification,9 1 11 1
 537_segmentation,
 538_classification,8 1
 538_segmentation,
 539_classification,3 1
 539_segmentation,
-540_classification,18 1 20 1
+540_classification,9 1 18 1 20 1
 540_segmentation,
-541_classification,17 1
+541_classification,10 1 17 1
 541_segmentation,
 542_classification,17 1
 542_segmentation,
 543_classification,16 1 18 1
 543_segmentation,
-544_classification,
+544_classification,12 1
 544_segmentation,
 545_classification,12 1
 545_segmentation,
@@ -1095,23 +1095,23 @@ Id,Predicted
 546_segmentation,
 547_classification,2 1
 547_segmentation,
-548_classification,9 1 15 1 20 1
+548_classification,9 1 15 1 18 1 20 1
 548_segmentation,
 549_classification,20 1
 549_segmentation,
 550_classification,17 1
 550_segmentation,
-551_classification,15 1 18 1
+551_classification,9 1 15 1 18 1
 551_segmentation,
 552_classification,15 1
 552_segmentation,
-553_classification,9 1 15 2 20 1
+553_classification,9 1 11 1 15 2
 553_segmentation,
 554_classification,18 1
 554_segmentation,
 555_classification,4 1
 555_segmentation,
-556_classification,14 2
+556_classification,14 1
 556_segmentation,
 557_classification,3 1
 557_segmentation,
@@ -1135,9 +1135,9 @@ Id,Predicted
 566_segmentation,
 567_classification,3 1
 567_segmentation,
-568_classification,9 1 18 1
+568_classification,9 1 16 1 18 1
 568_segmentation,
-569_classification,3 1 8 1
+569_classification,8 1
 569_segmentation,
 570_classification,13 1 15 1
 570_segmentation,
@@ -1151,7 +1151,7 @@ Id,Predicted
 574_segmentation,
 575_classification,13 1
 575_segmentation,
-576_classification,1 2 14 2
+576_classification,14 2
 576_segmentation,
 577_classification,12 1
 577_segmentation,
@@ -1165,11 +1165,11 @@ Id,Predicted
 581_segmentation,
 582_classification,15 1
 582_segmentation,
-583_classification,9 1 11 1
+583_classification,9 1 11 1 18 1
 583_segmentation,
 584_classification,5 1
 584_segmentation,
-585_classification,19 1
+585_classification,
 585_segmentation,
 586_classification,6 1
 586_segmentation,
@@ -1193,15 +1193,15 @@ Id,Predicted
 595_segmentation,
 596_classification,4 1
 596_segmentation,
-597_classification,2 1 14 1
+597_classification,2 1
 597_segmentation,
-598_classification,13 1
+598_classification,12 1 15 1
 598_segmentation,
-599_classification,1 1 5 1
+599_classification,5 1
 599_segmentation,
 600_classification,4 1
 600_segmentation,
-601_classification,17 1
+601_classification,12 1 17 1
 601_segmentation,
 602_classification,1 1
 602_segmentation,
@@ -1209,25 +1209,25 @@ Id,Predicted
 603_segmentation,
 604_classification,3 1
 604_segmentation,
-605_classification,
+605_classification,10 1
 605_segmentation,
-606_classification,2 1 16 1
+606_classification,16 1
 606_segmentation,
-607_classification,6 2 15 1
+607_classification,6 1 15 1
 607_segmentation,
 608_classification,12 1
 608_segmentation,
-609_classification,9 1 15 1
+609_classification,9 1 15 1 18 1 20 1
 609_segmentation,
 610_classification,19 1
 610_segmentation,
-611_classification,
+611_classification,3 1 12 1
 611_segmentation,
 612_classification,8 1
 612_segmentation,
 613_classification,6 2
 613_segmentation,
-614_classification,10 1 13 1
+614_classification,10 1
 614_segmentation,
 615_classification,8 1
 615_segmentation,
@@ -1237,7 +1237,7 @@ Id,Predicted
 617_segmentation,
 618_classification,1 1
 618_segmentation,
-619_classification,1 1 3 1
+619_classification,3 1
 619_segmentation,
 620_classification,3 1
 620_segmentation,
@@ -1255,7 +1255,7 @@ Id,Predicted
 626_segmentation,
 627_classification,9 1 11 1 16 1
 627_segmentation,
-628_classification,10 1 13 1
+628_classification,10 1
 628_segmentation,
 629_classification,17 1
 629_segmentation,
@@ -1275,7 +1275,7 @@ Id,Predicted
 636_segmentation,
 637_classification,6 1
 637_segmentation,
-638_classification,5 1 15 1
+638_classification,5 1
 638_segmentation,
 639_classification,4 1
 639_segmentation,
@@ -1285,13 +1285,13 @@ Id,Predicted
 641_segmentation,
 642_classification,5 1
 642_segmentation,
-643_classification,2 1 14 2
+643_classification,14 2
 643_segmentation,
 644_classification,12 1
 644_segmentation,
 645_classification,13 1
 645_segmentation,
-646_classification,4 1
+646_classification,9 1
 646_segmentation,
 647_classification,19 1
 647_segmentation,
@@ -1313,13 +1313,13 @@ Id,Predicted
 655_segmentation,
 656_classification,12 1 15 1
 656_segmentation,
-657_classification,13 1
+657_classification,13 1 16 1
 657_segmentation,
 658_classification,20 1
 658_segmentation,
-659_classification,8 1
+659_classification,8 1 16 1
 659_segmentation,
-660_classification,9 1 18 1
+660_classification,9 1 12 1 16 1 18 1
 660_segmentation,
 661_classification,6 1
 661_segmentation,
@@ -1331,13 +1331,13 @@ Id,Predicted
 664_segmentation,
 665_classification,5 1 15 1
 665_segmentation,
-666_classification,18 1
+666_classification,9 1 18 1
 666_segmentation,
 667_classification,7 1
 667_segmentation,
 668_classification,5 1 15 1
 668_segmentation,
-669_classification,13 1
+669_classification,12 1
 669_segmentation,
 670_classification,19 1
 670_segmentation,
@@ -1345,9 +1345,9 @@ Id,Predicted
 671_segmentation,
 672_classification,1 1
 672_segmentation,
-673_classification,16 1 19 1
+673_classification,16 1
 673_segmentation,
-674_classification,10 1 13 1
+674_classification,10 1 17 1
 674_segmentation,
 675_classification,14 2
 675_segmentation,
@@ -1359,11 +1359,11 @@ Id,Predicted
 678_segmentation,
 679_classification,3 1
 679_segmentation,
-680_classification,3 1
+680_classification,12 1
 680_segmentation,
 681_classification,3 1
 681_segmentation,
-682_classification,20 1
+682_classification,9 1 20 1
 682_segmentation,
 683_classification,1 1
 683_segmentation,
@@ -1373,21 +1373,21 @@ Id,Predicted
 685_segmentation,
 686_classification,17 1
 686_segmentation,
-687_classification,18 1
+687_classification,12 1 18 1
 687_segmentation,
 688_classification,15 1
 688_segmentation,
-689_classification,2 1
+689_classification,2 1 20 1
 689_segmentation,
-690_classification,20 1
+690_classification,9 1 18 1 20 1
 690_segmentation,
 691_classification,12 1
 691_segmentation,
-692_classification,8 1
+692_classification,8 1 16 1
 692_segmentation,
 693_classification,4 1
 693_segmentation,
-694_classification,13 1
+694_classification,10 1 13 1
 694_segmentation,
 695_classification,14 2
 695_segmentation,
@@ -1411,23 +1411,23 @@ Id,Predicted
 704_segmentation,
 705_classification,1 1
 705_segmentation,
-706_classification,15 1
+706_classification,15 2
 706_segmentation,
-707_classification,3 1 8 1
+707_classification,3 1 8 1 12 1
 707_segmentation,
 708_classification,20 1
 708_segmentation,
-709_classification,15 1
+709_classification,15 1 18 1
 709_segmentation,
 710_classification,8 1 17 1
 710_segmentation,
-711_classification,2 1
+711_classification,12 1
 711_segmentation,
-712_classification,10 1 13 1
+712_classification,10 1
 712_segmentation,
-713_classification,1 1
+713_classification,
 713_segmentation,
-714_classification,15 1
+714_classification,3 1 15 1
 714_segmentation,
 715_classification,12 1
 715_segmentation,
@@ -1441,29 +1441,29 @@ Id,Predicted
 719_segmentation,
 720_classification,8 1 12 1
 720_segmentation,
-721_classification,5 1 15 1
+721_classification,5 1
 721_segmentation,
-722_classification,18 1
+722_classification,8 1 12 1 16 1 18 1
 722_segmentation,
 723_classification,1 1
 723_segmentation,
-724_classification,15 1
+724_classification,12 1 15 1 18 1
 724_segmentation,
 725_classification,13 1 15 1
 725_segmentation,
-726_classification,7 1 15 1
+726_classification,7 1
 726_segmentation,
 727_classification,4 1
 727_segmentation,
 728_classification,9 1 11 1 16 1
 728_segmentation,
-729_classification,8 1
+729_classification,8 1 16 1
 729_segmentation,
 730_classification,8 1 12 1
 730_segmentation,
 731_classification,11 1 15 1
 731_segmentation,
-732_classification,10 1 13 1
+732_classification,10 1
 732_segmentation,
 733_classification,6 1
 733_segmentation,
@@ -1483,15 +1483,15 @@ Id,Predicted
 740_segmentation,
 741_classification,6 2
 741_segmentation,
-742_classification,5 1 15 1
+742_classification,5 1 11 1 15 1
 742_segmentation,
 743_classification,14 1
 743_segmentation,
 744_classification,2 1
 744_segmentation,
-745_classification,12 2
+745_classification,12 1 17 1
 745_segmentation,
-746_classification,8 1
+746_classification,8 1 20 1
 746_segmentation,
 747_classification,3 1
 747_segmentation,

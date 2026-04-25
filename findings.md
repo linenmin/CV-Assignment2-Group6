@@ -202,3 +202,18 @@ output/image_classification/<experiment>/
   artifacts below `/kaggle/working/image_classification/efficientnet_b3_320/`.
 - The final Kaggle classification CSV is
   `submission_classification_efficientnet_b3_320.csv`.
+
+### 2026-04-25 Prediction Index Bug
+- `test_set.csv` includes the same 20 class columns as `train_set.csv`, but the
+  values are `-1` placeholders. A naive `has_labels = all(column in df.columns
+  for column in LABELS)` check therefore marks the test set as labelled.
+- In `VOCDataset.__getitem__`, that means test samples return `(img, label)`
+  instead of `(img, idx)`. Prediction code must not rely on the DataLoader's
+  second batch item for test IDs when using this dataset.
+- The robust pattern is:
+  - create `test_ds = VOCDataset(...)`
+  - iterate as `for imgs, _ in test_loader`
+  - after inference, use `all_indices = list(test_ds.indices)`
+  - assert `all_probs.shape[0] == len(all_indices)` before creating DataFrames
+- This fix applies to both local `06_predict.py` and the Kaggle notebook
+  prediction cell.

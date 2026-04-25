@@ -248,3 +248,44 @@ Complete.
 ### Verification
 - Parsed notebook JSON successfully.
 - Compiled every code cell with Python `compile(...)`.
+
+---
+
+## Session: 2026-04-25 - Prediction Index Bug Fix and Notebook Review
+
+### Status
+Complete.
+
+### Actions Taken
+- Fixed `Image classification/06_predict.py` after `resnet50_224` prediction
+  failed with:
+  `ValueError: Shape of passed values is (750, 20), indices imply (20, 20)`.
+- Root cause: `test_set.csv` contains all 20 class columns with `-1`
+  placeholders, so `VOCDataset` treated test rows as labelled data and returned
+  `(img, label)` instead of `(img, idx)`. The prediction loop then accidentally
+  collected label tensors as indices.
+- Updated prediction code to ignore the batch second item and use
+  `test_ds.indices` as the authoritative test image IDs.
+- Added a prediction-count sanity check before building probability and binary
+  prediction DataFrames.
+- Reviewed `Image classification/kaggle_train.ipynb` and applied the same fix
+  to the Kaggle prediction cell.
+- Changed the notebook Stage 3 message from hard-coded `750 training samples`
+  to dynamic `len(df)` because the local training CSV has 749 rows.
+
+### Verification
+- Ran:
+  `C:\Users\31667\.conda\envs\biometrics\python.exe "Image classification\06_predict.py" --experiment resnet50_224`
+- Prediction completed and wrote:
+  - `output/image_classification/resnet50_224/submissions/submission_classification_resnet50_224.csv`
+  - `output/image_classification/resnet50_224/predictions/test_probabilities_resnet50_224.csv`
+  - `output/image_classification/resnet50_224/predictions/test_binary_predictions_resnet50_224.csv`
+- Submission row count: 1500 rows, classification plus empty segmentation rows.
+- Parsed `kaggle_train.ipynb` JSON successfully.
+- Compiled every notebook code cell with Python `compile(...)`.
+
+### Notes
+- Default `python` still lacks `torch`; use the `biometrics` conda environment
+  for model inference and training.
+- PowerShell profile execution-policy warnings appear during shell commands but
+  do not block the project scripts.

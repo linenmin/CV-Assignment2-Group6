@@ -1,0 +1,2 @@
+experiment,checkpoint,backbone,img_size,mAP
+efficientnet_b3_320,best_model.pth,efficientnet_b3,320,0.8599475445203373

@@ -1,0 +1,2 @@
+experiment,checkpoint,backbone,img_size,mAP
+resnet50_224,best_model.pth,resnet50,224,0.8175190041171738

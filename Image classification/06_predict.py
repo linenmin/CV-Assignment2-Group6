@@ -138,16 +138,17 @@ def main(
     )
 
     all_probs = []
-    all_indices = []
-    for imgs, indices in tqdm(test_loader, desc="Predicting (TTA)"):
+    for imgs, _ in tqdm(test_loader, desc="Predicting (TTA)"):
         probs = predict_tta(model, imgs.to(device)).cpu().numpy()
         all_probs.append(probs)
-        if torch.is_tensor(indices):
-            all_indices.extend(indices.cpu().numpy().tolist())
-        else:
-            all_indices.extend(list(indices))
 
     all_probs = np.vstack(all_probs)
+    all_indices = list(test_ds.indices)
+    if all_probs.shape[0] != len(all_indices):
+        raise ValueError(
+            f"Prediction count mismatch: got {all_probs.shape[0]} rows of probabilities "
+            f"for {len(all_indices)} test indices."
+        )
     preds = (all_probs > thresholds[None, :]).astype(int)
 
     prob_df = pd.DataFrame(all_probs, columns=LABELS, index=all_indices)

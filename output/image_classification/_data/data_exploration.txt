@@ -1,0 +1,41 @@
+============================================================
+  Step 1 / 4 - data exploration
+============================================================
+Training samples : 749
+Test samples     : 750
+Classes (20): ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
+
+=== Reading training image shapes ===
+train: 100%|████████████████████████████████████████████████████████████████████████████████████████████████| 749/749 [00:12<00:00, 61.63it/s]
+=== Image Size Statistics (training set) ===
+Height min:112  max:500  mean:383.1
+Width  min:257   max:500   mean:471.8
+
+=== Label Distribution (training set) ===
+  person           207 ( 27.6%)  ###########
+  chair             69 (  9.2%)  ###
+  car               63 (  8.4%)  ###
+  bird              55 (  7.3%)  ##
+  tvmonitor         51 (  6.8%)  ##
+  diningtable       48 (  6.4%)  ##
+  boat              48 (  6.4%)  ##
+  aeroplane         47 (  6.3%)  ##
+  motorbike         47 (  6.3%)  ##
+  cat               45 (  6.0%)  ##
+  sofa              44 (  5.9%)  ##
+  pottedplant       43 (  5.7%)  ##
+  dog               43 (  5.7%)  ##
+  bottle            42 (  5.6%)  ##
+  horse             42 (  5.6%)  ##
+  train             40 (  5.3%)  ##
+  bicycle           39 (  5.2%)  ##
+  bus               38 (  5.1%)  ##
+  cow               30 (  4.0%)  #
+  sheep             27 (  3.6%)  #
+
+Labels per image min:1  max:5  mean:1.43
+Single-label images : 504
+Multi-label images  : 245
+
+Sample grid saved to A:\OneDrive - KU Leuven\Master\Computer Vision\Assignment\Group Assignment 2\CV-Assignment2-Group6\output\image_classification\_data\figures\sample_grid.png
+Done.
