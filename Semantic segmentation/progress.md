@@ -495,3 +495,18 @@
   - validation: `mIoU=70.75`, `mAcc=84.62`, `aAcc=93.64`
   - this is above the previous V8 local validation reference (`mIoU=68.97`), so the SegMAN direction is currently promising.
 - The full run was resumed from `latest.pth` in WSL background mode after foreground command timeout.
+
+### 2026-04-25 (V10 SegMAN-B Submission Results)
+
+- Completed SegMAN-B training to `30000` iterations.
+- Best local validation checkpoint:
+  - checkpoint: `external/SegMAN/segmentation/outputs/ga2_segman_b/best_mIoU_iter_25000.pth`
+  - local validation: `mIoU=77.20`, `mAcc=85.27`, `aAcc=95.47`
+- Exported and submitted two V10 candidates:
+  - `submission_exp_v10_segman_b_iter25000.csv`: Kaggle `0.42682`, segmentation from SegMAN-B and placeholder classification.
+  - `submission_exp_v10_segman_b_iter25000_with_classification.csv`: Kaggle `0.85725`, SegMAN-B segmentation merged with teammate classification from `Image-Classification:output/submission_final.csv`.
+- Interpretation:
+  - SegMAN-B is a major segmentation improvement over V9 (`0.42682` vs `0.39064`) even before classification.
+  - The merged submission validates the end-to-end strategy and is now the best public result.
+- Disk cleanup:
+  - retain only the best checkpoint and final/latest checkpoint for the SegMAN-B run.
