@@ -9,9 +9,15 @@ Image classification/
   run_pipeline.py        # end-to-end experiment runner
   merge_submission.py    # merge classification and segmentation CSVs
   kaggle_train.ipynb     # self-contained Kaggle GPU training notebook
+  kaggle_train_convnext_tiny_320.ipynb  # ConvNeXt-Tiny Kaggle notebook
   experiments/
     README.md
     efficientnet_b3_320/
+      README.md
+      train.py
+      evaluate.py
+      predict.py
+    convnext_tiny_320/
       README.md
       train.py
       evaluate.py
@@ -34,7 +40,13 @@ output/image_classification/
       test_binary_predictions_<experiment>.csv
     submissions/
       submission_classification_<experiment>.csv
-      submission_final_<experiment>.csv
+      submission_final_<experiment>__seg_<segmentation_csv_name>.csv
+  convnext_tiny_320/
+    checkpoints/
+    metrics/
+    figures/
+    predictions/
+    submissions/
   resnet50_224/
     checkpoints/
     metrics/

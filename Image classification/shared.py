@@ -143,6 +143,13 @@ EXPERIMENTS = {
         batch_size=16,
         eval_batch_size=32,
     ),
+    "convnext_tiny_320": ExperimentConfig(
+        name="convnext_tiny_320",
+        backbone="convnext_tiny",
+        img_size=320,
+        batch_size=16,
+        eval_batch_size=32,
+    ),
     "resnet50_224": ExperimentConfig(
         name="resnet50_224",
         backbone="resnet50",

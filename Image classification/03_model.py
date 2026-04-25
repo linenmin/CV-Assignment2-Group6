@@ -19,6 +19,13 @@ _BACKBONE_CONFIGS = {
         "feat_dim": 1536,
         "features_fn": lambda model: nn.Sequential(model.features, model.avgpool),
     },
+    "convnext_tiny": {
+        "factory": lambda pretrained: models.convnext_tiny(
+            weights=models.ConvNeXt_Tiny_Weights.IMAGENET1K_V1 if pretrained else None
+        ),
+        "feat_dim": 768,
+        "features_fn": lambda model: nn.Sequential(model.features, model.avgpool),
+    },
 }
 
 
@@ -72,7 +79,7 @@ class MultiLabelClassifier(nn.Module):
 
 
 if __name__ == "__main__":
-    for backbone in ("efficientnet_b3", "resnet50"):
+    for backbone in ("efficientnet_b3", "convnext_tiny", "resnet50"):
         model = MultiLabelClassifier(backbone=backbone, num_classes=20, pretrained=False)
         model.freeze_backbone()
         frozen = model.trainable_params()

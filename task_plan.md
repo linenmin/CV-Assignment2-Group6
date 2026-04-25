@@ -159,6 +159,17 @@ overwriting each other's checkpoints, metrics, figures, or CSV files.
       DataLoader batch's second item.
 - [x] Verified `resnet50_224` prediction writes 1500 submission rows.
 
+### Follow-up 2026-04-25: ConvNeXt-Tiny Experiment
+- [x] Planned a third classification experiment, `convnext_tiny_320`, for the
+      CVPR 2022 ConvNeXt "modern CNN" backbone.
+- [x] Selected torchvision `convnext_tiny` with ImageNet-1K weights, 320 x 320
+      inputs, AsymmetricLoss, the existing three-stage fine-tuning schedule,
+      per-class thresholds, and TTA.
+- [x] Keep `efficientnet_b3_320` as the default experiment until ConvNeXt has
+      been trained and compared.
+- [ ] Train, evaluate, predict, and record Kaggle results for
+      `convnext_tiny_320`.
+
 ### Follow-up Errors Encountered
 | Error | Attempt | Resolution |
 |-------|---------|------------|

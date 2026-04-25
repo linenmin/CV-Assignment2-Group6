@@ -1,0 +1,2 @@
+experiment,checkpoint,backbone,img_size,mAP
+convnext_tiny_320,best_model.pth,convnext_tiny,320,0.8932642162089923

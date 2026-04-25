@@ -75,7 +75,7 @@ Images are `(H, W, 3)` uint8 arrays, variable size (~333×500). Resized to 320×
 
 ### Model (`03_model.py`)
 
-`MultiLabelClassifier(backbone, num_classes, pretrained)` wraps either `efficientnet_b3` (default, 1536-dim) or `resnet50` (2048-dim). The classifier head is `Linear(feat_dim→512)→ReLU→Linear(512→20)`. Outputs raw logits — sigmoid is applied at loss/inference time, not inside `forward()`.
+`MultiLabelClassifier(backbone, num_classes, pretrained)` wraps `efficientnet_b3` (default, 1536-dim), `convnext_tiny` (768-dim), or `resnet50` (2048-dim). The classifier head is `Linear(feat_dim→512)→ReLU→Linear(512→20)`. Outputs raw logits — sigmoid is applied at loss/inference time, not inside `forward()`.
 
 ### Training (`04_train.py`)
 
@@ -108,6 +108,7 @@ Kaggle requires one row per `{idx}_classification` and one row per `{idx}_segmen
 |---------|----------|------|-------|---------|----------------------|------------------------|
 | v1 | ResNet-50 | NegativeSmoothBCE | 224 | 0.801 | 0.38084 | — |
 | v2 | EfficientNet-B3 | AsymmetricLoss | 320 + TTA + Stage3 | 0.956 | 0.43043 | 0.81610 |
+| v3 planned | ConvNeXt-Tiny | AsymmetricLoss | 320 + TTA + Stage3 | pending | pending | pending |
 
 **About the 0.81610 score**: this is the Kaggle public score from a single complete submission containing **all 1500 rows** (750 classification + 750 segmentation). It is **not** the sum of two separate scores. Kaggle computes one Dice score across all rows together; classification-only submissions (missing segmentation rows) receive 0 for those rows, yielding a lower total.
 

@@ -289,3 +289,74 @@ Complete.
   for model inference and training.
 - PowerShell profile execution-policy warnings appear during shell commands but
   do not block the project scripts.
+
+---
+
+## Session: 2026-04-25 - Clear Model-Specific Merge Submission
+
+### Status
+Complete.
+
+### Actions Taken
+- Extended `Image classification/merge_submission.py` so a chosen trained
+  classification model can be merged with a chosen segmentation CSV.
+- Added `--clf-csv` to merge a specific classification file instead of always
+  using the default experiment submission.
+- Supported both classification submission CSVs with `*_classification` rows
+  and `test_binary_predictions_<experiment>.csv` files with the 20 binary label
+  columns.
+- Kept probability CSVs from being silently treated as binary submissions.
+- Added experiment inference from either the classification CSV folder or file
+  name, so files such as `submission_classification_convnext_tiny_320.csv` route
+  to the ConvNeXt output directory when possible.
+- Changed default merged filenames to include both source names, for example:
+  `submission_final_convnext_tiny_320__seg_submission_exp_v10_segman_b_iter25000.csv`.
+- Updated README, experiment README, and structure docs with the new naming and
+  `--clf-csv` usage.
+
+### Verification
+- `py_compile` passed for `merge_submission.py`.
+- `merge_submission.py --help` shows `--clf-csv`, `--seg-csv`, and `--out-csv`.
+- Verified merge with default ConvNeXt classification submission:
+  `submission_final_convnext_tiny_320__seg_submission_exp_v10_segman_b_iter25000.csv`
+  with 1500 rows.
+- Verified merge from ResNet binary predictions:
+  `submission_final_resnet50_224__clf_test_binary_predictions_resnet50_224__seg_submission_exp_v10_segman_b_iter25000.csv`
+  with 1500 rows.
+- Verified merged row ordering starts as `0_classification`, `0_segmentation`,
+  `1_classification`, `1_segmentation`.
+
+---
+
+## Session: 2026-04-25 - ConvNeXt-Tiny Experiment Addition
+
+### Status
+Complete.
+
+### Actions Taken
+- Compared Claude enabled plugins with Codex config earlier in this session;
+  the enabled plugin set was already aligned.
+- Confirmed local torchvision has ConvNeXt-Tiny and ConvNeXt-Small factories and
+  ImageNet-1K weight enums.
+- Planned `convnext_tiny_320` as a third classification experiment using the
+  existing shared train/evaluate/predict pipeline.
+- Added `convnext_tiny` to `MultiLabelClassifier`.
+- Registered `convnext_tiny_320` in shared experiment configs.
+- Added local train/evaluate/predict wrappers and experiment README.
+- Added `kaggle_train_convnext_tiny_320.ipynb`.
+- Updated README, experiment docs, structure docs, CLAUDE.md, task plan, and
+  findings.
+
+### Verification
+- `python -m py_compile` passed for edited scripts and new wrappers.
+- `MultiLabelClassifier(backbone="convnext_tiny", pretrained=False)` returned
+  `torch.Size([1, 20])` for a `(1, 3, 320, 320)` dummy tensor.
+- `run_pipeline.py --help` and the new train wrapper show
+  `convnext_tiny_320` as a valid experiment.
+- Compiled all 9 code cells in `kaggle_train_convnext_tiny_320.ipynb`.
+- Restored generated `__pycache__` changes after verification so the diff stays
+  focused on source, docs, and notebook changes.
+
+### Not Run
+- Full ConvNeXt training/evaluation/prediction was not run because it is
+  GPU/time intensive.

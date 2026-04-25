@@ -217,3 +217,12 @@ output/image_classification/<experiment>/
   - assert `all_probs.shape[0] == len(all_indices)` before creating DataFrames
 - This fix applies to both local `06_predict.py` and the Kaggle notebook
   prediction cell.
+
+### 2026-04-25 ConvNeXt-Tiny Plan
+- `torchvision==0.26.0+cu130` in the `biometrics` environment exposes
+  `convnext_tiny`, `convnext_small`, `ConvNeXt_Tiny_Weights`, and
+  `ConvNeXt_Small_Weights`, so no HuggingFace dependency is needed.
+- ConvNeXt-Tiny's pooled feature size is 768 when using
+  `nn.Sequential(model.features, model.avgpool)` followed by `flatten(1)`.
+- The chosen first experiment is `convnext_tiny_320`, not ConvNeXt-Small, to
+  keep compute and Kaggle GPU memory close to the existing EfficientNet-B3 run.
