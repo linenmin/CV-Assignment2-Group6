@@ -152,3 +152,99 @@
 ---
 
 *Update after completing each phase or encountering errors*
+
+---
+
+## Session: 2026-04-25 - Classification Reorganization
+
+### Status
+Complete.
+
+### Actions Taken
+- Read `.agent/skills/pi-planning-with-files/SKILL.md`.
+- Read `task_plan.md`, `findings.md`, and `progress.md`.
+- Compared Claude enabled plugins with Codex config; enabled plugin set was
+  already aligned.
+- Reviewed all Section 2.1 classification scripts.
+- Refactored shared configuration into `ExperimentConfig`.
+- Added experiment-specific folders for EfficientNet-B3 and ResNet-50.
+- Updated train/evaluate/predict/pipeline/merge scripts to accept experiment
+  names and use model-specific output folders.
+- Updated README and structure documentation.
+- Copied existing classification artifacts into the new
+  `efficientnet_b3_320` output folder.
+
+### Verification
+- `python -m py_compile` passed for edited Python files.
+- `C:\Users\31667\.conda\envs\biometrics\python.exe` CLI checks:
+  - `run_pipeline.py --help`
+  - `04_train.py --help`
+  - `05_evaluate.py --help`
+  - `06_predict.py --help`
+  - experiment wrapper `--help`
+  - `merge_submission.py --help`
+- Smoke test:
+  - ResNet-50 dummy forward: `torch.Size([1, 20])`
+  - EfficientNet-B3 dummy forward: `torch.Size([1, 20])`
+
+### Not Run
+- Full training was not run because it is GPU/time intensive.
+- Full prediction was not run because the request was structure/code cleanup,
+  and the smoke tests already verified model loading and CLI routing.
+
+### Notes
+- Default `python` lacks `torch`; use the `biometrics` conda environment.
+- `ruff` is not installed in the `biometrics` environment.
+- Existing git status already showed deleted segmentation submission files and
+  untracked `.agent/`; these were not changed by this task.
+
+---
+
+## Session: 2026-04-25 - Explore Script and CSV Naming Follow-up
+
+### Status
+Complete.
+
+### Actions Taken
+- Removed PNG conversion from `Image classification/01_explore_data.py`.
+- Kept shape statistics and sample-grid generation, reading images directly
+  from the original `.npy` files.
+- Updated submission and prediction CSV paths to include the experiment name:
+  - `submission_classification_<experiment>.csv`
+  - `submission_final_<experiment>.csv`
+  - `test_probabilities_<experiment>.csv`
+  - `test_binary_predictions_<experiment>.csv`
+- Updated README, experiment README, run pipeline text, and structure docs.
+- Renamed the copied EfficientNet submission artifact in the new output folder.
+
+### Verification
+- `python -m py_compile` passed for the touched scripts.
+- `biometrics` environment help checks passed for `06_predict.py` and
+  `merge_submission.py`.
+
+---
+
+## Session: 2026-04-25 - Kaggle Notebook Update
+
+### Status
+Complete.
+
+### Actions Taken
+- Rewrote `Image classification/kaggle_train.ipynb` as a clean, self-contained
+  Kaggle GPU notebook.
+- Added experiment-aware Kaggle output folders under
+  `/kaggle/working/image_classification/efficientnet_b3_320/`.
+- Updated Kaggle output filenames to include the experiment name:
+  - `best_model_efficientnet_b3_320.pth`
+  - `last_model_efficientnet_b3_320.pth`
+  - `final_model_efficientnet_b3_320.pth`
+  - `best_thresholds_efficientnet_b3_320.npy`
+  - `test_probabilities_efficientnet_b3_320.csv`
+  - `test_binary_predictions_efficientnet_b3_320.csv`
+  - `submission_classification_efficientnet_b3_320.csv`
+- Updated `README.md` and `Image classification/structure.txt` with the Kaggle
+  notebook workflow.
+
+### Verification
+- Parsed notebook JSON successfully.
+- Compiled every code cell with Python `compile(...)`.

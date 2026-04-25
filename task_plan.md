@@ -105,3 +105,52 @@ Phase 6: v2 重训与提交
 | Windows spawn multiprocessing | 1 | NUM_WORKERS=0 on Windows |
 | 模块名以数字开头无法 import | 1 | importlib.util.spec_from_file_location |
 | val mAP 高但 Kaggle Dice 低 | 1 | 换 ASL + 更大输入 + 阈值优化 |
+
+---
+
+## Session 2026-04-25: Classification Experiment Reorganization
+
+### Goal
+Organize Section 2.1 image-classification code and outputs by model so that
+ResNet-50 and EfficientNet-B3 can be trained, evaluated, and predicted without
+overwriting each other's checkpoints, metrics, figures, or CSV files.
+
+### Completed
+- [x] Added shared `ExperimentConfig` objects in `Image classification/shared.py`.
+- [x] Added two model-specific experiment folders:
+  - `Image classification/experiments/efficientnet_b3_320/`
+  - `Image classification/experiments/resnet50_224/`
+- [x] Refactored training, evaluation, prediction, pipeline, and merge scripts
+      to accept `--experiment`.
+- [x] Routed outputs to `output/image_classification/<experiment>/`.
+- [x] Copied existing classification artifacts into
+      `output/image_classification/efficientnet_b3_320/`.
+- [x] Updated `README.md` and `Image classification/structure.txt`.
+
+### New Output Layout
+`output/image_classification/<experiment>/checkpoints`, `metrics`, `figures`,
+`predictions`, and `submissions`.
+
+### Verification
+- `python -m py_compile ...` passed for all edited Python files.
+- `biometrics` environment CLI checks passed for pipeline, train, evaluate,
+  predict, merge, and experiment wrappers.
+- Smoke-tested both backbones with dummy input:
+  `resnet50 -> torch.Size([1, 20])`,
+  `efficientnet_b3 -> torch.Size([1, 20])`.
+
+### Errors Encountered
+| Error | Attempt | Resolution |
+|-------|---------|------------|
+| `git status` dubious ownership | Read status | Used one-command `git -c safe.directory=...` without global config change |
+| `pdftotext` unavailable and no local PDF Python parser | PDF extraction | Continued using code and existing project docs; no internet lookup needed |
+| Default `python` missing `torch` | CLI smoke test | Used `C:\Users\31667\.conda\envs\biometrics\python.exe` |
+| `ruff` not installed in biometrics env | Lint attempt | Recorded as unavailable; relied on py_compile and smoke tests |
+| `py_compile` touched `__pycache__` | Verification cleanup | Restored/removed generated cache files so source changes stay clean |
+
+### Follow-up 2026-04-25
+- [x] Removed `.npy -> PNG` conversion from the exploration step.
+- [x] Kept exploration statistics and sample-grid plotting from `.npy` files.
+- [x] Added experiment names to generated prediction/submission CSV filenames.
+- [x] Updated `Image classification/kaggle_train.ipynb` for Kaggle GPU training
+      with experiment-specific output folders and filenames.

@@ -147,3 +147,58 @@ Image classification/
 2. **Section 4: 讨论** — notebook未填写
 3. **学生姓名** — notebook cell 0 占位符未填写
 4. **v2重新训练** — 需重跑04_train.py + 05_evaluate.py + 06_predict.py
+
+---
+
+## 2026-04-25 Findings: Model-Specific Classification Organization
+
+### Code Review Findings
+- Previous classification scripts used hard-coded globals (`BACKBONE`,
+  `IMG_SIZE`, `CKPT_PATH`, `THRESH_PATH`) and wrote all artifacts into the same
+  `output/` paths. This made model comparison fragile because one run could
+  overwrite another model's checkpoint, thresholds, plot, or submission CSV.
+- The best simplification is not to duplicate full training code per model.
+  A shared `ExperimentConfig` keeps backbone, image size, batch size, split seed,
+  and output paths together. Model folders are thin entry points.
+- `run_pipeline.py --ckpt last` previously pointed at a file name that was not
+  consistently saved. Training now writes `last_model.pth` each epoch and
+  `final_model.pth` after full-data retraining.
+- Prediction now saves both human-readable CSVs and Kaggle submission CSV:
+  probabilities, binary predictions, and RLE submission are separated.
+
+### New Model Folders
+- `Image classification/experiments/efficientnet_b3_320/`
+- `Image classification/experiments/resnet50_224/`
+
+### New Output Convention
+For every experiment:
+
+```
+output/image_classification/<experiment>/
+  checkpoints/
+  metrics/
+  figures/
+  predictions/
+  submissions/
+```
+
+### Verification Notes
+- `py_compile` passed on edited source files.
+- In the `biometrics` environment, help output works for shared scripts and
+  experiment wrappers.
+- Dummy forward passes returned `(1, 20)` for both ResNet-50 and EfficientNet-B3.
+
+### 2026-04-25 Follow-up
+- Data exploration should not rewrite PNGs because the dataset has already been
+  converted before. `01_explore_data.py` now reads `.npy` files only for shape
+  statistics and sample-grid plotting.
+- CSV filenames should stay identifiable outside their model folders. Submission
+  and prediction CSVs now include the experiment name.
+
+### 2026-04-25 Kaggle Notebook
+- `kaggle_train.ipynb` should remain self-contained because Kaggle does not have
+  the local numbered Python modules by default.
+- The notebook now mirrors the local experiment naming convention and writes all
+  artifacts below `/kaggle/working/image_classification/efficientnet_b3_320/`.
+- The final Kaggle classification CSV is
+  `submission_classification_efficientnet_b3_320.csv`.

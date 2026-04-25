@@ -1,103 +1,141 @@
-# CV Assignment 2 — Group 6
+# CV Assignment 2 - Group 6
 
 KUL H02A5a Computer Vision, Group Assignment 2.
-Multi-label image classification on PASCAL VOC 2009 (20 classes) using PyTorch transfer learning.
+
+This repository contains the Group 6 solution code. Section 2.1 is the
+multi-label image classification task on PASCAL VOC 2009.
 
 ## Task
 
-Given 750 training images and 750 test images stored as `.npy` numpy arrays, predict which of 20 PASCAL VOC object categories are present in each image. Predictions are evaluated on Kaggle using the Dice coefficient (equivalent to F1 for binary predictions).
+The dataset contains 750 training images and 750 test images stored as `.npy`
+arrays. For each image, the classifier predicts which of the 20 PASCAL VOC
+classes are present.
 
-**Classes:** aeroplane, bicycle, bird, boat, bottle, bus, car, cat, chair, cow, diningtable, dog, horse, motorbike, person, pottedplant, sheep, sofa, train, tvmonitor
+Classes:
 
-## Results
+`aeroplane, bicycle, bird, boat, bottle, bus, car, cat, chair, cow,
+diningtable, dog, horse, motorbike, person, pottedplant, sheep, sofa, train,
+tvmonitor`
 
-| Version | Backbone | Loss | Input | val mAP | Kaggle (classification) | Kaggle (full submission) |
-|---------|----------|------|-------|---------|------------------------|--------------------------|
-| v1 | ResNet-50 | NegativeSmoothBCE | 224×224 | 0.801 | 0.381 | — |
-| v2 | EfficientNet-B3 | AsymmetricLoss | 320×320 + TTA | **0.956** | **0.430** | **0.816** |
+## Classification Layout
 
-The full submission score (0.816) is computed by Kaggle across all 1500 rows (750 classification + 750 segmentation) in a single submission — it is not the sum of two separate scores.
-
-## Setup
-
-All scripts require the `biometrics` conda environment:
-
-```bash
-conda activate biometrics
-# PyTorch 2.11.0+cu130, torchvision 0.26, scikit-learn, pandas, PIL, tqdm
-# timm is NOT installed — torchvision.models is used for all backbones
-```
-
-## Running
-
-All commands are run from the **project root**:
-
-```bash
-# Full pipeline from scratch (~40–50 min on a local GPU)
-python "Image classification/run_pipeline.py"
-
-# PNG export already done, retrain from scratch
-python "Image classification/run_pipeline.py" --skip-explore
-
-# Use existing checkpoint, skip training
-python "Image classification/run_pipeline.py" --skip-explore --skip-train
-
-# Individual steps
-python "Image classification/04_train.py"       # train → output/checkpoints/
-python "Image classification/05_evaluate.py"    # val mAP + best_thresholds.npy
-python "Image classification/06_predict.py"     # submission_classification.csv
-python "Image classification/merge_submission.py"  # merge with segmentation → submission_final.csv
-```
-
-## Architecture
+Shared implementation lives in `Image classification/`:
 
 ```
 Image classification/
-├── shared.py            # LABELS, DATA_DIR, OUTPUT_DIR, load_module(), AsymmetricLoss
-├── 01_explore_data.py   # Data stats + export all .npy → PNG
-├── 02_dataset.py        # VOCDataset, 320×320 transforms, RandomErasing
-├── 03_model.py          # MultiLabelClassifier (EfficientNet-B3 / ResNet-50)
-├── 04_train.py          # Three-stage training
-├── 05_evaluate.py       # mAP evaluation + per-class threshold search
-├── 06_predict.py        # TTA inference → submission CSV
-├── merge_submission.py  # Combine classification + segmentation submissions
-└── run_pipeline.py      # End-to-end orchestration script
+  shared.py
+  01_explore_data.py
+  02_dataset.py
+  03_model.py
+  04_train.py
+  05_evaluate.py
+  06_predict.py
+  run_pipeline.py
+  merge_submission.py
+  experiments/
+    efficientnet_b3_320/
+      train.py
+      evaluate.py
+      predict.py
+    resnet50_224/
+      train.py
+      evaluate.py
+      predict.py
 ```
 
-### Model
+Each experiment writes to its own output folder:
 
-`MultiLabelClassifier` wraps EfficientNet-B3 (default) or ResNet-50 from `torchvision.models`. The head is `Dropout(0.4) → Linear(1536→512) → ReLU → Dropout(0.2) → Linear(512→20)`. The model outputs raw logits; sigmoid is applied at loss/inference time.
+```
+output/image_classification/<experiment>/
+  checkpoints/
+    best_model.pth
+    last_model.pth
+    final_model.pth
+  metrics/
+    training_history.csv
+    ap_per_class.csv
+    best_thresholds.npy
+    evaluation_summary.csv
+  figures/
+    eval_ap_per_class.png
+  predictions/
+    test_probabilities_<experiment>.csv
+    test_binary_predictions_<experiment>.csv
+  submissions/
+    submission_classification_<experiment>.csv
+    submission_final_<experiment>.csv
+```
 
-### Three-Stage Training
+Data exploration figures are stored in:
 
-| Stage | Backbone | Epochs | LR | Purpose |
-|-------|----------|--------|----|---------|
-| 1 | Frozen | 5 | 1e-3 | Warm up classification head |
-| 2 | Unfrozen | 20 | 1e-4 | Full fine-tuning, saves `best_model.pth` |
-| 3 | Unfrozen | 5 | 5e-5 | Retrain on all 750 samples → `final_model.pth` |
+```
+output/image_classification/_data/
+```
 
-### Key Design Decisions
+## Experiments
 
-**AsymmetricLoss (ICCV 2021)** replaces BCE. PASCAL VOC has systematic false-negative noise — objects appear in images but are unannotated (e.g., people in the background of a "bicycle" image). `clip=0.05` zeros out the loss for negatives where `P < 0.05`; `gamma_neg=4` down-weights easy negatives. This improved the hardest class (diningtable) from AP=0.28 to AP≈0.68.
+| Experiment | Backbone | Input | Loss | Purpose |
+|------------|----------|-------|------|---------|
+| `efficientnet_b3_320` | EfficientNet-B3 | 320 x 320 | AsymmetricLoss | Strong model |
+| `resnet50_224` | ResNet-50 | 224 x 224 | AsymmetricLoss | Baseline comparison |
 
-**Per-class thresholds** are searched on the validation split to maximise per-class F1, then saved to `output/best_thresholds.npy`. Kaggle Dice = F1, so this directly optimises the submission metric.
+## Running
 
-**TTA** (Test-Time Augmentation): averages sigmoid probabilities over the original image and its horizontal flip at inference time, with no training cost.
+Run from the project root.
 
-## Output Files
+```bash
+# Full pipeline for the strong model
+python "Image classification/run_pipeline.py" --experiment efficientnet_b3_320
 
-| File | Description |
-|------|-------------|
-| `output/checkpoints/best_model.pth` | Best checkpoint by val loss (after Stage 2) |
-| `output/checkpoints/final_model.pth` | Checkpoint after Stage 3 full-data retrain (used for submission) |
-| `output/best_thresholds.npy` | Per-class optimal F1 thresholds |
-| `output/submission_classification.csv` | Classification predictions (RLE-encoded) |
-| `output/submission_final.csv` | Final merged submission (classification + segmentation) |
-| `output/eval_ap_per_class.png` | Per-class AP bar chart |
+# Full pipeline for the ResNet baseline
+python "Image classification/run_pipeline.py" --experiment resnet50_224
 
-## Potential Improvements
+# Skip data exploration and train only one model
+python "Image classification/run_pipeline.py" --experiment efficientnet_b3_320 --skip-explore
 
-- **K-fold cross-validation** — val set is only 150 images; k-fold gives more robust thresholds
-- **MixUp / CutMix** — strong regularisation for small datasets
-- **Larger backbone** — EfficientNet-B4/B5 if GPU memory allows
-- **Ensemble** — average probabilities from multiple checkpoints or backbones
+# Use an existing checkpoint
+python "Image classification/run_pipeline.py" --experiment efficientnet_b3_320 --skip-explore --skip-train --ckpt best
+```
+
+You can also run model-specific entry points:
+
+```bash
+python "Image classification/experiments/efficientnet_b3_320/train.py"
+python "Image classification/experiments/efficientnet_b3_320/evaluate.py"
+python "Image classification/experiments/efficientnet_b3_320/predict.py"
+
+python "Image classification/experiments/resnet50_224/train.py"
+python "Image classification/experiments/resnet50_224/evaluate.py"
+python "Image classification/experiments/resnet50_224/predict.py"
+```
+
+## Kaggle GPU Notebook
+
+For Kaggle training, upload or open:
+
+```text
+Image classification/kaggle_train.ipynb
+```
+
+Enable a Kaggle GPU and run all cells. The notebook is self-contained and writes
+to:
+
+```text
+/kaggle/working/image_classification/efficientnet_b3_320/
+```
+
+The classification submission file is:
+
+```text
+/kaggle/working/image_classification/efficientnet_b3_320/submissions/submission_classification_efficientnet_b3_320.csv
+```
+
+## Merging With Segmentation
+
+After classification prediction and segmentation prediction are both available:
+
+```bash
+python "Image classification/merge_submission.py" --experiment efficientnet_b3_320 --seg-csv output/submission_exp_v7_segformer_b3.csv
+```
+
+The merged file is written to the selected experiment's `submissions/` folder.

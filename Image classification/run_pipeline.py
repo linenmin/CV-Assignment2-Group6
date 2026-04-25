@@ -1,69 +1,76 @@
-"""
-Full pipeline: explore → train → evaluate → predict.
+"""Run explore, train, evaluate, and predict for one experiment."""
 
-Run from project root:
-    python "Image classification/run_pipeline.py"
-
-Common usage:
-    # Full run from scratch
-    python "Image classification/run_pipeline.py"
-
-    # PNGs already exported, retrain from scratch
-    python "Image classification/run_pipeline.py" --skip-explore
-
-    # Skip both explore and train, use existing best checkpoint
-    python "Image classification/run_pipeline.py" --skip-explore --skip-train
-
-    # Skip train, use last checkpoint instead of best
-    python "Image classification/run_pipeline.py" --skip-explore --skip-train --ckpt last
-"""
-
-import sys
 import argparse
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from shared import OUTPUT_DIR, load_module
+from shared import EXPERIMENTS, describe_experiment, get_experiment_config, load_module  # noqa: E402
 
 _here = Path(__file__).parent
-CKPT_DIR = OUTPUT_DIR / "checkpoints"
 
 
-def _sep(title):
+def sep(title: str) -> None:
     print(f"\n{'=' * 60}")
     print(f"  {title}")
-    print('=' * 60)
+    print("=" * 60)
 
 
-def main():
+def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--skip-explore", action="store_true",
-                        help="Skip step 1 (PNG export already done)")
-    parser.add_argument("--skip-train", action="store_true",
-                        help="Skip step 2 (use existing checkpoint)")
-    parser.add_argument("--ckpt", choices=["best", "last"], default="best",
-                        help="Which checkpoint to use for eval/predict (default: best)")
-    args = parser.parse_args()
+    parser.add_argument(
+        "--experiment",
+        choices=sorted(EXPERIMENTS),
+        default=None,
+        help="Experiment config to run.",
+    )
+    parser.add_argument("--skip-explore", action="store_true", help="Skip data exploration.")
+    parser.add_argument("--skip-train", action="store_true", help="Use an existing checkpoint.")
+    parser.add_argument(
+        "--ckpt",
+        choices=["best", "final", "last"],
+        default="best",
+        help="Checkpoint for evaluate/predict when training is skipped.",
+    )
+    return parser.parse_args()
 
-    ckpt_path = CKPT_DIR / f"{args.ckpt}_model.pth"
 
-    if not args.skip_explore:
-        _sep("Step 1 / 4 — Data exploration + PNG export")
+def main(config=None):
+    args = parse_args() if config is None else None
+    config = config or get_experiment_config(args.experiment)
+
+    skip_explore = args.skip_explore if args else False
+    skip_train = args.skip_train if args else False
+    ckpt_name = args.ckpt if args else "best"
+
+    print(f"Experiment: {describe_experiment(config)}")
+
+    if not skip_explore:
+        sep("Step 1 / 4 - data exploration")
         load_module("explore", _here / "01_explore_data.py").main()
 
-    if not args.skip_train:
-        _sep("Step 2 / 4 — Training (two-stage ResNet-50 fine-tune)")
-        load_module("train", _here / "04_train.py").main()
+    if not skip_train:
+        sep("Step 2 / 4 - training")
+        load_module("train", _here / "04_train.py").main(config=config)
+        ckpt_name = "best"
     else:
-        print(f"\n[skip-train] Using checkpoint: {ckpt_path}")
+        print(f"\n[skip-train] Using {ckpt_name} checkpoint from {config.checkpoints_dir}")
 
-    _sep("Step 3 / 4 — Evaluation (mAP + best thresholds)")
-    load_module("evaluate", _here / "05_evaluate.py").main(ckpt_path=ckpt_path)
+    sep("Step 3 / 4 - evaluation")
+    load_module("evaluate", _here / "05_evaluate.py").main(
+        config=config,
+        ckpt_name=ckpt_name,
+    )
 
-    _sep("Step 4 / 4 — Predict test set + generate submission")
-    load_module("predict", _here / "06_predict.py").main(ckpt_path=ckpt_path)
+    sep("Step 4 / 4 - predict test set + submission CSV")
+    predict_ckpt = "auto" if not skip_train else ckpt_name
+    load_module("predict", _here / "06_predict.py").main(
+        config=config,
+        ckpt_name=predict_ckpt,
+    )
 
     print("\nPipeline complete.")
+    print(f"Experiment output: {config.output_dir}")
 
 
 if __name__ == "__main__":

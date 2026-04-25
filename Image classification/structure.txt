@@ -1,9 +1,43 @@
 Image classification/
-├── shared.py            # 共享常量、load_module、NegativeSmoothBCELoss
-├── 01_explore_data.py   # 数据探索 + PNG 转换
-├── 02_dataset.py        # VOCDataset（库模块）
-├── 03_model.py          # ResNet-50（库模块）
-├── 04_train.py          # 两阶段训练
-├── 05_evaluate.py       # mAP 评估 + 最优阈值
-├── 06_predict.py        # 测试集推理 + 生成 CSV
-└── run_pipeline.py      # 一键从头跑到尾 ← 新增
+  shared.py              # labels, paths, experiment configs, losses
+  01_explore_data.py     # data stats and sample grid
+  02_dataset.py          # VOCDataset and transforms
+  03_model.py            # MultiLabelClassifier backbones
+  04_train.py            # configurable training
+  05_evaluate.py         # configurable mAP + threshold search
+  06_predict.py          # configurable test prediction + submission CSV
+  run_pipeline.py        # end-to-end experiment runner
+  merge_submission.py    # merge classification and segmentation CSVs
+  kaggle_train.ipynb     # self-contained Kaggle GPU training notebook
+  experiments/
+    README.md
+    efficientnet_b3_320/
+      README.md
+      train.py
+      evaluate.py
+      predict.py
+    resnet50_224/
+      README.md
+      train.py
+      evaluate.py
+      predict.py
+
+output/image_classification/
+  _data/
+    figures/
+  efficientnet_b3_320/
+    checkpoints/
+    metrics/
+    figures/
+    predictions/
+      test_probabilities_<experiment>.csv
+      test_binary_predictions_<experiment>.csv
+    submissions/
+      submission_classification_<experiment>.csv
+      submission_final_<experiment>.csv
+  resnet50_224/
+    checkpoints/
+    metrics/
+    figures/
+    predictions/
+    submissions/

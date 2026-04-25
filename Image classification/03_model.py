@@ -1,12 +1,4 @@
-"""
-Step 3: Multi-label classifier with swappable backbone.
-
-Supports:
-  backbone='efficientnet_b3'  — 1536-dim features, 81.6% ImageNet top-1  (default)
-  backbone='resnet50'         — 2048-dim features, 76.1% ImageNet top-1
-
-Both expose the same API: freeze_backbone / unfreeze_backbone / forward.
-"""
+"""Step 3: swappable-backbone multi-label classifier."""
 
 import torch
 import torch.nn as nn
@@ -14,40 +6,41 @@ import torchvision.models as models
 
 _BACKBONE_CONFIGS = {
     "resnet50": {
-        "factory":    lambda pretrained: models.resnet50(
+        "factory": lambda pretrained: models.resnet50(
             weights=models.ResNet50_Weights.IMAGENET1K_V1 if pretrained else None
         ),
-        "feat_dim":   2048,
-        # strip the final FC; everything up to AdaptiveAvgPool is kept
-        "features_fn": lambda m: nn.Sequential(*list(m.children())[:-1]),
+        "feat_dim": 2048,
+        "features_fn": lambda model: nn.Sequential(*list(model.children())[:-1]),
     },
     "efficientnet_b3": {
-        "factory":    lambda pretrained: models.efficientnet_b3(
+        "factory": lambda pretrained: models.efficientnet_b3(
             weights=models.EfficientNet_B3_Weights.IMAGENET1K_V1 if pretrained else None
         ),
-        "feat_dim":   1536,
-        # keep the pretrained features + avgpool, drop the classifier
-        "features_fn": lambda m: nn.Sequential(m.features, m.avgpool),
+        "feat_dim": 1536,
+        "features_fn": lambda model: nn.Sequential(model.features, model.avgpool),
     },
 }
 
 
 class MultiLabelClassifier(nn.Module):
-    """
-    Parameters
-    ----------
-    backbone    : 'efficientnet_b3' (default) or 'resnet50'
-    num_classes : number of output labels (20 for PASCAL VOC)
-    pretrained  : load ImageNet weights for the backbone
-    """
+    """ImageNet backbone plus a small multi-label classification head."""
 
-    def __init__(self, backbone: str = "efficientnet_b3",
-                 num_classes: int = 20, pretrained: bool = True):
+    def __init__(
+        self,
+        backbone: str = "efficientnet_b3",
+        num_classes: int = 20,
+        pretrained: bool = True,
+    ):
         super().__init__()
+        if backbone not in _BACKBONE_CONFIGS:
+            valid = ", ".join(sorted(_BACKBONE_CONFIGS))
+            raise ValueError(f"Unknown backbone '{backbone}'. Valid: {valid}")
+
         cfg = _BACKBONE_CONFIGS[backbone]
-        m   = cfg["factory"](pretrained)
-        self.features   = cfg["features_fn"](m)
-        self._feat_dim  = cfg["feat_dim"]
+        model = cfg["factory"](pretrained)
+        self.backbone = backbone
+        self.features = cfg["features_fn"](model)
+        self._feat_dim = cfg["feat_dim"]
 
         self.classifier = nn.Sequential(
             nn.Dropout(p=0.4),
@@ -62,31 +55,28 @@ class MultiLabelClassifier(nn.Module):
                 nn.init.zeros_(layer.bias)
 
     def freeze_backbone(self):
-        for p in self.features.parameters():
-            p.requires_grad = False
+        for parameter in self.features.parameters():
+            parameter.requires_grad = False
 
     def unfreeze_backbone(self):
-        for p in self.features.parameters():
-            p.requires_grad = True
+        for parameter in self.features.parameters():
+            parameter.requires_grad = True
 
     def trainable_params(self) -> int:
-        return sum(p.numel() for p in self.parameters() if p.requires_grad)
+        return sum(parameter.numel() for parameter in self.parameters() if parameter.requires_grad)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.features(x)   # (B, feat_dim, 1, 1)
-        x = x.flatten(1)       # (B, feat_dim)
-        return self.classifier(x)  # (B, num_classes)  raw logits
+        x = self.features(x)
+        x = x.flatten(1)
+        return self.classifier(x)
 
 
-# ---------------------------------------------------------------------------
-# Sanity check
-# ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    for bb in ("efficientnet_b3", "resnet50"):
-        model = MultiLabelClassifier(backbone=bb, num_classes=20, pretrained=False)
+    for backbone in ("efficientnet_b3", "resnet50"):
+        model = MultiLabelClassifier(backbone=backbone, num_classes=20, pretrained=False)
         model.freeze_backbone()
         frozen = model.trainable_params()
         model.unfreeze_backbone()
-        full  = model.trainable_params()
-        out   = model(torch.randn(2, 3, 320, 320))
-        print(f"[{bb}]  frozen={frozen:,}  full={full:,}  out={out.shape}")
+        full = model.trainable_params()
+        out = model(torch.randn(2, 3, 320, 320))
+        print(f"[{backbone}] frozen={frozen:,} full={full:,} out={out.shape}")
