@@ -35,12 +35,15 @@ Image classification/
   - 典型案例：被标为bicycle的图包含bus/person；diningtable严重受此影响
 
 ### Kaggle实验结果
-| 版本 | 模型 | 损失函数 | 输入尺寸 | val mAP | Kaggle 分类 Dice | Kaggle 完整 Dice |
-|------|------|----------|----------|---------|-----------------|-----------------|
-| v1（初始）| ResNet-50 | NegativeSmoothBCE | 224 | 0.801 | **0.38084** | — |
-| v2（当前）| EfficientNet-B3 | AsymmetricLoss | 320+TTA+S3 | 0.956 | **0.43043** | **0.81610** |
+| 版本 | 模型 | 损失函数 | 输入尺寸 | val mAP | Kaggle显示分数 | 分类Dice（x2） |
+|------|------|----------|----------|---------|---------------|----------------|
+| v1（初始）| ResNet-50 | NegativeSmoothBCE | 224 | 0.801 | **0.38084** | **0.76168** |
+| v2 | EfficientNet-B3 | AsymmetricLoss | 320+TTA+S3 | 0.956 | **0.42813** | **0.85626** |
+| v3 | ConvNeXt-Tiny | AsymmetricLoss | 320+TTA+S3 | **0.8933** | **0.43673** | **0.87346** |
+| v4 | ResNet-50 | AsymmetricLoss | 224+TTA+S3 | — | **0.39165** | **0.78330** |
 
 注：0.81610 是含全部 1500 行（分类+分割）的完整提交在 Kaggle 上统一计算的 Dice，**不是**两部分分别得分相加。
+当前模型对比中，Kaggle 显示分数需要乘以 2 才是分类部分的真实 Dice；因此当前最佳分类模型是 `convnext_tiny_320`（0.87346）。
 
 ### Val mAP vs Kaggle Dice 的根本差距
 - val mAP = 0.801（AUC指标，阈值无关）
@@ -226,3 +229,34 @@ output/image_classification/<experiment>/
   `nn.Sequential(model.features, model.avgpool)` followed by `flatten(1)`.
 - The chosen first experiment is `convnext_tiny_320`, not ConvNeXt-Small, to
   keep compute and Kaggle GPU memory close to the existing EfficientNet-B3 run.
+
+### 2026-04-25 ConvNeXt-Tiny Results
+- `convnext_tiny_320` training completed with all three stages.
+- Local evaluation used `best_model.pth` and produced val mAP
+  **0.8932642162**.
+- Best validation loss was **0.0293972875** at Stage 2 epoch 4; later Stage 2
+  epochs overfit on validation loss while train loss continued decreasing.
+- Stage 3 full-data retraining completed; final Stage 3 train loss was
+  **0.0075267962**.
+- Lowest AP classes: diningtable **0.5732**, sofa **0.7582**, bottle
+  **0.7645**, pottedplant **0.7916**, chair **0.8308**.
+- Highest AP classes: train **1.0000**, boat **1.0000**, cow **1.0000**,
+  cat **0.9922**, aeroplane **0.9909**.
+- Generated artifacts under
+  `output/image_classification/convnext_tiny_320/`: checkpoints, metrics,
+  `eval_ap_per_class.png`, test probabilities, binary predictions, and
+  submission CSVs.
+- `submission_classification_convnext_tiny_320.csv` and
+  `submission_final_convnext_tiny_320.csv` both contain 1500 rows.
+- Kaggle display score for ConvNeXt is **0.43673**; adjusted classification
+  Dice is **0.87346** after multiplying by 2.
+
+### 2026-04-26 Kaggle Classification Scores
+| Experiment | Kaggle display | Classification Dice (x2) | Rank |
+|------------|----------------|--------------------------|------|
+| `convnext_tiny_320` | **0.43673** | **0.87346** | 1 |
+| `efficientnet_b3_320` | **0.42813** | **0.85626** | 2 |
+| `resnet50_224` | **0.39165** | **0.78330** | 3 |
+
+Decision: use `convnext_tiny_320` as the strongest current classification
+submission unless a later ensemble or threshold update beats **0.87346**.

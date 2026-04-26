@@ -125,7 +125,7 @@
 | ASL forward pass | unit test | tensor scalar | 0.1761 | ✓ |
 | EfficientNet-B3 出力 | unit test | (2,20) | (2,20) | ✓ |
 | ResNet-50 出力 | unit test | (2,20) | (2,20) | ✓ |
-| v2 Kaggle Score | 待提交 | >0.50 | — | pending |
+| v2 Kaggle Score | `efficientnet_b3_320` | >0.50 adjusted | Kaggle 0.42813, adjusted 0.85626 | 已记录 |
 
 ---
 
@@ -310,7 +310,8 @@ Complete.
   name, so files such as `submission_classification_convnext_tiny_320.csv` route
   to the ConvNeXt output directory when possible.
 - Changed default merged filenames to include both source names, for example:
-  `submission_final_convnext_tiny_320__seg_submission_exp_v10_segman_b_iter25000.csv`.
+  `submission_final_convnext_tiny_320__seg_submission_exp_v10_segman_b_iter25000.csv`
+  when both source names are inferred.
 - Updated README, experiment README, and structure docs with the new naming and
   `--clf-csv` usage.
 
@@ -318,7 +319,7 @@ Complete.
 - `py_compile` passed for `merge_submission.py`.
 - `merge_submission.py --help` shows `--clf-csv`, `--seg-csv`, and `--out-csv`.
 - Verified merge with default ConvNeXt classification submission:
-  `submission_final_convnext_tiny_320__seg_submission_exp_v10_segman_b_iter25000.csv`
+  `submission_final_convnext_tiny_320.csv`
   with 1500 rows.
 - Verified merge from ResNet binary predictions:
   `submission_final_resnet50_224__clf_test_binary_predictions_resnet50_224__seg_submission_exp_v10_segman_b_iter25000.csv`
@@ -360,3 +361,64 @@ Complete.
 ### Not Run
 - Full ConvNeXt training/evaluation/prediction was not run because it is
   GPU/time intensive.
+
+---
+
+## Session: 2026-04-26 - ConvNeXt-Tiny Result Documentation
+
+### Status
+Complete.
+
+### Actions Taken
+- Read `.agent/skills/pi-planning-with-files/SKILL.md`.
+- Compared Claude enabled plugins with Codex config; enabled plugin set was
+  already aligned.
+- Reviewed ConvNeXt-Tiny output artifacts under
+  `output/image_classification/convnext_tiny_320/`.
+- Updated `task_plan.md`, `findings.md`, `progress.md`, and `CLAUDE.md` to
+  record the completed local ConvNeXt result.
+
+### Results Recorded
+- Experiment: `convnext_tiny_320`.
+- Evaluation checkpoint: `best_model.pth`.
+- val mAP: **0.8932642162**.
+- Best validation loss: **0.0293972875** at Stage 2 epoch 4.
+- Final Stage 3 training loss: **0.0075267962**.
+- Lowest AP classes: diningtable **0.5732**, sofa **0.7582**, bottle
+  **0.7645**, pottedplant **0.7916**, chair **0.8308**.
+- Highest AP classes: train **1.0000**, boat **1.0000**, cow **1.0000**,
+  cat **0.9922**, aeroplane **0.9909**.
+- Generated CSVs:
+  - `submission_classification_convnext_tiny_320.csv` with 1500 rows.
+  - `submission_final_convnext_tiny_320.csv` with 1500 rows.
+  - `test_probabilities_convnext_tiny_320.csv` with 750 rows.
+  - `test_binary_predictions_convnext_tiny_320.csv` with 750 rows.
+
+### Notes
+- ConvNeXt Kaggle score was not yet available during this documentation pass;
+  it was recorded in the following score update.
+
+---
+
+## Session: 2026-04-26 - Kaggle Classification Score Update
+
+### Status
+Complete.
+
+### Actions Taken
+- Recorded user-provided Kaggle display scores for three classification
+  experiments.
+- Updated `task_plan.md`, `findings.md`, `progress.md`, and `CLAUDE.md`.
+- Stored both raw Kaggle display scores and adjusted classification Dice scores
+  using the convention: true classification score = Kaggle display score x 2.
+
+### Scores Recorded
+| Experiment | Kaggle display | Classification Dice (x2) |
+|------------|----------------|--------------------------|
+| `convnext_tiny_320` | **0.43673** | **0.87346** |
+| `efficientnet_b3_320` | **0.42813** | **0.85626** |
+| `resnet50_224` | **0.39165** | **0.78330** |
+
+### Decision
+- `convnext_tiny_320` is the current best classification model by adjusted
+  Kaggle Dice.

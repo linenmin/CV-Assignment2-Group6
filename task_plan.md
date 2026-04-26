@@ -165,10 +165,38 @@ overwriting each other's checkpoints, metrics, figures, or CSV files.
 - [x] Selected torchvision `convnext_tiny` with ImageNet-1K weights, 320 x 320
       inputs, AsymmetricLoss, the existing three-stage fine-tuning schedule,
       per-class thresholds, and TTA.
-- [x] Keep `efficientnet_b3_320` as the default experiment until ConvNeXt has
-      been trained and compared.
-- [ ] Train, evaluate, predict, and record Kaggle results for
+- [x] Trained, evaluated, predicted, and generated submissions for
       `convnext_tiny_320`.
+- [x] Recorded local ConvNeXt results:
+      val mAP = **0.8933** from `best_model.pth`.
+- [x] Generated `submission_classification_convnext_tiny_320.csv` and
+      `submission_final_convnext_tiny_320.csv`, both with 1500 rows.
+- [x] Recorded Kaggle scores for `convnext_tiny_320`, `efficientnet_b3_320`,
+      and `resnet50_224`. The displayed Kaggle scores should be multiplied by
+      2 for true classification Dice comparison.
+
+### ConvNeXt-Tiny Local Result Summary
+| Item | Value |
+|------|-------|
+| Experiment | `convnext_tiny_320` |
+| Backbone | ConvNeXt-Tiny |
+| Input | 320 x 320 + TTA + Stage 3 full-data retraining |
+| Evaluation checkpoint | `output/image_classification/convnext_tiny_320/checkpoints/best_model.pth` |
+| val mAP | **0.8932642162** |
+| Best val loss | **0.0293972875** at S2 epoch 4 |
+| Weakest AP classes | diningtable 0.5732, sofa 0.7582, bottle 0.7645 |
+| Strongest AP classes | train 1.0000, boat 1.0000, cow 1.0000 |
+| Final training loss | S3 epoch 5 train loss 0.0075267962 |
+| Kaggle display score | **0.43673** |
+| Classification Dice (x2) | **0.87346** |
+| Submission files | `submission_classification_convnext_tiny_320.csv`, `submission_final_convnext_tiny_320.csv` |
+
+### Kaggle Classification Model Ranking
+| Rank | Experiment | Kaggle display | Classification Dice (x2) |
+|------|------------|----------------|--------------------------|
+| 1 | `convnext_tiny_320` | **0.43673** | **0.87346** |
+| 2 | `efficientnet_b3_320` | **0.42813** | **0.85626** |
+| 3 | `resnet50_224` | **0.39165** | **0.78330** |
 
 ### Follow-up Errors Encountered
 | Error | Attempt | Resolution |

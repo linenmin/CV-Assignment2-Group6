@@ -104,13 +104,24 @@ Kaggle requires one row per `{idx}_classification` and one row per `{idx}_segmen
 
 ## Experiment Results
 
-| Version | Backbone | Loss | Input | val mAP | Kaggle classification | Kaggle full (1500 rows) |
-|---------|----------|------|-------|---------|----------------------|------------------------|
-| v1 | ResNet-50 | NegativeSmoothBCE | 224 | 0.801 | 0.38084 | — |
-| v2 | EfficientNet-B3 | AsymmetricLoss | 320 + TTA + Stage3 | 0.956 | 0.43043 | 0.81610 |
-| v3 planned | ConvNeXt-Tiny | AsymmetricLoss | 320 + TTA + Stage3 | pending | pending | pending |
+| Version | Backbone | Loss | Input | val mAP | Kaggle display | Classification Dice (x2) |
+|---------|----------|------|-------|---------|----------------|--------------------------|
+| v1 | ResNet-50 | NegativeSmoothBCE | 224 | 0.801 | 0.38084 | 0.76168 |
+| v2 | EfficientNet-B3 | AsymmetricLoss | 320 + TTA + Stage3 | 0.956 | 0.42813 | 0.85626 |
+| v3 | ConvNeXt-Tiny | AsymmetricLoss | 320 + TTA + Stage3 | 0.8933 | 0.43673 | 0.87346 |
+| v4 | ResNet-50 | AsymmetricLoss | 224 + TTA + Stage3 | — | 0.39165 | 0.78330 |
 
 **About the 0.81610 score**: this is the Kaggle public score from a single complete submission containing **all 1500 rows** (750 classification + 750 segmentation). It is **not** the sum of two separate scores. Kaggle computes one Dice score across all rows together; classification-only submissions (missing segmentation rows) receive 0 for those rows, yielding a lower total.
+
+**Classification score convention**: the Kaggle display score for
+classification-only comparisons should be multiplied by 2 because the submitted
+file includes both classification and segmentation rows. The table records both
+the raw Kaggle display score and the adjusted classification Dice.
+
+**ConvNeXt-Tiny result**: `convnext_tiny_320` completed local training,
+evaluation, prediction, submission generation, and Kaggle scoring. It produced
+`evaluation_summary.csv` with val mAP **0.8932642162** and scored **0.43673**
+on Kaggle display, equivalent to **0.87346** adjusted classification Dice.
 
 ## Planning Files
 
