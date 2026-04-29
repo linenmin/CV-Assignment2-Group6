@@ -103,6 +103,30 @@
 - `findings.md` — 更新 Kaggle 实验结果表（v2 行）
 - `memory/project_image_classification.md` — 修正 0.81610 的错误描述
 
+---
+
+## Session: 2026-04-29（三实验结果整理）
+
+### 阶段：查看并记录 resnet50_224 / efficientnet_b3_320 / convnext_tiny_320 结果
+- **Status:** complete
+
+**数据来源：** 各实验目录下的 `evaluation_summary.csv` + `ap_per_class.csv`（均使用 `best_model.pth` 评估）
+
+| 实验 | val mAP | Kaggle 显示分数 | 分类 Dice (×2) |
+|------|---------|----------------|----------------|
+| `resnet50_224` (V1) | 0.8175 | 0.39165 | 0.78330 |
+| `efficientnet_b3_320` (V2) | 0.8599 | 0.42813 | 0.85626 |
+| `convnext_tiny_320` (V3) | **0.8933** | **0.43673** | **0.87346** |
+
+**与旧记录差异：**
+- EfficientNet-B3 val mAP 由早期记录的 0.956 修正为 **0.8599**（代码重构后重新评估的实测值）
+- ResNet-50 ASL 的 val mAP 此前为缺失值，现补全为 **0.8175**
+
+**本次更新的文件：**
+- `CLAUDE.md` — 修正 v2 mAP（0.956→0.8599），补全 v4 mAP（0.8175），加入实验文件夹列
+- `findings.md` — 更新 Kaggle 结果表，新增逐类 AP 三实验对比表
+- `progress.md` — 本条记录
+
 ## Next Steps（下一 Session 需做）
 
 1. 若需进一步提升分类分数（目标 0.50+）：
@@ -116,38 +140,38 @@
 
 ---
 
-## Test Results
+## 测试结果
 
-| Test | Input | Expected | Actual | Status |
-|------|-------|----------|--------|--------|
-| v1 Kaggle Score | submission_v1 | >0.38 基线 | 0.38084 | 已记录 |
+| 测试 | 输入 | 预期 | 实际 | 状态 |
+|------|------|------|------|------|
+| v1 Kaggle 分数 | submission_v1 | >0.38 基线 | 0.38084 | 已记录 |
 | v1 val mAP | 05_evaluate.py | >0.5 | 0.801 | ✓ |
-| ASL forward pass | unit test | tensor scalar | 0.1761 | ✓ |
-| EfficientNet-B3 出力 | unit test | (2,20) | (2,20) | ✓ |
-| ResNet-50 出力 | unit test | (2,20) | (2,20) | ✓ |
-| v2 Kaggle Score | `efficientnet_b3_320` | >0.50 adjusted | Kaggle 0.42813, adjusted 0.85626 | 已记录 |
+| ASL 前向传播 | 单元测试 | tensor 标量 | 0.1761 | ✓ |
+| EfficientNet-B3 输出 | 单元测试 | (2,20) | (2,20) | ✓ |
+| ResNet-50 输出 | 单元测试 | (2,20) | (2,20) | ✓ |
+| v2 Kaggle 分数 | `efficientnet_b3_320` | >0.50 调整后 | Kaggle 0.42813，调整后 0.85626 | 已记录 |
 
 ---
 
-## Error Log
+## 错误日志
 
-| Timestamp | Error | Attempt | Resolution |
-|-----------|-------|---------|------------|
-| 2026-04-23 | Windows multiprocessing spawn | 1 | NUM_WORKERS=0 |
+| 时间戳 | 错误 | 尝试次数 | 解决方案 |
+|--------|------|---------|---------|
+| 2026-04-23 | Windows 多进程 spawn 问题 | 1 | NUM_WORKERS=0 |
 | 2026-04-23 | 模块名以数字开头无法直接 import | 1 | importlib.util |
 | 2026-04-23 | val mAP 0.80 但 Kaggle Dice 0.38 | 1 | ASL + 320px + TTA + S3 |
 
 ---
 
-## 5-Question Reboot Check
+## 五问重启检查
 
-| Question | Answer |
-|----------|--------|
-| Where am I? | Phase 6: v2 重训与提交 |
-| Where am I going? | Kaggle Dice > 0.50 |
-| What's the goal? | PASCAL VOC 多标签分类 Dice 提升 |
-| What have I learned? | v1=0.38；改进: ASL+EffNetB3+320px+TTA+S3全量 |
-| What have I done? | v2代码已就绪，待重新训练并提交 |
+| 问题 | 答案 |
+|------|------|
+| 我在哪里？ | 第 6 阶段：v2 重训与提交 |
+| 我要去哪里？ | Kaggle Dice > 0.50 |
+| 目标是什么？ | 提升 PASCAL VOC 多标签分类 Dice |
+| 我学到了什么？ | v1=0.38；改进: ASL+EffNetB3+320px+TTA+S3全量 |
+| 我做了什么？ | v2 代码已就绪，待重新训练并提交 |
 
 ---
 
@@ -155,86 +179,77 @@
 
 ---
 
-## Session: 2026-04-25 - Classification Reorganization
+## 会话：2026-04-25 - 分类代码重构
 
-### Status
-Complete.
+### 状态
+已完成。
 
-### Actions Taken
-- Read `.agent/skills/pi-planning-with-files/SKILL.md`.
-- Read `task_plan.md`, `findings.md`, and `progress.md`.
-- Compared Claude enabled plugins with Codex config; enabled plugin set was
-  already aligned.
-- Reviewed all Section 2.1 classification scripts.
-- Refactored shared configuration into `ExperimentConfig`.
-- Added experiment-specific folders for EfficientNet-B3 and ResNet-50.
-- Updated train/evaluate/predict/pipeline/merge scripts to accept experiment
-  names and use model-specific output folders.
-- Updated README and structure documentation.
-- Copied existing classification artifacts into the new
-  `efficientnet_b3_320` output folder.
+### 已执行操作
+- 读取 `.agent/skills/pi-planning-with-files/SKILL.md`。
+- 读取 `task_plan.md`、`findings.md` 和 `progress.md`。
+- 比对 Claude 已启用插件与 Codex 配置；插件集已对齐，无需修改。
+- 审查所有 2.1 分类脚本。
+- 将共享配置重构为 `ExperimentConfig`。
+- 为 EfficientNet-B3 和 ResNet-50 添加实验专属文件夹。
+- 更新 train/evaluate/predict/pipeline/merge 脚本，支持实验名称参数并使用模型专属输出目录。
+- 更新 README 和结构文档。
+- 将现有分类制品复制到新的 `efficientnet_b3_320` 输出文件夹。
 
-### Verification
-- `python -m py_compile` passed for edited Python files.
-- `C:\Users\31667\.conda\envs\biometrics\python.exe` CLI checks:
+### 验证
+- 已修改的 Python 文件通过 `python -m py_compile`。
+- 使用 `C:\Users\31667\.conda\envs\biometrics\python.exe` 验证以下 CLI 帮助输出：
   - `run_pipeline.py --help`
   - `04_train.py --help`
   - `05_evaluate.py --help`
   - `06_predict.py --help`
-  - experiment wrapper `--help`
+  - 实验封装脚本 `--help`
   - `merge_submission.py --help`
-- Smoke test:
-  - ResNet-50 dummy forward: `torch.Size([1, 20])`
-  - EfficientNet-B3 dummy forward: `torch.Size([1, 20])`
+- 冒烟测试：
+  - ResNet-50 虚拟前向：`torch.Size([1, 20])`
+  - EfficientNet-B3 虚拟前向：`torch.Size([1, 20])`
 
-### Not Run
-- Full training was not run because it is GPU/time intensive.
-- Full prediction was not run because the request was structure/code cleanup,
-  and the smoke tests already verified model loading and CLI routing.
+### 未执行
+- 完整训练因 GPU/时间成本未运行。
+- 完整预测因任务为结构/代码整理未运行，冒烟测试已验证模型加载与 CLI 路由。
 
-### Notes
-- Default `python` lacks `torch`; use the `biometrics` conda environment.
-- `ruff` is not installed in the `biometrics` environment.
-- Existing git status already showed deleted segmentation submission files and
-  untracked `.agent/`; these were not changed by this task.
+### 备注
+- 默认 `python` 不含 `torch`，需使用 `biometrics` conda 环境。
+- `ruff` 未安装在 `biometrics` 环境中。
+- 现有 git 状态已显示删除的分割提交文件和未跟踪的 `.agent/`，本任务未修改这些内容。
 
 ---
 
-## Session: 2026-04-25 - Explore Script and CSV Naming Follow-up
+## 会话：2026-04-25 - 探索脚本与 CSV 命名跟进
 
-### Status
-Complete.
+### 状态
+已完成。
 
-### Actions Taken
-- Removed PNG conversion from `Image classification/01_explore_data.py`.
-- Kept shape statistics and sample-grid generation, reading images directly
-  from the original `.npy` files.
-- Updated submission and prediction CSV paths to include the experiment name:
+### 已执行操作
+- 从 `Image classification/01_explore_data.py` 中移除 PNG 转换逻辑。
+- 保留形状统计和样本网格生成，直接从原始 `.npy` 文件读取图像。
+- 更新提交和预测 CSV 路径，加入实验名称：
   - `submission_classification_<experiment>.csv`
   - `submission_final_<experiment>.csv`
   - `test_probabilities_<experiment>.csv`
   - `test_binary_predictions_<experiment>.csv`
-- Updated README, experiment README, run pipeline text, and structure docs.
-- Renamed the copied EfficientNet submission artifact in the new output folder.
+- 更新 README、实验 README、流水线说明和结构文档。
+- 重命名新输出文件夹中已复制的 EfficientNet 提交制品。
 
-### Verification
-- `python -m py_compile` passed for the touched scripts.
-- `biometrics` environment help checks passed for `06_predict.py` and
-  `merge_submission.py`.
+### 验证
+- 修改的脚本通过 `python -m py_compile`。
+- `biometrics` 环境中 `06_predict.py` 和 `merge_submission.py` 的帮助输出验证通过。
 
 ---
 
-## Session: 2026-04-25 - Kaggle Notebook Update
+## 会话：2026-04-25 - Kaggle Notebook 更新
 
-### Status
-Complete.
+### 状态
+已完成。
 
-### Actions Taken
-- Rewrote `Image classification/kaggle_train.ipynb` as a clean, self-contained
-  Kaggle GPU notebook.
-- Added experiment-aware Kaggle output folders under
-  `/kaggle/working/image_classification/efficientnet_b3_320/`.
-- Updated Kaggle output filenames to include the experiment name:
+### 已执行操作
+- 将 `Image classification/kaggle_train.ipynb` 重写为简洁的自包含 Kaggle GPU Notebook。
+- 在 `/kaggle/working/image_classification/efficientnet_b3_320/` 下添加实验专属 Kaggle 输出目录。
+- 更新 Kaggle 输出文件名，加入实验名称：
   - `best_model_efficientnet_b3_320.pth`
   - `last_model_efficientnet_b3_320.pth`
   - `final_model_efficientnet_b3_320.pth`
@@ -242,183 +257,164 @@ Complete.
   - `test_probabilities_efficientnet_b3_320.csv`
   - `test_binary_predictions_efficientnet_b3_320.csv`
   - `submission_classification_efficientnet_b3_320.csv`
-- Updated `README.md` and `Image classification/structure.txt` with the Kaggle
-  notebook workflow.
+- 更新 `README.md` 和 `Image classification/structure.txt`，添加 Kaggle Notebook 工作流说明。
 
-### Verification
-- Parsed notebook JSON successfully.
-- Compiled every code cell with Python `compile(...)`.
+### 验证
+- Notebook JSON 解析成功。
+- 用 Python `compile(...)` 编译所有代码单元格成功。
 
 ---
 
-## Session: 2026-04-25 - Prediction Index Bug Fix and Notebook Review
+## 会话：2026-04-25 - 预测索引 Bug 修复与 Notebook 审查
 
-### Status
-Complete.
+### 状态
+已完成。
 
-### Actions Taken
-- Fixed `Image classification/06_predict.py` after `resnet50_224` prediction
-  failed with:
-  `ValueError: Shape of passed values is (750, 20), indices imply (20, 20)`.
-- Root cause: `test_set.csv` contains all 20 class columns with `-1`
-  placeholders, so `VOCDataset` treated test rows as labelled data and returned
-  `(img, label)` instead of `(img, idx)`. The prediction loop then accidentally
-  collected label tensors as indices.
-- Updated prediction code to ignore the batch second item and use
-  `test_ds.indices` as the authoritative test image IDs.
-- Added a prediction-count sanity check before building probability and binary
-  prediction DataFrames.
-- Reviewed `Image classification/kaggle_train.ipynb` and applied the same fix
-  to the Kaggle prediction cell.
-- Changed the notebook Stage 3 message from hard-coded `750 training samples`
-  to dynamic `len(df)` because the local training CSV has 749 rows.
+### 已执行操作
+- 修复 `Image classification/06_predict.py`，原因为 `resnet50_224` 预测时报错：
+  `ValueError: Shape of passed values is (750, 20), indices imply (20, 20)`。
+- 根本原因：`test_set.csv` 包含所有 20 个类别列（填充 `-1` 占位符），导致 `VOCDataset` 将测试行视为有标签数据，返回 `(img, label)` 而非 `(img, idx)`。预测循环因此错误地将标签张量当作索引收集。
+- 更新预测代码，忽略 batch 第二个返回值，改用 `test_ds.indices` 作为权威测试图像 ID。
+- 在构建概率和二值预测 DataFrame 之前，添加预测数量合理性检查。
+- 审查 `Image classification/kaggle_train.ipynb`，对 Kaggle 预测单元格应用相同修复。
+- 将 Notebook Stage 3 消息从硬编码的 `750 training samples` 改为动态 `len(df)`，因为本地训练 CSV 有 749 行。
 
-### Verification
-- Ran:
+### 验证
+- 执行：
   `C:\Users\31667\.conda\envs\biometrics\python.exe "Image classification\06_predict.py" --experiment resnet50_224`
-- Prediction completed and wrote:
+- 预测完成并写入：
   - `output/image_classification/resnet50_224/submissions/submission_classification_resnet50_224.csv`
   - `output/image_classification/resnet50_224/predictions/test_probabilities_resnet50_224.csv`
   - `output/image_classification/resnet50_224/predictions/test_binary_predictions_resnet50_224.csv`
-- Submission row count: 1500 rows, classification plus empty segmentation rows.
-- Parsed `kaggle_train.ipynb` JSON successfully.
-- Compiled every notebook code cell with Python `compile(...)`.
+- 提交文件行数：1500 行（分类行 + 空分割行）。
+- `kaggle_train.ipynb` JSON 解析成功。
+- 用 Python `compile(...)` 编译所有 Notebook 代码单元格成功。
 
-### Notes
-- Default `python` still lacks `torch`; use the `biometrics` conda environment
-  for model inference and training.
-- PowerShell profile execution-policy warnings appear during shell commands but
-  do not block the project scripts.
+### 备注
+- 默认 `python` 仍不含 `torch`，模型推理和训练需使用 `biometrics` conda 环境。
+- PowerShell profile 执行策略警告在 shell 命令中出现，但不影响项目脚本运行。
 
 ---
 
-## Session: 2026-04-25 - Clear Model-Specific Merge Submission
+## 会话：2026-04-25 - 模型专属合并提交
 
-### Status
-Complete.
+### 状态
+已完成。
 
-### Actions Taken
-- Extended `Image classification/merge_submission.py` so a chosen trained
-  classification model can be merged with a chosen segmentation CSV.
-- Added `--clf-csv` to merge a specific classification file instead of always
-  using the default experiment submission.
-- Supported both classification submission CSVs with `*_classification` rows
-  and `test_binary_predictions_<experiment>.csv` files with the 20 binary label
-  columns.
-- Kept probability CSVs from being silently treated as binary submissions.
-- Added experiment inference from either the classification CSV folder or file
-  name, so files such as `submission_classification_convnext_tiny_320.csv` route
-  to the ConvNeXt output directory when possible.
-- Changed default merged filenames to include both source names, for example:
-  `submission_final_convnext_tiny_320__seg_submission_exp_v10_segman_b_iter25000.csv`
-  when both source names are inferred.
-- Updated README, experiment README, and structure docs with the new naming and
-  `--clf-csv` usage.
+### 已执行操作
+- 扩展 `Image classification/merge_submission.py`，支持将指定分类模型与指定分割 CSV 合并。
+- 添加 `--clf-csv` 参数，支持指定特定分类文件，而非始终使用默认实验提交。
+- 同时支持含 `*_classification` 行的分类提交 CSV 和含 20 个二值标签列的 `test_binary_predictions_<experiment>.csv`。
+- 防止概率 CSV 被静默当作二值提交处理。
+- 从分类 CSV 文件夹或文件名推断实验名称，例如 `submission_classification_convnext_tiny_320.csv` 在可能时路由到 ConvNeXt 输出目录。
+- 将默认合并文件名改为包含两个来源名称，例如：
+  `submission_final_convnext_tiny_320__seg_submission_exp_v10_segman_b_iter25000.csv`。
+- 更新 README、实验 README 和结构文档，添加新命名规则和 `--clf-csv` 用法说明。
 
-### Verification
-- `py_compile` passed for `merge_submission.py`.
-- `merge_submission.py --help` shows `--clf-csv`, `--seg-csv`, and `--out-csv`.
-- Verified merge with default ConvNeXt classification submission:
-  `submission_final_convnext_tiny_320.csv`
-  with 1500 rows.
-- Verified merge from ResNet binary predictions:
-  `submission_final_resnet50_224__clf_test_binary_predictions_resnet50_224__seg_submission_exp_v10_segman_b_iter25000.csv`
-  with 1500 rows.
-- Verified merged row ordering starts as `0_classification`, `0_segmentation`,
-  `1_classification`, `1_segmentation`.
+### 验证
+- `merge_submission.py` 通过 `py_compile`。
+- `merge_submission.py --help` 显示 `--clf-csv`、`--seg-csv` 和 `--out-csv`。
+- 验证使用默认 ConvNeXt 分类提交合并：
+  `submission_final_convnext_tiny_320.csv` 共 1500 行。
+- 验证从 ResNet 二值预测合并：
+  `submission_final_resnet50_224__clf_test_binary_predictions_resnet50_224__seg_submission_exp_v10_segman_b_iter25000.csv` 共 1500 行。
+- 验证合并行顺序以 `0_classification`、`0_segmentation`、`1_classification`、`1_segmentation` 开头。
 
 ---
 
-## Session: 2026-04-25 - ConvNeXt-Tiny Experiment Addition
+## 会话：2026-04-25 - 添加 ConvNeXt-Tiny 实验
 
-### Status
-Complete.
+### 状态
+已完成。
 
-### Actions Taken
-- Compared Claude enabled plugins with Codex config earlier in this session;
-  the enabled plugin set was already aligned.
-- Confirmed local torchvision has ConvNeXt-Tiny and ConvNeXt-Small factories and
-  ImageNet-1K weight enums.
-- Planned `convnext_tiny_320` as a third classification experiment using the
-  existing shared train/evaluate/predict pipeline.
-- Added `convnext_tiny` to `MultiLabelClassifier`.
-- Registered `convnext_tiny_320` in shared experiment configs.
-- Added local train/evaluate/predict wrappers and experiment README.
-- Added `kaggle_train_convnext_tiny_320.ipynb`.
-- Updated README, experiment docs, structure docs, CLAUDE.md, task plan, and
-  findings.
+### 已执行操作
+- 比对 Claude 已启用插件与 Codex 配置；插件集已对齐，无需修改。
+- 确认本地 torchvision 具有 ConvNeXt-Tiny 和 ConvNeXt-Small 工厂函数及 ImageNet-1K 权重枚举。
+- 规划 `convnext_tiny_320` 作为第三个分类实验，复用现有共享 train/evaluate/predict 流水线。
+- 将 `convnext_tiny` 添加到 `MultiLabelClassifier`。
+- 在共享实验配置中注册 `convnext_tiny_320`。
+- 添加本地 train/evaluate/predict 封装脚本和实验 README。
+- 添加 `kaggle_train_convnext_tiny_320.ipynb`。
+- 更新 README、实验文档、结构文档、CLAUDE.md、task_plan.md 和 findings.md。
 
-### Verification
-- `python -m py_compile` passed for edited scripts and new wrappers.
-- `MultiLabelClassifier(backbone="convnext_tiny", pretrained=False)` returned
-  `torch.Size([1, 20])` for a `(1, 3, 320, 320)` dummy tensor.
-- `run_pipeline.py --help` and the new train wrapper show
-  `convnext_tiny_320` as a valid experiment.
-- Compiled all 9 code cells in `kaggle_train_convnext_tiny_320.ipynb`.
-- Restored generated `__pycache__` changes after verification so the diff stays
-  focused on source, docs, and notebook changes.
+### 验证
+- 修改的脚本和新封装脚本通过 `python -m py_compile`。
+- `MultiLabelClassifier(backbone="convnext_tiny", pretrained=False)` 对 `(1, 3, 320, 320)` 虚拟张量返回 `torch.Size([1, 20])`。
+- `run_pipeline.py --help` 和新训练封装脚本显示 `convnext_tiny_320` 为有效实验。
+- 编译 `kaggle_train_convnext_tiny_320.ipynb` 所有 9 个代码单元格成功。
+- 验证后清理生成的 `__pycache__` 变更，使 diff 聚焦于源码、文档和 Notebook 改动。
 
-### Not Run
-- Full ConvNeXt training/evaluation/prediction was not run because it is
-  GPU/time intensive.
+### 未执行
+- 完整 ConvNeXt 训练/评估/预测因 GPU/时间成本未运行。
 
 ---
 
-## Session: 2026-04-26 - ConvNeXt-Tiny Result Documentation
+## 会话：2026-04-26 - ConvNeXt-Tiny 结果记录
 
-### Status
-Complete.
+### 状态
+已完成。
 
-### Actions Taken
-- Read `.agent/skills/pi-planning-with-files/SKILL.md`.
-- Compared Claude enabled plugins with Codex config; enabled plugin set was
-  already aligned.
-- Reviewed ConvNeXt-Tiny output artifacts under
-  `output/image_classification/convnext_tiny_320/`.
-- Updated `task_plan.md`, `findings.md`, `progress.md`, and `CLAUDE.md` to
-  record the completed local ConvNeXt result.
+### 已执行操作
+- 读取 `.agent/skills/pi-planning-with-files/SKILL.md`。
+- 比对 Claude 已启用插件与 Codex 配置；插件集已对齐，无需修改。
+- 审查 `output/image_classification/convnext_tiny_320/` 下的 ConvNeXt-Tiny 输出制品。
+- 更新 `task_plan.md`、`findings.md`、`progress.md` 和 `CLAUDE.md`，记录已完成的本地 ConvNeXt 结果。
 
-### Results Recorded
-- Experiment: `convnext_tiny_320`.
-- Evaluation checkpoint: `best_model.pth`.
-- val mAP: **0.8932642162**.
-- Best validation loss: **0.0293972875** at Stage 2 epoch 4.
-- Final Stage 3 training loss: **0.0075267962**.
-- Lowest AP classes: diningtable **0.5732**, sofa **0.7582**, bottle
-  **0.7645**, pottedplant **0.7916**, chair **0.8308**.
-- Highest AP classes: train **1.0000**, boat **1.0000**, cow **1.0000**,
-  cat **0.9922**, aeroplane **0.9909**.
-- Generated CSVs:
-  - `submission_classification_convnext_tiny_320.csv` with 1500 rows.
-  - `submission_final_convnext_tiny_320.csv` with 1500 rows.
-  - `test_probabilities_convnext_tiny_320.csv` with 750 rows.
-  - `test_binary_predictions_convnext_tiny_320.csv` with 750 rows.
+### 记录结果
+- 实验：`convnext_tiny_320`。
+- 评估 checkpoint：`best_model.pth`。
+- val mAP：**0.8932642162**。
+- 最优验证 loss：Stage 2 第 4 epoch **0.0293972875**。
+- Stage 3 最终训练 loss：**0.0075267962**。
+- 最弱 AP 类别：diningtable **0.5732**、sofa **0.7582**、bottle **0.7645**、pottedplant **0.7916**、chair **0.8308**。
+- 最强 AP 类别：train **1.0000**、boat **1.0000**、cow **1.0000**、cat **0.9922**、aeroplane **0.9909**。
+- 生成的 CSV：
+  - `submission_classification_convnext_tiny_320.csv`，共 1500 行。
+  - `submission_final_convnext_tiny_320.csv`，共 1500 行。
+  - `test_probabilities_convnext_tiny_320.csv`，共 750 行。
+  - `test_binary_predictions_convnext_tiny_320.csv`，共 750 行。
 
-### Notes
-- ConvNeXt Kaggle score was not yet available during this documentation pass;
-  it was recorded in the following score update.
+### 备注
+- 本次记录时 ConvNeXt Kaggle 分数尚未获取，在后续分数更新中记录。
 
 ---
 
-## Session: 2026-04-26 - Kaggle Classification Score Update
+## 会话：2026-04-26 - Kaggle 分类分数更新
 
-### Status
-Complete.
+### 状态
+已完成。
 
-### Actions Taken
-- Recorded user-provided Kaggle display scores for three classification
-  experiments.
-- Updated `task_plan.md`, `findings.md`, `progress.md`, and `CLAUDE.md`.
-- Stored both raw Kaggle display scores and adjusted classification Dice scores
-  using the convention: true classification score = Kaggle display score x 2.
+### 已执行操作
+- 记录用户提供的三个分类实验的 Kaggle 显示分数。
+- 更新 `task_plan.md`、`findings.md`、`progress.md` 和 `CLAUDE.md`。
+- 按照约定同时存储原始 Kaggle 显示分数和调整后分类 Dice 分数（真实分类分数 = Kaggle 显示分数 × 2）。
 
-### Scores Recorded
-| Experiment | Kaggle display | Classification Dice (x2) |
-|------------|----------------|--------------------------|
+### 记录分数
+| 实验 | Kaggle 显示 | 分类 Dice（×2） |
+|------|------------|----------------|
 | `convnext_tiny_320` | **0.43673** | **0.87346** |
 | `efficientnet_b3_320` | **0.42813** | **0.85626** |
 | `resnet50_224` | **0.39165** | **0.78330** |
 
-### Decision
-- `convnext_tiny_320` is the current best classification model by adjusted
-  Kaggle Dice.
+### 决策
+- 按调整后 Kaggle Dice 排名，`convnext_tiny_320` 为当前最佳分类模型。
+
+---
+
+## 会话：2026-04-29 - ConvNeXt 默认与 findings 同步
+
+### 状态
+已完成。
+
+### 已执行操作
+- 使用 `planning-with-files` 上下文（`task_plan.md`、`findings.md`、`progress.md`）并读取本地技能说明。
+- 核对 `Image classification/shared.py`：`convnext_tiny_320` 已映射到 `backbone="convnext_tiny"`。
+- 核对 `Image classification/03_model.py`：已通过 `torchvision.models.convnext_tiny` 支持 ConvNeXt-Tiny，池化特征维度为 768。
+- 核对 `Image classification/experiments/convnext_tiny_320/{train,evaluate,predict}.py`：三个入口均设置 `EXPERIMENT = "convnext_tiny_320"`。
+- 更新 `findings.md`，将当前技术决策和关键超参数从旧 v2 EfficientNet-B3 口径同步为当前最佳 v3 ConvNeXt-Tiny。
+- 更新 `Image classification/shared.py`，将 `DEFAULT_EXPERIMENT` 从 `efficientnet_b3_320` 改为 `convnext_tiny_320`。
+
+### 验证
+- 搜索了项目中的 `EfficientNet`、`convnext_tiny_320`、`backbone` 和 `BACKBONE` 引用。
+- `python -m py_compile "Image classification/shared.py"` 通过；已清理本次生成的 `shared.cpython-312.pyc` 缓存文件。
+- 历史结果表中的 EfficientNet-B3 条目保留为 v2 对比记录。

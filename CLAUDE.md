@@ -104,12 +104,12 @@ Kaggle requires one row per `{idx}_classification` and one row per `{idx}_segmen
 
 ## Experiment Results
 
-| Version | Backbone | Loss | Input | val mAP | Kaggle display | Classification Dice (x2) |
-|---------|----------|------|-------|---------|----------------|--------------------------|
-| v1 | ResNet-50 | NegativeSmoothBCE | 224 | 0.801 | 0.38084 | 0.76168 |
-| v2 | EfficientNet-B3 | AsymmetricLoss | 320 + TTA + Stage3 | 0.956 | 0.42813 | 0.85626 |
-| v3 | ConvNeXt-Tiny | AsymmetricLoss | 320 + TTA + Stage3 | 0.8933 | 0.43673 | 0.87346 |
-| v4 | ResNet-50 | AsymmetricLoss | 224 + TTA + Stage3 | — | 0.39165 | 0.78330 |
+| Version | Experiment folder | Backbone | Loss | Input | val mAP | Kaggle display | Classification Dice (x2) |
+|---------|-------------------|----------|------|-------|---------|----------------|--------------------------|
+| v1.0 | *(pre-refactor)* | ResNet-50 | NegativeSmoothBCE | 224 | 0.801 | 0.38084 | 0.76168 |
+| v1.1 | `resnet50_224` | ResNet-50 | AsymmetricLoss | 224 + TTA + Stage3 | 0.8175 | 0.39165 | 0.78330 |
+| v2 | `efficientnet_b3_320` | EfficientNet-B3 | AsymmetricLoss | 320 + TTA + Stage3 | **0.8599** | 0.42813 | 0.85626 |
+| v3 | `convnext_tiny_320` | ConvNeXt-Tiny | AsymmetricLoss | 320 + TTA + Stage3 | **0.8933** | **0.43673** | **0.87346** |
 
 **About the 0.81610 score**: this is the Kaggle public score from a single complete submission containing **all 1500 rows** (750 classification + 750 segmentation). It is **not** the sum of two separate scores. Kaggle computes one Dice score across all rows together; classification-only submissions (missing segmentation rows) receive 0 for those rows, yielding a lower total.
 

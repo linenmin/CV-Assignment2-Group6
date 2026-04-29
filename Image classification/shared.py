@@ -133,7 +133,7 @@ class ExperimentConfig:
         return self.predictions_dir / f"test_binary_predictions_{self.name}.csv"
 
 
-DEFAULT_EXPERIMENT = "efficientnet_b3_320"
+DEFAULT_EXPERIMENT = "convnext_tiny_320"
 
 EXPERIMENTS = {
     "efficientnet_b3_320": ExperimentConfig(
