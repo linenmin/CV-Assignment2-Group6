@@ -108,70 +108,80 @@ Phase 6: v2 重训与提交
 
 ---
 
-## Session 2026-04-25: Classification Experiment Reorganization
+## 会话 2026-04-25：分类实验重构
 
-### Goal
-Organize Section 2.1 image-classification code and outputs by model so that
-ResNet-50 and EfficientNet-B3 can be trained, evaluated, and predicted without
-overwriting each other's checkpoints, metrics, figures, or CSV files.
+### 目标
+将 2.1 分类代码和输出按模型隔离，使 ResNet-50 与 EfficientNet-B3 的训练、评估、预测互不覆盖各自的 checkpoint、指标、图表和提交 CSV。
 
-### Completed
-- [x] Added shared `ExperimentConfig` objects in `Image classification/shared.py`.
-- [x] Added two model-specific experiment folders:
+### 已完成
+- [x] 在 `shared.py` 中添加共享 `ExperimentConfig` 对象
+- [x] 新增两个模型专属实验目录：
   - `Image classification/experiments/efficientnet_b3_320/`
   - `Image classification/experiments/resnet50_224/`
-- [x] Refactored training, evaluation, prediction, pipeline, and merge scripts
-      to accept `--experiment`.
-- [x] Routed outputs to `output/image_classification/<experiment>/`.
-- [x] Copied existing classification artifacts into
-      `output/image_classification/efficientnet_b3_320/`.
-- [x] Updated `README.md` and `Image classification/structure.txt`.
+- [x] 重构训练、评估、预测、流水线、合并脚本，统一支持 `--experiment` 参数
+- [x] 输出路径统一路由至 `output/image_classification/<experiment>/`
+- [x] 将已有 EfficientNet-B3 制品复制到 `output/image_classification/efficientnet_b3_320/`
+- [x] 更新 `README.md` 和 `Image classification/structure.txt`
 
-### New Output Layout
-`output/image_classification/<experiment>/checkpoints`, `metrics`, `figures`,
-`predictions`, and `submissions`.
+### 新输出结构
+`output/image_classification/<experiment>/checkpoints`、`metrics`、`figures`、`predictions`、`submissions`
 
-### Verification
-- `python -m py_compile ...` passed for all edited Python files.
-- `biometrics` environment CLI checks passed for pipeline, train, evaluate,
-  predict, merge, and experiment wrappers.
-- Smoke-tested both backbones with dummy input:
-  `resnet50 -> torch.Size([1, 20])`,
-  `efficientnet_b3 -> torch.Size([1, 20])`.
+### 验证
+- 所有修改的 Python 文件通过 `python -m py_compile` 检查
+- 在 `biometrics` 环境中确认 pipeline、train、evaluate、predict、merge 及实验封装脚本的帮助输出正常
+- 用虚拟输入验证两个 backbone：`resnet50 → torch.Size([1, 20])`，`efficientnet_b3 → torch.Size([1, 20])`
 
-### Errors Encountered
-| Error | Attempt | Resolution |
-|-------|---------|------------|
-| `git status` dubious ownership | Read status | Used one-command `git -c safe.directory=...` without global config change |
-| `pdftotext` unavailable and no local PDF Python parser | PDF extraction | Continued using code and existing project docs; no internet lookup needed |
-| Default `python` missing `torch` | CLI smoke test | Used `C:\Users\31667\.conda\envs\biometrics\python.exe` |
-| `ruff` not installed in biometrics env | Lint attempt | Recorded as unavailable; relied on py_compile and smoke tests |
-| `py_compile` touched `__pycache__` | Verification cleanup | Restored/removed generated cache files so source changes stay clean |
+### 遇到的错误
+| 错误 | 尝试次数 | 解决方案 |
+|------|---------|---------|
+| `git status` 报 dubious ownership | 1 | 使用单次 `git -c safe.directory=...` 而不修改全局配置 |
+| `pdftotext` 不可用且无本地 PDF 解析器 | 1 | 直接使用代码和已有项目文档，无需提取 PDF |
+| 默认 `python` 不含 `torch` | 1 | 改用 `C:\Users\31667\.conda\envs\biometrics\python.exe` |
+| `ruff` 未安装在 biometrics 环境 | 1 | 仅依赖 py_compile 和 smoke test |
+| `py_compile` 生成 `__pycache__` | 1 | 验证完成后清理缓存文件，保持源码目录干净 |
 
-### Follow-up 2026-04-25
-- [x] Removed `.npy -> PNG` conversion from the exploration step.
-- [x] Kept exploration statistics and sample-grid plotting from `.npy` files.
-- [x] Added experiment names to generated prediction/submission CSV filenames.
-- [x] Updated `Image classification/kaggle_train.ipynb` for Kaggle GPU training
-      with experiment-specific output folders and filenames.
-- [x] Fixed prediction index handling in `06_predict.py` and
-      `kaggle_train.ipynb` so test IDs come from `test_ds.indices`, not from the
-      DataLoader batch's second item.
-- [x] Verified `resnet50_224` prediction writes 1500 submission rows.
+### 后续更新（2026-04-25）
+- [x] 从探索步骤中移除 `.npy → PNG` 转换（PNG 已存在，不重复生成）
+- [x] 保留从 `.npy` 读取进行统计分析和样本网格绘图
+- [x] 预测和提交 CSV 文件名中加入实验名称，便于在文件夹外识别
+- [x] 更新 `kaggle_train.ipynb`，使用实验专属输出目录和文件名
+- [x] 修复 `06_predict.py` 和 `kaggle_train.ipynb` 中的预测索引 bug：测试 ID 来自 `test_ds.indices` 而非 DataLoader batch 的第二个返回值
+- [x] 验证 `resnet50_224` 预测写入 1500 行提交文件
 
-### Follow-up 2026-04-25: ConvNeXt-Tiny Experiment
-- [x] Planned a third classification experiment, `convnext_tiny_320`, for the
-      CVPR 2022 ConvNeXt "modern CNN" backbone.
-- [x] Selected torchvision `convnext_tiny` with ImageNet-1K weights, 320 x 320
-      inputs, AsymmetricLoss, the existing three-stage fine-tuning schedule,
-      per-class thresholds, and TTA.
-- [x] Keep `efficientnet_b3_320` as the default experiment until ConvNeXt has
-      been trained and compared.
-- [ ] Train, evaluate, predict, and record Kaggle results for
-      `convnext_tiny_320`.
+### 后续更新（2026-04-25）：ConvNeXt-Tiny 实验
+- [x] 规划第三个分类实验 `convnext_tiny_320`（CVPR 2022 ConvNeXt "现代 CNN" backbone）
+- [x] 选用 torchvision `convnext_tiny`（ImageNet-1K 预训练），320×320 输入，AsymmetricLoss，沿用三阶段训练、per-class 阈值和 TTA
+- [x] 完成 `convnext_tiny_320` 的训练、评估、预测和提交文件生成
+- [x] 记录本地 ConvNeXt-Tiny 结果：val mAP = **0.8933**（来自 `best_model.pth`）
+- [x] 生成 `submission_classification_convnext_tiny_320.csv` 和 `submission_final_convnext_tiny_320.csv`，均为 1500 行
+- [x] 记录三个实验的 Kaggle 得分，并说明显示分数需×2 才是真实分类 Dice
 
-### Follow-up Errors Encountered
-| Error | Attempt | Resolution |
-|-------|---------|------------|
-| `ValueError: Shape of passed values is (750, 20), indices imply (20, 20)` in `06_predict.py` | Ran `resnet50_224` prediction | `test_set.csv` has `-1` label placeholder columns, so the DataLoader returned labels instead of IDs. Prediction now uses `test_ds.indices` and checks row counts. |
-| Same prediction-index bug present in `kaggle_train.ipynb` | Notebook review | Applied the same `test_ds.indices` pattern to the Kaggle prediction cell. |
+### ConvNeXt-Tiny 本地结果汇总
+| 项目 | 值 |
+|------|---|
+| 实验 | `convnext_tiny_320` |
+| Backbone | ConvNeXt-Tiny |
+| 输入 | 320×320 + TTA + Stage 3 全量重训 |
+| 评估 checkpoint | `output/image_classification/convnext_tiny_320/checkpoints/best_model.pth` |
+| val mAP | **0.8932642162** |
+| 最优 val loss | S2 第 4 epoch **0.0293972875** |
+| 最弱 AP 类别 | diningtable 0.5732、sofa 0.7582、bottle 0.7645 |
+| 最强 AP 类别 | train 1.0000、boat 1.0000、cow 1.0000 |
+| S3 最终训练 loss | 第 5 epoch **0.0075267962** |
+| Kaggle 显示分数 | **0.43673** |
+| 分类 Dice（×2） | **0.87346** |
+| 提交文件 | `submission_classification_convnext_tiny_320.csv`、`submission_final_convnext_tiny_320.csv` |
+
+### Kaggle 分类模型排名
+| 排名 | 版本 | 实验文件夹 | Kaggle 显示 | 分类 Dice（×2） |
+|------|------|-----------|------------|----------------|
+| 1 | v3 | `convnext_tiny_320` | **0.43673** | **0.87346** |
+| 2 | v2 | `efficientnet_b3_320` | **0.42813** | **0.85626** |
+| 3 | v1.1 | `resnet50_224` | **0.39165** | **0.78330** |
+| — | v1.0 | *(重构前 ResNet-50 + NegativeSmoothBCE)* | 0.38084 | 0.76168 |
+
+### 遇到的错误（后续）
+| 错误 | 尝试次数 | 解决方案 |
+|------|---------|---------|
+| `06_predict.py` 中 `ValueError: Shape of passed values is (750, 20), indices imply (20, 20)` | 1 | `test_set.csv` 含 `-1` 占位标签列，导致 DataLoader 返回标签而非 ID；改为使用 `test_ds.indices` 并校验行数 |
+| `kaggle_train.ipynb` 存在相同的预测索引 bug | 1 | 同样应用 `test_ds.indices` 修复方案 |

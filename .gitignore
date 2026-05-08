@@ -1,3 +1,5 @@
 kul-computer-vision-ga-2-2026/
 __pycache__/
 *.py[cod]
+output/test_png/
+output/train_png/
