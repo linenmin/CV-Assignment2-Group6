@@ -14,6 +14,18 @@ experiments/
     train.py
     evaluate.py
     predict.py
+  convnext_small_320/
+    train.py
+    evaluate.py
+    predict.py
+  convnext_base_320/
+    train.py
+    evaluate.py
+    predict.py
+  convnext_large_320/
+    train.py
+    evaluate.py
+    predict.py
   resnet50_224/
     train.py
     evaluate.py
@@ -43,7 +55,25 @@ python "Image classification/run_pipeline.py" --experiment efficientnet_b3_320
 
 python "Image classification/experiments/convnext_tiny_320/train.py"
 python "Image classification/run_pipeline.py" --experiment convnext_tiny_320
+
+python "Image classification/experiments/convnext_small_320/train.py"
+python "Image classification/run_pipeline.py" --experiment convnext_small_320
+
+python "Image classification/run_pipeline.py" --experiment convnext_base_320
 ```
+
+`convnext_large_320` is registered too, but it uses batch size 2 and is the
+least efficient first experiment on an 8 GB GPU. Prefer Small and Base before
+spending time on Large.
+
+For Colab or Colab Pro runs with stronger GPUs, use:
+
+```bash
+Image classification/colab_train_convnext.ipynb
+```
+
+It is self-contained, supports ConvNeXt Tiny/Small/Base/Large presets, writes to
+Google Drive, and includes an AMP memory probe before training.
 
 Merge a trained model's classification CSV with a segmentation CSV using:
 

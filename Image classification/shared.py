@@ -133,7 +133,7 @@ class ExperimentConfig:
         return self.predictions_dir / f"test_binary_predictions_{self.name}.csv"
 
 
-DEFAULT_EXPERIMENT = "convnext_tiny_320"
+DEFAULT_EXPERIMENT = "convnext_small_320"
 
 EXPERIMENTS = {
     "efficientnet_b3_320": ExperimentConfig(
@@ -149,6 +149,27 @@ EXPERIMENTS = {
         img_size=320,
         batch_size=16,
         eval_batch_size=32,
+    ),
+    "convnext_small_320": ExperimentConfig(
+        name="convnext_small_320",
+        backbone="convnext_small",
+        img_size=320,
+        batch_size=8,
+        eval_batch_size=16,
+    ),
+    "convnext_base_320": ExperimentConfig(
+        name="convnext_base_320",
+        backbone="convnext_base",
+        img_size=320,
+        batch_size=4,
+        eval_batch_size=8,
+    ),
+    "convnext_large_320": ExperimentConfig(
+        name="convnext_large_320",
+        backbone="convnext_large",
+        img_size=320,
+        batch_size=2,
+        eval_batch_size=4,
     ),
     "resnet50_224": ExperimentConfig(
         name="resnet50_224",

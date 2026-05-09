@@ -10,6 +10,7 @@ Image classification/
   merge_submission.py    # merge classification and segmentation CSVs
   kaggle_train.ipynb     # self-contained Kaggle GPU training notebook
   kaggle_train_convnext_tiny_320.ipynb  # ConvNeXt-Tiny Kaggle notebook
+  colab_train_convnext.ipynb  # Colab GPU notebook for ConvNeXt Small/Base/Large
   experiments/
     README.md
     efficientnet_b3_320/
@@ -18,6 +19,21 @@ Image classification/
       evaluate.py
       predict.py
     convnext_tiny_320/
+      README.md
+      train.py
+      evaluate.py
+      predict.py
+    convnext_small_320/
+      README.md
+      train.py
+      evaluate.py
+      predict.py
+    convnext_base_320/
+      README.md
+      train.py
+      evaluate.py
+      predict.py
+    convnext_large_320/
       README.md
       train.py
       evaluate.py
@@ -42,6 +58,24 @@ output/image_classification/
       submission_classification_<experiment>.csv
       submission_final_<experiment>__seg_<segmentation_csv_name>.csv
   convnext_tiny_320/
+    checkpoints/
+    metrics/
+    figures/
+    predictions/
+    submissions/
+  convnext_small_320/
+    checkpoints/
+    metrics/
+    figures/
+    predictions/
+    submissions/
+  convnext_base_320/
+    checkpoints/
+    metrics/
+    figures/
+    predictions/
+    submissions/
+  convnext_large_320/
     checkpoints/
     metrics/
     figures/

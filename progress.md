@@ -418,3 +418,265 @@
 - 搜索了项目中的 `EfficientNet`、`convnext_tiny_320`、`backbone` 和 `BACKBONE` 引用。
 - `python -m py_compile "Image classification/shared.py"` 通过；已清理本次生成的 `shared.cpython-312.pyc` 缓存文件。
 - 历史结果表中的 EfficientNet-B3 条目保留为 v2 对比记录。
+
+---
+
+## Session: 2026-05-09 - ConvNeXt Larger Variants
+
+### Status
+Implementation complete, training not run.
+
+### Actions taken
+- Read the existing planning files, CLAUDE.md, README.md, experiment README,
+  shared configuration, and model implementation.
+- Compared enabled Claude plugins with Codex plugin configuration. Codex keeps
+  native GitHub/Superpowers equivalents enabled and disables duplicate Claude
+  variants, matching the repository policy.
+- Confirmed in the `biometrics` environment that torchvision provides
+  ConvNeXt Tiny/Small/Base/Large and ImageNet-1K weights for each.
+- Checked `CV_GA2.pdf` Sect. 2.1 and Kaggle practicalities; the assignment
+  allows transfer learning/fine-tuning from library pre-trained models, while
+  warning that final notebooks should be self-contained and resource-aware.
+- Added `convnext_small`, `convnext_base`, and `convnext_large` to
+  `Image classification/03_model.py`.
+- Added experiment configs for:
+  - `convnext_small_320` with batch size 8.
+  - `convnext_base_320` with batch size 4.
+  - `convnext_large_320` with batch size 2.
+- Added train/evaluate/predict wrappers and README files for the three new
+  experiments.
+- Updated README.md, CLAUDE.md, experiments README, structure.txt, task_plan.md,
+  findings.md, and progress.md.
+
+### Validation
+- `py_compile` passed for `03_model.py`, `shared.py`, and all new experiment
+  wrapper scripts.
+- Smoke forward passes passed with `pretrained=False`:
+  - `convnext_small_320`: batch size 8, 49.86M params after classifier swap,
+    output `(1, 20)`.
+  - `convnext_base_320`: batch size 4, 88.10M params after classifier swap,
+    output `(1, 20)`.
+  - `convnext_large_320`: batch size 2, 197.02M params after classifier swap,
+    output `(1, 20)`.
+- `run_pipeline.py --help` lists all new experiments in `--experiment`.
+- Full model training/evaluation/prediction is not run yet due GPU time cost.
+
+### Error log
+| Error | Attempt | Resolution |
+|-------|---------|------------|
+| PowerShell rejected Bash heredoc syntax (`<<'PY'`) | 1 | Re-ran with a PowerShell here-string piped into Python |
+| `Start-Process` split `Image classification/run_pipeline.py` at the space | 1 | Restart with the script path quoted inside the argument string |
+
+### Stop hook follow-up
+- The planning hook reported the overall assignment plan as incomplete because
+  Phase 7 (notebook integration/adversarial/discussion) is still pending.
+- For the current user request, the directly relevant unfinished item is the
+  larger-ConvNeXt experiment itself. Continuing with `convnext_small_320`
+  training first instead of switching to the unrelated notebook phase.
+
+### `convnext_small_320` completed
+- Full pipeline completed successfully.
+- Best val loss: **0.02936561396** at Stage 2 epoch 2.
+- val mAP: **0.8995381256**, slightly above Tiny's **0.8932642162**.
+- Stage 3 final full-train loss: **0.0073612132**.
+- 1500-row submission generated at
+  `output/image_classification/convnext_small_320/submissions/submission_classification_convnext_small_320.csv`.
+- Because Small improved on local mAP, continue to `convnext_base_320`.
+
+### `convnext_base_320` interrupted
+- Started `convnext_base_320` full pipeline after Small improved locally.
+- Downloaded weights and reached Stage 1 epoch 3:
+  - S1 epoch 1: val loss **0.0428**
+  - S1 epoch 2: val loss **0.0388**
+  - S1 epoch 3: val loss **0.0331**
+- User shifted focus to GPU efficiency/capacity, so the background process was
+  stopped manually at PID 4888 to avoid unexpected GPU usage.
+- No complete Base evaluation/submission was produced.
+
+### GPU capacity check
+- Current GPU after stopping Base: no running GPU processes, 0 MiB reported by
+  `nvidia-smi`.
+- One-step training benchmark on RTX 4060 Laptop GPU, using current experiment
+  batch sizes and `pretrained=False`:
+  - `convnext_tiny_320`: batch 16, peak allocated **3.51 GB**, **1.83 s/step**.
+  - `convnext_small_320`: batch 8, peak allocated **2.88 GB**, **1.40 s/step**.
+  - `convnext_base_320`: batch 4, peak allocated **2.19 GB**, **1.29 s/step**.
+  - `convnext_large_320`: batch 2, peak allocated **3.71 GB**, **1.40 s/step**.
+- Interpretation: all configured variants fit in memory for one train step, but
+  throughput per sample drops strongly as the model gets larger because batch
+  size must shrink.
+
+### Stop hook follow-up 2
+- The stop hook fired again because the global assignment plan still has
+  Phase 7 pending.
+- Re-read `task_plan.md` and updated its Current Phase to Phase 7.
+- Cleaned up the ConvNeXt larger-variant checklist: `convnext_small_320` is
+  complete, `convnext_base_320` was started and intentionally stopped, and
+  completing Base/Large is now treated as optional based on GPU time tradeoff.
+- No background training process is running.
+
+### Colab notebook for stronger GPU training
+- Created `Image classification/colab_train_convnext.ipynb`.
+- The notebook is self-contained for Colab and supports:
+  - `convnext_tiny_320_colab`
+  - `convnext_small_320_colab`
+  - `convnext_base_320_colab`
+  - `convnext_large_320_colab`
+- It mounts Google Drive, verifies/extracts the dataset, uses AMP mixed
+  precision, includes a one-step memory probe, trains with the same 3-stage
+  protocol, evaluates mAP/thresholds, and writes probabilities, binary
+  predictions, and a 1500-row classification submission.
+- Updated README, experiments README, structure.txt, task_plan.md, and
+  findings.md to mention the Colab workflow.
+
+### Phase 7 discussion draft
+- The stop hook fired again, so I re-read `task_plan.md` and inspected
+  `Discussion.md` plus the top-level notebook structure.
+- Rewrote `Discussion.md` from a note-filled draft into a complete discussion
+  section.
+- The new discussion uses concrete evidence from the project:
+  - 749 training images, average 1.43 labels/image.
+  - class imbalance, e.g. person 207 vs sheep 27 and cow 30.
+  - model comparison: ResNet-50, EfficientNet-B3, ConvNeXt-Tiny, and
+    ConvNeXt-Small.
+  - ConvNeXt-Small local mAP **0.8995**, ConvNeXt-Tiny Kaggle display
+    **0.43673** / adjusted classification Dice **0.87346**.
+  - weakest Small AP classes: diningtable, pottedplant, sofa, bottle, sheep.
+- Marked Section 4 discussion content complete in `task_plan.md`, while keeping
+  notebook insertion, student names, and Section 3 adversarial attack pending.
+
+### Kaggle result update: `convnext_small_320`
+- User reported latest Kaggle test results:
+  - complete submission score: **0.87588**.
+  - `convnext_small_320` classification Kaggle display: **0.44905**.
+  - adjusted classification Dice: **0.89810**.
+- Updated README.md, CLAUDE.md, findings.md, task_plan.md, and progress.md.
+- Decision: `convnext_small_320` supersedes `convnext_tiny_320` as the current
+  best classification model.
+- Updated `DEFAULT_EXPERIMENT` in `Image classification/shared.py` to
+  `convnext_small_320`.
+
+### Notebook integration after stop hook
+- Stop hook fired again. Re-read `task_plan.md` and inspected the notebook
+  section cells.
+- Updated `ga2_group_6.ipynb`:
+  - inserted final classification results under Section 1,
+  - replaced the Section 4 template discussion with the completed
+    `Discussion.md` content.
+- Validation:
+  - notebook JSON loads successfully,
+  - all notebook code cells parse as Python.
+- Marked "show/reference final classification results in the notebook" complete
+  in `task_plan.md`.
+- Still pending: student names and Section 3 adversarial attack.
+
+### Colab notebook explanations and hyperparameter guidance
+- Updated `Image classification/colab_train_convnext.ipynb` with explanatory
+  markdown before every code cell.
+- Added a "Recommended Settings for 749 Training Images" section covering:
+  - batch-size ranges for local RTX 4060 8 GB, Colab T4, L4/V100, and A100,
+  - recommended ranges for image size, epochs, learning rates, weight decay,
+    validation split, and AsymmetricLoss parameters,
+  - current recommendation to prioritize `convnext_small_320_colab`, then try
+    `convnext_base_320_colab` only if GPU budget is available.
+- Validation:
+  - notebook JSON loads successfully,
+  - 12 code cells parse as Python,
+  - 13 generated explanation/guidance cells are present.
+
+### Phase 7 adversarial attack implementation
+- Added `Image classification/07_adversarial_attack.py`.
+- Implemented targeted FGSM and PGD against the configured classifier.
+- Ran a smoke test on `convnext_small_320`, targeting `aeroplane`, with
+  `max_samples=8`, `epsilon=0.03`, `alpha=0.01`, and `pgd_steps=3`.
+- Smoke-test result:
+  - clean target probability mean **0.3257**,
+  - FGSM target probability mean **0.7112**,
+  - PGD target probability mean **0.9272**,
+  - PGD target activation rate **1.000**.
+- Saved summary to
+  `output/image_classification/convnext_small_320/metrics/adversarial_aeroplane.csv`.
+- Updated `ga2_group_6.ipynb` Section 3 with explanation, command, and result
+  table.
+- Validation:
+  - `07_adversarial_attack.py` passes `py_compile`,
+  - notebook JSON loads successfully,
+  - notebook code cells parse as Python.
+- Marked Section 3 complete in `task_plan.md`; remaining global blocker is
+  student names in notebook cell 0.
+
+### Colab figures directory fix
+- Investigated why
+  `I:\我的云端硬盘\CV-Assignment2\image_classification\convnext_large_320_colab\figures`
+  was empty.
+- Root cause: `Image classification/colab_train_convnext.ipynb` created
+  `FIGURES_DIR`, but did not import matplotlib or call `savefig`. The local
+  `05_evaluate.py` saves `eval_ap_per_class.png`, while the self-contained
+  Colab notebook only wrote CSV metrics.
+- Updated the Colab notebook to save:
+  - `figures/training_history.png`
+  - `figures/eval_ap_per_class.png`
+- Added an optional regeneration cell that recreates the figures from existing
+  `metrics/training_history.csv` and `metrics/ap_per_class.csv` without
+  retraining.
+- Used the existing Google Drive metrics CSVs to generate the missing PNGs
+  immediately:
+  - `I:\我的云端硬盘\CV-Assignment2\image_classification\convnext_large_320_colab\figures\training_history.png`
+  - `I:\我的云端硬盘\CV-Assignment2\image_classification\convnext_large_320_colab\figures\eval_ap_per_class.png`
+- Validation:
+  - notebook JSON loads successfully,
+  - all code cells parse as Python after accounting for Colab `!nvidia-smi`.
+
+### Stop hook follow-up: Phase 7 remaining work
+- Stop hook reported the global planning task is still incomplete.
+- Updating progress first as requested, then re-reading `task_plan.md` to
+  identify the remaining Phase 7 item.
+- Re-read `task_plan.md`; the only unfinished Phase 7 item is notebook cell 0
+  student names.
+- Inspected `ga2_group_6.ipynb` cell 0 and found template placeholders:
+  `name1, name2, ...` plus the old "replace X with group number" note.
+- Updated cell 0 to show **Group 6** and removed the obsolete notebook-name
+  TODO, because the repository and notebook filename already identify Group 6.
+- Remaining blocker: actual final group member names are not present anywhere
+  in the repo, so this needs user input before Phase 7 can be marked complete.
+- Validation: `ga2_group_6.ipynb` JSON loads successfully and all code cells
+  parse as Python.
+
+### Colab AP figure style alignment
+- User pointed out that the desired AP figure style is the local
+  `05_evaluate.py` chart: VOC class order on the x-axis with a red dashed mAP
+  line.
+- Updated `Image classification/colab_train_convnext.ipynb` so
+  `plot_ap_per_class()` now matches the local evaluation style instead of the
+  earlier horizontal sorted bar chart.
+- Patched the evaluation cell itself to call
+  `plot_ap_per_class(ap_df, AP_PLOT, map_score=map_score)` immediately after
+  saving `ap_per_class.csv`.
+- Patched the optional regeneration cell to read `evaluation_summary.csv` and
+  use its stored `mAP` when redrawing the figure.
+- Regenerated the Drive figure:
+  `I:\我的云端硬盘\CV-Assignment2\image_classification\convnext_large_320_colab\figures\eval_ap_per_class.png`
+  with size **1200x400**, matching the attached example layout.
+- Validation: `Image classification/colab_train_convnext.ipynb` code cells
+  parse successfully.
+
+### Stop hook follow-up: re-check remaining task
+- Stop hook fired again after the Colab AP figure style fix.
+- Updating `progress.md` first as requested, then re-reading `task_plan.md`.
+- Expected remaining blocker is still the same: final student names in
+  `ga2_group_6.ipynb` cell 0 are not available in repository files.
+
+### Stop hook follow-up: Phase 7 final blocker
+- Stop hook `stop:4` requested updating `progress.md`, then re-reading
+  `task_plan.md` and continuing the remaining phases.
+- Re-read `task_plan.md`; Phase 7 is 6/7 complete.
+- Remaining item: final student names in `ga2_group_6.ipynb` cell 0.
+- Next action: inspect repository files for any reliable source of group member
+  names before asking the user.
+- Repository text search did not find a final member list.
+- Git history contains possible author clues:
+  - `Enmin Lin <enmin.lin@student.kuleuven.be>`
+  - `121philip <ykx20010330@gmail.com>`
+  - `hapgab <zhenyang.linguistics@outlook.com>`
+- These are not enough to safely replace the notebook TODO with formal student
+  names; user confirmation is required.

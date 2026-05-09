@@ -4,7 +4,7 @@
 完成 PASCAL VOC 2009 多标签图像分类任务，在 Kaggle Dice 指标上从 0.38 提升到 0.55+，并最终完成完整 notebook 提交。
 
 ## Current Phase
-Phase 6: v2 重训与提交
+Phase 7: Notebook 整合与交付（pending）
 
 ---
 
@@ -55,9 +55,9 @@ Phase 6: v2 重训与提交
 
 ### Phase 7: Notebook 整合与交付
 - [ ] 填写学生姓名（notebook cell 0）
-- [ ] Section 3: 实现对抗攻击（FGSM / PGD）
-- [ ] Section 4: 填写讨论内容
-- [ ] 在 notebook 中展示/引用分类代码结果
+- [x] Section 3: 实现对抗攻击（FGSM / PGD）
+- [x] Section 4: 填写讨论内容（已在 `Discussion.md` 中完成草稿）
+- [x] 在 notebook 中展示/引用分类代码结果
 - **Status:** pending
 
 ---
@@ -175,9 +175,10 @@ Phase 6: v2 重训与提交
 ### Kaggle 分类模型排名
 | 排名 | 版本 | 实验文件夹 | Kaggle 显示 | 分类 Dice（×2） |
 |------|------|-----------|------------|----------------|
-| 1 | v3 | `convnext_tiny_320` | **0.43673** | **0.87346** |
-| 2 | v2 | `efficientnet_b3_320` | **0.42813** | **0.85626** |
-| 3 | v1.1 | `resnet50_224` | **0.39165** | **0.78330** |
+| 1 | v4 | `convnext_small_320` | **0.44905** | **0.89810** |
+| 2 | v3 | `convnext_tiny_320` | **0.43673** | **0.87346** |
+| 3 | v2 | `efficientnet_b3_320` | **0.42813** | **0.85626** |
+| 4 | v1.1 | `resnet50_224` | **0.39165** | **0.78330** |
 | — | v1.0 | *(重构前 ResNet-50 + NegativeSmoothBCE)* | 0.38084 | 0.76168 |
 
 ### 遇到的错误（后续）
@@ -185,3 +186,124 @@ Phase 6: v2 重训与提交
 |------|---------|---------|
 | `06_predict.py` 中 `ValueError: Shape of passed values is (750, 20), indices imply (20, 20)` | 1 | `test_set.csv` 含 `-1` 占位标签列，导致 DataLoader 返回标签而非 ID；改为使用 `test_ds.indices` 并校验行数 |
 | `kaggle_train.ipynb` 存在相同的预测索引 bug | 1 | 同样应用 `test_ds.indices` 修复方案 |
+
+---
+
+## Session 2026-05-09: ConvNeXt Larger Variants
+
+### Goal
+Evaluate whether a larger ConvNeXt backbone can improve on the current best
+`convnext_tiny_320` classification Dice of **0.87346**.
+
+### Findings
+- The local `biometrics` environment has `torch==2.11.0+cu130` and
+  `torchvision==0.26.0+cu130`.
+- `torchvision.models` provides `convnext_tiny`, `convnext_small`,
+  `convnext_base`, and `convnext_large`, each with ImageNet-1K weights.
+- Local GPU: NVIDIA GeForce RTX 4060 Laptop GPU, 8 GB VRAM.
+- Parameter counts from local inspection:
+  - ConvNeXt-Tiny: 28.59M, feature dim 768.
+  - ConvNeXt-Small: 50.22M, feature dim 768.
+  - ConvNeXt-Base: 88.59M, feature dim 1024.
+  - ConvNeXt-Large: 197.77M, feature dim 1536.
+
+### Implementation Plan
+- [x] Register `convnext_small`, `convnext_base`, and `convnext_large` in
+  `Image classification/03_model.py`.
+- [x] Add experiment configs:
+  - `convnext_small_320`, batch size 8.
+  - `convnext_base_320`, batch size 4.
+  - `convnext_large_320`, batch size 2.
+- [x] Add thin train/evaluate/predict entry points under
+  `Image classification/experiments/`.
+- [x] Update README/CLAUDE/structure docs.
+- [x] Run full training for `convnext_small_320`.
+- [x] If Small improves or is close, start `convnext_base_320`.
+- [ ] Complete `convnext_base_320` only if GPU time is worth the lower
+  throughput tradeoff.
+- [ ] Treat `convnext_large_320` as optional because 750 training images and
+  8 GB VRAM make it slower and more overfit-prone.
+
+### ConvNeXt-Small Result
+- Full pipeline completed for `convnext_small_320`.
+- Best checkpoint: Stage 2 epoch 2, val loss **0.02936561396**.
+- val mAP: **0.8995381256**, slightly above `convnext_tiny_320` mAP
+  **0.8932642162**.
+- Weakest AP classes: diningtable **0.5570**, pottedplant **0.7518**,
+  sofa **0.7872**, bottle **0.7914**, sheep **0.8167**.
+- Stage 3 final full-train loss: **0.0073612132**.
+- Generated 1500-row submission:
+  `output/image_classification/convnext_small_320/submissions/submission_classification_convnext_small_320.csv`.
+- Kaggle result: complete submission score **0.87588**. Classification display
+  score **0.44905**, adjusted classification Dice **0.89810**. This makes
+  `convnext_small_320` the current best classification model.
+- `convnext_base_320` was started and reached Stage 1 epoch 3, then stopped
+  intentionally when the user asked about GPU efficiency/capacity. No complete
+  Base evaluation/submission exists yet.
+- Added `Image classification/colab_train_convnext.ipynb` for stronger Colab
+  GPUs. It supports ConvNeXt Tiny/Small/Base/Large presets, AMP mixed
+  precision, Google Drive outputs, and a `memory_probe()` cell for batch-size
+  sanity checks.
+
+---
+
+## Session 2026-05-09: Phase 7 Discussion Draft
+
+- Stop hook requested continuing the remaining global Phase 7 work.
+- Read `Discussion.md` and `ga2_group_6.ipynb` structure.
+- Rewrote `Discussion.md` into a complete Section 4 discussion draft covering:
+  - transfer learning/backbone choice,
+  - augmentation and class imbalance,
+  - AsymmetricLoss and noisy negative labels,
+  - mAP vs Kaggle Dice and thresholding,
+  - per-class failure analysis,
+  - real-world limitations, dataset bias and deployment risk.
+- Remaining Phase 7 items:
+  - student names in notebook cell 0,
+  - Section 3 adversarial attack implementation.
+
+### Notebook Integration Update
+- Inserted a "Final classification model and results" markdown cell after
+  `# 1. Image classification` in `ga2_group_6.ipynb`.
+- Replaced the template `# 4. Discussion` markdown cell with the completed
+  `Discussion.md` content.
+- Notebook JSON loaded successfully and all code cells parse as Python.
+- Added explanatory markdown and recommended hyperparameter ranges to
+  `Image classification/colab_train_convnext.ipynb`.
+- Remaining Phase 7 blockers:
+  - student names are still unknown,
+  - final notebook metadata/cell 0 still needs the actual student names.
+
+### Adversarial Attack Update
+- Added `Image classification/07_adversarial_attack.py`.
+- Implemented targeted FGSM and PGD attacks against the configured classifier.
+- Updated `ga2_group_6.ipynb` Section 3 with:
+  - method explanation,
+  - command to reproduce the smoke test,
+  - FGSM/PGD result table.
+- Smoke test on 8 validation images targeting `aeroplane`:
+  - clean target probability mean: **0.3257**,
+  - FGSM target probability mean: **0.7112**,
+  - PGD target probability mean: **0.9272**,
+  - PGD target activation rate: **1.000**.
+- Validation: `07_adversarial_attack.py` compiles, smoke test ran
+  successfully, and notebook JSON/code cells parse correctly.
+
+### Errors Encountered
+| Error | Attempt | Resolution |
+|-------|---------|------------|
+| Used Bash heredoc syntax in PowerShell while probing torchvision models | 1 | Re-ran the probe using a PowerShell here-string piped to Python |
+| Colab `convnext_large_320_colab/figures` was empty | 1 | The notebook created `FIGURES_DIR` but never called `savefig`; added matplotlib plotting helpers plus an optional CSV-to-PNG regeneration cell |
+
+### Stop Hook Follow-up: Notebook Cell 0
+- Re-read this plan after the stop hook.
+- Confirmed the only remaining Phase 7 blocker is student names in
+  `ga2_group_6.ipynb` cell 0.
+- Updated cell 0 to show **Group 6** and removed the obsolete template TODO
+  about replacing `X` in the notebook name.
+- Remaining blocker: final group member names are unknown and not discoverable
+  from repository files.
+- Follow-up check: repository text search still found no final member list.
+  Git history shows author clues (`Enmin Lin`, `121philip`, `hapgab`) but not a
+  reliable formal group-member list, so the notebook TODO should not be filled
+  without user confirmation.

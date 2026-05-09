@@ -16,7 +16,13 @@
       "Bash(/c/Users/31667/.conda/envs/biometrics/python.exe -c \"import torchvision; print\\(torchvision.__version__\\); from torchvision.models import efficientnet_b3; print\\('efficientnet_b3 available'\\)\")",
       "Bash(/c/Users/31667/.conda/envs/biometrics/python.exe \"Image classification/04_train.py\")",
       "Skill(planning-with-files:planning-with-files-zh)",
-      "Skill(planning-with-files:planning-with-files-zh:*)"
+      "Skill(planning-with-files:planning-with-files-zh:*)",
+      "Bash(git stash *)",
+      "Bash(git pull *)",
+      "Bash(git remote *)",
+      "Bash(git restore *)",
+      "Bash(git fetch *)",
+      "Bash(python -c ' *)"
     ]
   }
 }

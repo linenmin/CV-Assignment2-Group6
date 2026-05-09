@@ -26,6 +26,27 @@ _BACKBONE_CONFIGS = {
         "feat_dim": 768,
         "features_fn": lambda model: nn.Sequential(model.features, model.avgpool),
     },
+    "convnext_small": {
+        "factory": lambda pretrained: models.convnext_small(
+            weights=models.ConvNeXt_Small_Weights.IMAGENET1K_V1 if pretrained else None
+        ),
+        "feat_dim": 768,
+        "features_fn": lambda model: nn.Sequential(model.features, model.avgpool),
+    },
+    "convnext_base": {
+        "factory": lambda pretrained: models.convnext_base(
+            weights=models.ConvNeXt_Base_Weights.IMAGENET1K_V1 if pretrained else None
+        ),
+        "feat_dim": 1024,
+        "features_fn": lambda model: nn.Sequential(model.features, model.avgpool),
+    },
+    "convnext_large": {
+        "factory": lambda pretrained: models.convnext_large(
+            weights=models.ConvNeXt_Large_Weights.IMAGENET1K_V1 if pretrained else None
+        ),
+        "feat_dim": 1536,
+        "features_fn": lambda model: nn.Sequential(model.features, model.avgpool),
+    },
 }
 
 
@@ -79,7 +100,7 @@ class MultiLabelClassifier(nn.Module):
 
 
 if __name__ == "__main__":
-    for backbone in ("efficientnet_b3", "convnext_tiny", "resnet50"):
+    for backbone in sorted(_BACKBONE_CONFIGS):
         model = MultiLabelClassifier(backbone=backbone, num_classes=20, pretrained=False)
         model.freeze_backbone()
         frozen = model.trainable_params()

@@ -25,8 +25,10 @@ Kaggle 显示分数需×2 得到真实分类 Dice（提交文件含 1500 行：7
 | v1.1 | `resnet50_224` | ResNet-50 | AsymmetricLoss | 224 + TTA | 0.818 | 0.392 | 0.783 |
 | v2 | `efficientnet_b3_320` | EfficientNet-B3 | AsymmetricLoss | 320 + TTA | 0.860 | 0.428 | 0.856 |
 | v3 | `convnext_tiny_320` | ConvNeXt-Tiny | AsymmetricLoss | 320 + TTA | **0.893** | **0.437** | **0.873** |
+| v4 | `convnext_small_320` | ConvNeXt-Small | AsymmetricLoss | 320 + TTA | **0.900** | **0.449** | **0.898** |
 
-**当前最佳模型：** `convnext_tiny_320`，分类 Dice = **0.873**。
+**当前最佳分类模型：** `convnext_small_320`，Kaggle 显示 **0.44905**，
+分类 Dice = **0.89810**。当前最佳完整提交总分：**0.87588**。
 
 **关于 Kaggle 显示分数：** 完整提交包含分类行和分割行，Kaggle 在 1500 行上统一计算一个 Dice 值；
 仅含分类行的提交因缺少分割行得 0，显示分数减半。×2 后的数值才是真实的分类性能。
@@ -61,6 +63,9 @@ Image classification/
   experiments/
     efficientnet_b3_320/ # train.py  evaluate.py  predict.py
     convnext_tiny_320/   # train.py  evaluate.py  predict.py
+    convnext_small_320/  # train.py  evaluate.py  predict.py
+    convnext_base_320/   # train.py  evaluate.py  predict.py
+    convnext_large_320/  # train.py  evaluate.py  predict.py
     resnet50_224/        # train.py  evaluate.py  predict.py
 ```
 
@@ -85,14 +90,17 @@ output/image_classification/<experiment>/
 | 实验文件夹 | Backbone | 输入尺寸 | 损失函数 | 说明 |
 |-----------|----------|---------|---------|------|
 | `efficientnet_b3_320` | EfficientNet-B3 | 320×320 | AsymmetricLoss | 强模型（v2） |
-| `convnext_tiny_320` | ConvNeXt-Tiny | 320×320 | AsymmetricLoss | 最优结果（v3） |
+| `convnext_tiny_320` | ConvNeXt-Tiny | 320×320 | AsymmetricLoss | 强结果（v3） |
+| `convnext_small_320` | ConvNeXt-Small | 320×320 | AsymmetricLoss | 当前最佳分类结果（v4） |
+| `convnext_base_320` | ConvNeXt-Base | 320×320 | AsymmetricLoss | 待测，计算量更高 |
+| `convnext_large_320` | ConvNeXt-Large | 320×320 | AsymmetricLoss | 待测，高显存/过拟合风险 |
 | `resnet50_224` | ResNet-50 | 224×224 | AsymmetricLoss | 基线对比（v1.1） |
 
 ## 运行方式
 
 ```bash
-# 使用最佳模型跑完整流水线
-python "Image classification/run_pipeline.py" --experiment convnext_tiny_320
+# 使用最佳分类模型跑完整流水线
+python "Image classification/run_pipeline.py" --experiment convnext_small_320
 
 # 跳过数据探索（PNG 已生成）
 python "Image classification/run_pipeline.py" --experiment convnext_tiny_320 --skip-explore
@@ -108,9 +116,17 @@ python "Image classification/experiments/convnext_tiny_320/train.py"
 python "Image classification/experiments/convnext_tiny_320/evaluate.py"
 python "Image classification/experiments/convnext_tiny_320/predict.py"
 
+python "Image classification/run_pipeline.py" --experiment convnext_small_320 --skip-explore
+python "Image classification/run_pipeline.py" --experiment convnext_base_320 --skip-explore
+
 python "Image classification/experiments/efficientnet_b3_320/train.py"
 python "Image classification/experiments/resnet50_224/train.py"
 ```
+
+ConvNeXt 在当前 `torchvision` 环境中可用的系列为 Tiny/Small/Base/Large。
+Small 已经超过 Tiny，成为当前最佳分类结果；若继续冲分，再考虑
+`convnext_base_320`。`convnext_large_320` 参数量约 198M，在 8 GB 显存上 batch
+size 已降到 2，训练慢且更容易在 750 张训练图上过拟合。
 
 ## 关键设计决策
 
@@ -142,6 +158,32 @@ Image classification/kaggle_train_convnext_tiny_320.ipynb    # convnext_tiny_320
 启用 GPU 加速器后运行所有单元格。Notebook 将输出写入
 `/kaggle/working/image_classification/<experiment>/`，
 生成的 `submission_classification_<experiment>.csv` 可直接下载提交。
+
+## Colab 强 GPU Notebook
+
+如需在 Colab/Colab Pro 上用更强 GPU 尝试更大的 ConvNeXt 或更大的 batch size，使用：
+
+```text
+Image classification/colab_train_convnext.ipynb
+```
+
+该 notebook 支持：
+
+- `convnext_tiny_320_colab`
+- `convnext_small_320_colab`
+- `convnext_base_320_colab`
+- `convnext_large_320_colab`
+
+默认使用 `convnext_small_320_colab`，并启用 AMP 混合精度。将数据集目录放到
+`/content/drive/MyDrive/CV-Assignment2/kul-computer-vision-ga-2-2026/`，或在 notebook
+中设置 `DATA_ZIP` 后解压。输出默认写入 Google Drive：
+
+```text
+/content/drive/MyDrive/CV-Assignment2/image_classification/<experiment>/
+```
+
+建议先用 notebook 里的 `memory_probe()` 检查当前 Colab GPU，再逐步增大 batch size。
+本地 8GB GPU 已足够跑 Tiny/Small；Base/Large 更适合在 Colab 强 GPU 上试。
 
 ## 合并分割提交
 

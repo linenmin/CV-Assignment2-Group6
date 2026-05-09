@@ -44,9 +44,11 @@ val mAP 来自各实验目录下的 `evaluation_summary.csv`（使用 `best_mode
 | v1.1 | `resnet50_224` | ResNet-50 | AsymmetricLoss | 224+TTA+S3 | 0.8175 | 0.39165 | 0.78330 |
 | v2 | `efficientnet_b3_320` | EfficientNet-B3 | AsymmetricLoss | 320+TTA+S3 | **0.8599** | 0.42813 | 0.85626 |
 | v3 | `convnext_tiny_320` | ConvNeXt-Tiny | AsymmetricLoss | 320+TTA+S3 | **0.8933** | **0.43673** | **0.87346** |
+| v4 | `convnext_small_320` | ConvNeXt-Small | AsymmetricLoss | 320+TTA+S3 | **0.8995** | **0.44905** | **0.89810** |
 
 注：Kaggle 显示分数需×2 得到真实分类 Dice（因提交含 1500 行，750 行为分割占位）。
-当前最佳模型：`convnext_tiny_320`，分类 Dice = **0.87346**。
+当前最佳分类模型：`convnext_small_320`，分类 Dice = **0.89810**。当前最佳完整提交总分：
+**0.87588**（`convnext_small_320` + `submission_exp_v10_segman_b_iter25000.csv`）。
 
 ### 逐类 AP 对比（三个当前实验，best_model.pth）
 
@@ -104,12 +106,12 @@ val mAP 来自各实验目录下的 `evaluation_summary.csv`（使用 `best_mode
 - **gamma_neg=4**：对easy负样本(p≪0.5)强力下权，让rare正样本主导梯度
 - 论文：https://arxiv.org/abs/2009.14119
 
-### 骨干网络：ConvNeXt-Tiny（当前最佳 v3）
-- 当前最佳实验为 `convnext_tiny_320`，替代 v2 `efficientnet_b3_320` 作为默认/推荐分类 backbone。
-- 通过 `torchvision.models.convnext_tiny` 加载 ImageNet-1K 预训练权重。
+### 骨干网络：ConvNeXt-Small（当前最佳 v4）
+- 当前最佳分类实验为 `convnext_small_320`，替代 v3 `convnext_tiny_320` 作为默认/推荐分类 backbone。
+- 通过 `torchvision.models.convnext_small` 加载 ImageNet-1K 预训练权重。
 - 特征提取路径：`nn.Sequential(model.features, model.avgpool)` + `flatten(1)`。
-- 池化特征维度：768（EfficientNet-B3 为 1536，ResNet-50 为 2048）。
-- 实测结果：val mAP **0.8933**，Kaggle 显示 **0.43673**，分类 Dice **0.87346**。
+- 池化特征维度：768（ConvNeXt-Tiny 同为 768，EfficientNet-B3 为 1536，ResNet-50 为 2048）。
+- 实测结果：val mAP **0.8995**，Kaggle 显示 **0.44905**，分类 Dice **0.89810**。
 - EfficientNet-B3 保留为 v2 对比实验，不再是当前最佳 backbone。
 
 ### 输入尺寸：320×320（替代224×224）
@@ -135,13 +137,13 @@ val mAP 来自各实验目录下的 `evaluation_summary.csv`（使用 `best_mode
 
 ---
 
-## 关键超参数（当前最佳 v3：convnext_tiny_320）
+## 关键超参数（当前最佳 v4：convnext_small_320）
 | 参数 | 值 |
 |------|-----|
-| EXPERIMENT | convnext_tiny_320 |
-| BACKBONE | convnext_tiny |
+| EXPERIMENT | convnext_small_320 |
+| BACKBONE | convnext_small |
 | IMG_SIZE | 320 |
-| BATCH_SIZE | 16 |
+| BATCH_SIZE | 8 |
 | STAGE1_EPOCHS | 5 |
 | STAGE1_LR | 1e-3 |
 | STAGE2_EPOCHS | 20 |
@@ -275,4 +277,80 @@ output/image_classification/<experiment>/
 | `efficientnet_b3_320` | **0.42813** | **0.85626** | 2 |
 | `resnet50_224` | **0.39165** | **0.78330** | 3 |
 
-决策：在 ensemble 或阈值更新超过 **0.87346** 之前，以 `convnext_tiny_320` 作为最强分类提交。
+当时决策：在 ensemble 或阈值更新超过 **0.87346** 之前，以 `convnext_tiny_320`
+作为最强分类提交。2026-05-09 后续 Kaggle 测试已由 `convnext_small_320`
+超过该分数。
+
+---
+
+## 2026-05-09 ConvNeXt Larger Variant Findings
+
+- Initial motivation: `convnext_tiny_320` had Kaggle display **0.43673** and
+  adjusted classification Dice **0.87346**. Later Kaggle testing confirmed
+  `convnext_small_320` improves this to display **0.44905** and adjusted
+  classification Dice **0.89810**.
+- There is no "Middle" ConvNeXt naming in torchvision. The available family is
+  Tiny, Small, Base, and Large.
+- Local `torchvision==0.26.0+cu130` exposes all four factories and all four
+  ImageNet-1K weight enums:
+  - `convnext_tiny` / `ConvNeXt_Tiny_Weights.IMAGENET1K_V1`
+  - `convnext_small` / `ConvNeXt_Small_Weights.IMAGENET1K_V1`
+  - `convnext_base` / `ConvNeXt_Base_Weights.IMAGENET1K_V1`
+  - `convnext_large` / `ConvNeXt_Large_Weights.IMAGENET1K_V1`
+- Local parameter counts:
+  - Tiny: 28.59M, feature dim 768.
+  - Small: 50.22M, feature dim 768.
+  - Base: 88.59M, feature dim 1024.
+  - Large: 197.77M, feature dim 1536.
+- Recommended experiment order:
+  1. `convnext_small_320` as the most likely useful next step.
+  2. `convnext_base_320` if Small is promising.
+  3. `convnext_large_320` only if time/GPU budget allows; it may overfit and is
+     expensive on 8 GB VRAM.
+- `CV_GA2.pdf` confirms that the classification task allows choosing any known
+  architecture and encourages transfer learning/fine-tuning, as long as
+  pre-training did not use PASCAL VOC images. ImageNet-1K ConvNeXt weights fit
+  that constraint.
+
+### `convnext_small_320` result
+- Full train/evaluate/predict pipeline completed locally.
+- val mAP: **0.8995381256**, which is above `convnext_tiny_320`
+  (**0.8932642162**) on the same validation protocol.
+- Best val loss: **0.02936561396** at Stage 2 epoch 2. Later Stage 2 epochs
+  overfit: training loss continues falling, while val loss rises.
+- Stage 3 final full-train loss: **0.0073612132**.
+- Weakest AP classes: diningtable **0.5570**, pottedplant **0.7518**,
+  sofa **0.7872**, bottle **0.7914**, sheep **0.8167**.
+- Submission generated with 1500 rows:
+  `submission_classification_convnext_small_320.csv`.
+- Kaggle result received on 2026-05-09:
+  - complete submission score: **0.87588**.
+  - classification Kaggle display: **0.44905**.
+  - adjusted classification Dice: **0.89810**.
+  - decision: `convnext_small_320` supersedes `convnext_tiny_320` as the best
+    classification model.
+
+### Colab training decision
+- Local RTX 4060 Laptop 8 GB can fit all current ConvNeXt presets only because
+  batch size is reduced for larger models.
+- Small is a good local/Colab candidate; Base and Large are better suited for
+  Colab Pro/A100/L4-style runtimes if available.
+- Added `Image classification/colab_train_convnext.ipynb` with:
+  - ConvNeXt Tiny/Small/Base/Large presets.
+  - Conservative Colab batch sizes: Tiny 32, Small 16, Base 8, Large 4.
+  - AMP mixed precision to reduce memory and improve throughput.
+  - Google Drive dataset/output paths.
+  - A one-step `memory_probe()` before full training.
+
+### Colab figure-output finding
+- `convnext_large_320_colab/figures` was empty because the Colab notebook only
+  created the directory and saved CSV metrics. It did not import matplotlib or
+  call `savefig`.
+- The local evaluation script `05_evaluate.py` already saves
+  `figures/eval_ap_per_class.png`; the Colab notebook had missed that plotting
+  step while being made self-contained.
+- Updated `Image classification/colab_train_convnext.ipynb` to save:
+  - `figures/training_history.png` from `metrics/training_history.csv`.
+  - `figures/eval_ap_per_class.png` from `metrics/ap_per_class.csv`.
+- Added an optional regeneration cell so existing Colab runs can create the
+  missing figures from CSV files without rerunning training.

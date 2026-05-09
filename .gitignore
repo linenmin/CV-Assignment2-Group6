@@ -3,3 +3,6 @@ __pycache__/
 *.py[cod]
 output/test_png/
 output/train_png/
+Image classification/__pycache__/03_model.cpython-310.pyc
+Image classification/__pycache__/shared.cpython-310.pyc
+.claude/
