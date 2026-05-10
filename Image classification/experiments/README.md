@@ -1,8 +1,6 @@
-# Image Classification Experiments
+# 图像分类实验说明
 
-Each folder is one model experiment. The files inside are thin entry points:
-they call the shared training/evaluation/prediction code in the parent
-directory, while keeping outputs separated by experiment.
+每个子文件夹对应一个模型实验。文件夹里的 `train.py`、`evaluate.py`、`predict.py` 只是薄封装入口，实际会调用上一级目录里的共享训练、评估和预测代码，同时把不同实验的输出隔离开。
 
 ```
 experiments/
@@ -15,6 +13,10 @@ experiments/
     evaluate.py
     predict.py
   convnext_small_320/
+    train.py
+    evaluate.py
+    predict.py
+  convnext_small_320_pad_sampler/
     train.py
     evaluate.py
     predict.py
@@ -32,7 +34,7 @@ experiments/
     predict.py
 ```
 
-Outputs are written to:
+输出会写入：
 
 ```
 output/image_classification/<experiment>/
@@ -47,7 +49,7 @@ output/image_classification/<experiment>/
     submission_final_<experiment>__seg_<segmentation_csv_name>.csv
 ```
 
-You can run either from these folders or from the shared pipeline:
+可以直接运行实验文件夹里的入口，也可以使用共享流水线：
 
 ```bash
 python "Image classification/experiments/efficientnet_b3_320/train.py"
@@ -59,28 +61,37 @@ python "Image classification/run_pipeline.py" --experiment convnext_tiny_320
 python "Image classification/experiments/convnext_small_320/train.py"
 python "Image classification/run_pipeline.py" --experiment convnext_small_320
 
+python "Image classification/experiments/convnext_small_320_pad_sampler/train.py"
+python "Image classification/run_pipeline.py" --experiment convnext_small_320_pad_sampler
+
 python "Image classification/run_pipeline.py" --experiment convnext_base_320
 ```
 
-`convnext_large_320` is registered too, but it uses batch size 2 and is the
-least efficient first experiment on an 8 GB GPU. Prefer Small and Base before
-spending time on Large.
+`convnext_small_320_pad_sampler` 保留 ConvNeXt-Small 骨干网络，但将图像预处理改为先方形填充再缩放；训练时对 `bottle`、`diningtable`、`pottedplant`、`sheep`、`sofa` 做温和加权采样；第二阶段使用 patience=4 的提前停止。
 
-For Colab or Colab Pro runs with stronger GPUs, use:
+如果要在不重新训练的情况下集成已有分类模型：
+
+```bash
+python "Image classification/07_ensemble.py" --mode val-search --name ensemble_existing
+python "Image classification/07_ensemble.py" --mode predict --name ensemble_existing
+```
+
+输出会写入 `output/image_classification/ensemble_existing/`，包括 ensemble 指标、概率文件、二值预测和分类提交 CSV。
+
+`convnext_large_320` 也已注册，但它在 8 GB GPU 上批大小只有 2，训练成本较高。除非明确要测试最大 torchvision ConvNeXt 骨干网络，否则建议先跑 Small 和 Base。
+
+如果要在 Colab 或 Colab Pro 的更强 GPU 上训练，使用：
 
 ```bash
 Image classification/colab_train_convnext.ipynb
 ```
 
-It is self-contained, supports ConvNeXt Tiny/Small/Base/Large presets, writes to
-Google Drive, and includes an AMP memory probe before training.
+该 notebook 是自包含版本，支持 ConvNeXt Tiny/Small/Base/Large，输出到 Google Drive，并包含 AMP 显存探测单元。
 
-Merge a trained model's classification CSV with a segmentation CSV using:
+将分类 CSV 与分割 CSV 合并：
 
 ```bash
 python "Image classification/merge_submission.py" --experiment convnext_tiny_320 --seg-csv output/submission_exp_v10_segman_b_iter25000.csv
 ```
 
-Use `--clf-csv` when you want to merge a specific classification submission or
-binary prediction CSV. The merged CSV is saved in that experiment's
-`submissions/` folder with both source names in the filename.
+如果要合并指定的分类提交或二值预测 CSV，使用 `--clf-csv`。合并后的 CSV 会保存到对应实验的 `submissions/` 文件夹，文件名会包含分类和分割两个来源。

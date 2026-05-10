@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from PIL import Image
+from PIL import ImageOps
 import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as T
@@ -15,12 +16,41 @@ from shared import LABELS  # noqa: E402
 
 _MEAN = [0.485, 0.456, 0.406]
 _STD = [0.229, 0.224, 0.225]
+_PAD_FILL = tuple(int(round(channel * 255)) for channel in _MEAN)
 
 
-def get_train_transform(img_size: int = 320) -> T.Compose:
+class SquarePad:
+    """Pad a PIL image to a square while preserving aspect ratio."""
+
+    def __init__(self, fill: tuple[int, int, int] = _PAD_FILL):
+        self.fill = fill
+
+    def __call__(self, img: Image.Image) -> Image.Image:
+        width, height = img.size
+        side = max(width, height)
+        pad_left = (side - width) // 2
+        pad_top = (side - height) // 2
+        pad_right = side - width - pad_left
+        pad_bottom = side - height - pad_top
+        return ImageOps.expand(
+            img,
+            border=(pad_left, pad_top, pad_right, pad_bottom),
+            fill=self.fill,
+        )
+
+
+def _resize_ops(img_size: int, mode: str) -> list:
+    if mode == "resize":
+        return [T.Resize((img_size, img_size))]
+    if mode == "square_pad":
+        return [SquarePad(), T.Resize((img_size, img_size))]
+    raise ValueError(f"Unknown transform mode: {mode}")
+
+
+def get_train_transform(img_size: int = 320, mode: str = "resize") -> T.Compose:
     return T.Compose(
-        [
-            T.Resize((img_size, img_size)),
+        _resize_ops(img_size, mode)
+        + [
             T.RandomHorizontalFlip(),
             T.RandomRotation(15),
             T.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2, hue=0.05),
@@ -31,10 +61,10 @@ def get_train_transform(img_size: int = 320) -> T.Compose:
     )
 
 
-def get_val_transform(img_size: int = 320) -> T.Compose:
+def get_val_transform(img_size: int = 320, mode: str = "resize") -> T.Compose:
     return T.Compose(
-        [
-            T.Resize((img_size, img_size)),
+        _resize_ops(img_size, mode)
+        + [
             T.ToTensor(),
             T.Normalize(_MEAN, _STD),
         ]

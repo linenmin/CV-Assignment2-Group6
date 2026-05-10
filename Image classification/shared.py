@@ -63,6 +63,9 @@ class ExperimentConfig:
     random_seed: int = 42
     loss_name: str = "asymmetric"
     threshold: float = 0.5
+    transform_mode: str = "resize"
+    sampler: str = "none"
+    early_stop_patience: int | None = None
 
     @property
     def output_dir(self) -> Path:
@@ -157,12 +160,23 @@ EXPERIMENTS = {
         batch_size=8,
         eval_batch_size=16,
     ),
+    "convnext_small_320_pad_sampler": ExperimentConfig(
+        name="convnext_small_320_pad_sampler",
+        backbone="convnext_small",
+        img_size=320,
+        batch_size=8,
+        eval_batch_size=16,
+        transform_mode="square_pad",
+        sampler="weak_class_weighted",
+        early_stop_patience=4,
+    ),
     "convnext_base_320": ExperimentConfig(
         name="convnext_base_320",
         backbone="convnext_base",
         img_size=320,
         batch_size=4,
         eval_batch_size=8,
+        early_stop_patience=4,
     ),
     "convnext_large_320": ExperimentConfig(
         name="convnext_large_320",

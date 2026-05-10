@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
+from torch.utils.data import WeightedRandomSampler
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 
@@ -34,6 +35,8 @@ load_train_df = _ds.load_train_df
 get_train_transform = _ds.get_train_transform
 get_val_transform = _ds.get_val_transform
 MultiLabelClassifier = _mdl.MultiLabelClassifier
+
+WEAK_CLASSES = ["bottle", "diningtable", "pottedplant", "sheep", "sofa"]
 
 
 def parse_args():
@@ -66,20 +69,22 @@ def build_loaders(data_dir: Path, config: ExperimentConfig, device: torch.device
         df.iloc[train_idx],
         data_dir,
         split="train",
-        transform=get_train_transform(config.img_size),
+        transform=get_train_transform(config.img_size, mode=config.transform_mode),
     )
     val_ds = VOCDataset(
         df.iloc[val_idx],
         data_dir,
         split="train",
-        transform=get_val_transform(config.img_size),
+        transform=get_val_transform(config.img_size, mode=config.transform_mode),
     )
 
     pin_memory = device.type == "cuda"
+    sampler = build_sampler(df.iloc[train_idx], config)
     train_loader = DataLoader(
         train_ds,
         batch_size=config.batch_size,
-        shuffle=True,
+        shuffle=sampler is None,
+        sampler=sampler,
         num_workers=NUM_WORKERS,
         pin_memory=pin_memory,
     )
@@ -91,6 +96,26 @@ def build_loaders(data_dir: Path, config: ExperimentConfig, device: torch.device
         pin_memory=pin_memory,
     )
     return train_loader, val_loader
+
+
+def build_sampler(train_df: pd.DataFrame, config: ExperimentConfig):
+    if config.sampler == "none":
+        return None
+    if config.sampler != "weak_class_weighted":
+        raise ValueError(f"Unknown sampler: {config.sampler}")
+
+    weak_labels = train_df[WEAK_CLASSES].astype(float)
+    weak_count = weak_labels.sum(axis=1).to_numpy()
+    weights = 1.0 + 0.75 * weak_count
+    weights = np.clip(weights, 1.0, 3.0)
+    generator = torch.Generator()
+    generator.manual_seed(config.random_seed)
+    return WeightedRandomSampler(
+        weights=torch.DoubleTensor(weights),
+        num_samples=len(weights),
+        replacement=True,
+        generator=generator,
+    )
 
 
 def run_epoch(model, loader, criterion, optimizer, train: bool, device: torch.device) -> float:
@@ -128,6 +153,7 @@ def train_stage(
     stage_name: str,
     best_val_loss: float,
     history: list[dict],
+    early_stop_patience: int | None = None,
 ) -> float:
     optimizer = torch.optim.AdamW(
         filter(lambda parameter: parameter.requires_grad, model.parameters()),
@@ -136,6 +162,7 @@ def train_stage(
     )
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
+    epochs_without_improvement = 0
     for epoch in range(1, epochs + 1):
         train_loss = run_epoch(model, train_loader, criterion, optimizer, True, device)
         val_loss = run_epoch(model, val_loader, criterion, optimizer, False, device)
@@ -145,6 +172,9 @@ def train_stage(
         if is_best:
             best_val_loss = val_loss
             torch.save(model.state_dict(), config.best_checkpoint)
+            epochs_without_improvement = 0
+        else:
+            epochs_without_improvement += 1
 
         torch.save(model.state_dict(), config.last_checkpoint)
         history.append(
@@ -164,6 +194,13 @@ def train_stage(
             f"[{stage_name}] Epoch {epoch:3d}/{epochs} | "
             f"train_loss={train_loss:.4f} val_loss={val_loss:.4f}{flag}"
         )
+
+        if early_stop_patience and epochs_without_improvement >= early_stop_patience:
+            print(
+                f"[{stage_name}] Early stopping after {epochs_without_improvement} "
+                "epochs without validation improvement."
+            )
+            break
 
     return best_val_loss
 
@@ -223,6 +260,7 @@ def main(config: ExperimentConfig | None = None):
         stage_name="S2",
         best_val_loss=best_val_loss,
         history=history,
+        early_stop_patience=config.early_stop_patience,
     )
 
     print("\n=== Stage 3: retrain on all training images ===")
@@ -232,7 +270,7 @@ def main(config: ExperimentConfig | None = None):
         full_df,
         DATA_DIR,
         split="train",
-        transform=get_train_transform(config.img_size),
+        transform=get_train_transform(config.img_size, mode=config.transform_mode),
     )
     full_loader = DataLoader(
         full_ds,

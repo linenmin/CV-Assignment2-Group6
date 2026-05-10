@@ -18,8 +18,10 @@ tvmonitor`
 
 val mAP 来自各实验目录下的 `evaluation_summary.csv`（使用 `best_model.pth` 评估）。
 Kaggle 显示分数需×2 得到真实分类 Dice（提交文件含 1500 行：750 行分类 + 750 行分割占位）。
+如果需要理解 `mAP`、`per-class AP`、阈值、F1、TP/FP/FN 和训练/ensemble 超参数的计算方式，请看
+[ensemble_method_explained.md](<Image classification/ensemble_method_explained.md>)。
 
-| 版本 | 实验文件夹 | Backbone | 损失函数 | 输入 | val mAP | Kaggle 显示 | 分类 Dice（×2） |
+| 版本 | 实验文件夹 | 骨干网络 | 损失函数 | 输入 | val mAP | Kaggle 显示 | 分类 Dice（×2） |
 |------|-----------|----------|---------|------|---------|------------|----------------|
 | v1.0 | *(重构前)* | ResNet-50 | NegativeSmoothBCE | 224 | 0.801 | 0.381 | 0.762 |
 | v1.1 | `resnet50_224` | ResNet-50 | AsymmetricLoss | 224 + TTA | 0.818 | 0.392 | 0.783 |
@@ -40,7 +42,7 @@ Kaggle 显示分数需×2 得到真实分类 Dice（提交文件含 1500 行：7
 ```bash
 conda activate biometrics
 # PyTorch 2.11.0+cu130，torchvision 0.26，scikit-learn，pandas，PIL，tqdm
-# timm 未安装 — 所有 backbone 均通过 torchvision.models 加载
+# timm 未安装 — 所有骨干网络均通过 torchvision.models 加载
 ```
 
 所有命令从**项目根目录**运行。
@@ -87,7 +89,7 @@ output/image_classification/<experiment>/
 
 ## 实验列表
 
-| 实验文件夹 | Backbone | 输入尺寸 | 损失函数 | 说明 |
+| 实验文件夹 | 骨干网络 | 输入尺寸 | 损失函数 | 说明 |
 |-----------|----------|---------|---------|------|
 | `efficientnet_b3_320` | EfficientNet-B3 | 320×320 | AsymmetricLoss | 强模型（v2） |
 | `convnext_tiny_320` | ConvNeXt-Tiny | 320×320 | AsymmetricLoss | 强结果（v3） |
@@ -136,7 +138,7 @@ size 已降到 2，训练慢且更容易在 750 张训练图上过拟合。
 `gamma_neg=4` 进一步压低 easy 负样本权重，让 rare 正样本主导梯度。
 效果：diningtable AP 从 v1.0 的 0.28 提升至 v3 的 0.57。
 
-**三阶段训练** — 冻结 backbone（5 epoch，lr=1e-3）→ 全网络微调（20 epoch，
+**三阶段训练** — 冻结骨干网络（5 epoch，lr=1e-3）→ 全网络微调（20 epoch，
 lr=1e-4，保存 `best_model.pth`）→ 在全部 750 个样本上重训（5 epoch，lr=5e-5，
 保存 `final_model.pth`）。第三阶段消除了 20% 验证集 holdout 对训练数据的浪费。
 
@@ -161,7 +163,7 @@ Image classification/kaggle_train_convnext_tiny_320.ipynb    # convnext_tiny_320
 
 ## Colab 强 GPU Notebook
 
-如需在 Colab/Colab Pro 上用更强 GPU 尝试更大的 ConvNeXt 或更大的 batch size，使用：
+如需在 Colab/Colab Pro 上用更强 GPU 尝试更大的 ConvNeXt 或更大的批大小，使用：
 
 ```text
 Image classification/colab_train_convnext.ipynb
@@ -182,7 +184,7 @@ Image classification/colab_train_convnext.ipynb
 /content/drive/MyDrive/CV-Assignment2/image_classification/<experiment>/
 ```
 
-建议先用 notebook 里的 `memory_probe()` 检查当前 Colab GPU，再逐步增大 batch size。
+建议先用 notebook 里的 `memory_probe()` 检查当前 Colab GPU，再逐步增大批大小。
 本地 8GB GPU 已足够跑 Tiny/Small；Base/Large 更适合在 Colab 强 GPU 上试。
 
 ## 合并分割提交
@@ -202,3 +204,32 @@ python "Image classification/merge_submission.py" \
   --clf-csv output/image_classification/resnet50_224/predictions/test_binary_predictions_resnet50_224.csv \
   --seg-csv output/submission_exp_v10_segman_b_iter25000.csv
 ```
+
+## Ensemble 与弱类别恢复
+
+在尝试新的 transformer 依赖之前，当前成本最低的提升路径是先做概率 ensemble：
+
+```bash
+python "Image classification/07_ensemble.py" --mode val-search --name ensemble_existing
+python "Image classification/07_ensemble.py" --mode predict --name ensemble_existing
+python "Image classification/merge_submission.py" \
+  --clf-csv output/image_classification/ensemble_existing/submissions/submission_classification_ensemble_existing.csv \
+  --seg-csv output/submission_exp_v10_segman_b_iter25000.csv \
+  --out-csv output/image_classification/ensemble_existing/submissions/submission_final_ensemble_existing__seg_submission_exp_v10_segman_b_iter25000.csv
+```
+
+ensemble 搜索使用与单模型实验相同的验证集划分，先拟合全局权重和逐类别权重，然后保存阈值和权重 JSON。最新本地运行中，由于 `convnext_tiny_320` 的本地 checkpoint 缺失，脚本跳过了它，并集成了 `resnet50_224`、`efficientnet_b3_320` 和 `convnext_small_320`，验证集 mAP 达到 **0.9257**。
+
+详细方法说明见：
+
+```text
+Image classification/ensemble_method_explained.md
+```
+
+另外还注册了一个后续训练实验：
+
+```bash
+python "Image classification/run_pipeline.py" --experiment convnext_small_320_pad_sampler --skip-explore
+```
+
+它保留 ConvNeXt-Small 骨干网络，但在缩放前先做方形填充；训练时对 `bottle`、`diningtable`、`pottedplant`、`sheep`、`sofa` 做温和加权采样；第二阶段使用 patience=4 的提前停止。

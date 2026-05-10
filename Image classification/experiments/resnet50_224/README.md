@@ -1,11 +1,11 @@
 # resnet50_224
 
-Baseline classification experiment.
+ResNet-50 分类基线实验。
 
-- Backbone: ResNet-50
-- Image size: 224 x 224
-- Loss: AsymmetricLoss
-- Output: `output/image_classification/resnet50_224/`
+- 骨干网络：ResNet-50
+- 图像尺寸：224 x 224
+- 损失函数：AsymmetricLoss
+- 输出目录：`output/image_classification/resnet50_224/`
 
 ```bash
 python "Image classification/experiments/resnet50_224/train.py"

@@ -1,23 +1,23 @@
-# Progress Log
+# 进度记录
 
 ---
 
-## Session: 2026-04-23 (Session 1)
+## 会话：2026-04-23（第 1 次）
 
-### Phase 1: Requirements & Discovery
-- **Status:** complete
-- **Started:** 2026-04-23 ~19:30
-- Actions taken:
+### 第 1 阶段：需求与探索
+- **状态：** 已完成
+- **开始时间：** 2026-04-23 ~19:30
+- 已执行操作：
   - 读取 AGENTS.md，了解可用技能
   - 分析项目结构和已有输出文件
   - 阅读所有 Python 源代码和 notebook
   - 确认 submission 格式（1500行 = 750×2）
-- Files created:
+- 新建文件：
   - task_plan.md, findings.md, progress.md（初始版）
 
-### Phase 2~4: Pipeline 构建 v1
-- **Status:** complete
-- Actions taken:
+### 第 2~4 阶段：Pipeline 构建 v1
+- **状态：** 已完成
+- 已执行操作：
   - 创建 01_explore_data.py → 09/explore_data.py
   - 创建 02_dataset.py（VOCDataset + transforms）
   - 创建 03_model.py（ResNet50Classifier）
@@ -25,17 +25,17 @@
   - 创建 05_evaluate.py（mAP + 阈值优化）
   - 创建 06_predict.py（推理 + RLE）
   - 创建 shared.py（共享常量 + NegativeSmoothBCELoss）
-- Key results:
+- 关键结果：
   - val mAP = **0.801**
   - Kaggle Score = **0.38084**
 
 ---
 
-## Session: 2026-04-23 (Session 2 — 改进)
+## 会话：2026-04-23（第 2 次：改进）
 
-### Phase 4: 问题分析与改进 v2
-- **Status:** complete
-- **Started:** 2026-04-23 ~21:00
+### 第 4 阶段：问题分析与改进 v2
+- **状态：** 已完成
+- **开始时间：** 2026-04-23 ~21:00
 
 **根因分析：**
 - val mAP(0.80) vs Kaggle Dice(0.38) 差距 = 指标错位 + 噪声损失函数 + 输入分辨率不足
@@ -63,16 +63,16 @@
    - `_predict_tta()` 函数
    - 自动优先使用 final_model.pth，fallback 到 best_model.pth
 
-- Files modified:
+- 修改文件：
   - shared.py, 03_model.py, 02_dataset.py, 04_train.py, 06_predict.py
 
 ---
 
-## Session: 2026-04-23 (Session 3 — 规划文件更新)
+## 会话：2026-04-23（第 3 次：规划文件更新）
 
-### Phase: 文档整理
-- **Status:** complete
-- Actions taken:
+### 阶段：文档整理
+- **状态：** 已完成
+- 已执行操作：
   - 读取现有 task_plan.md / findings.md / progress.md
   - 用 /pi-planning-with-files 全量更新三个规划文件
   - 反映 v2 改动、Kaggle 实验结果、待做事项
@@ -84,7 +84,7 @@
 ## Session: 2026-04-24（v2 结果分析 + 文档更新）
 
 ### 阶段：v2 Kaggle 验证 + 文档整理
-- **Status:** complete
+- **状态：** 已完成
 
 **v2 实验结果：**
 - val mAP: **0.956**（diningtable: 0.28→0.68，ASL clip 显著改善）
@@ -108,7 +108,7 @@
 ## Session: 2026-04-29（三实验结果整理）
 
 ### 阶段：查看并记录 resnet50_224 / efficientnet_b3_320 / convnext_tiny_320 结果
-- **Status:** complete
+- **状态：** 已完成
 
 **数据来源：** 各实验目录下的 `evaluation_summary.csv` + `ap_per_class.csv`（均使用 `best_model.pth` 评估）
 
@@ -127,13 +127,13 @@
 - `findings.md` — 更新 Kaggle 结果表，新增逐类 AP 三实验对比表
 - `progress.md` — 本条记录
 
-## Next Steps（下一 Session 需做）
+## 下一步（下一次会话需做）
 
 1. 若需进一步提升分类分数（目标 0.50+）：
    - K-fold 交叉验证（val 仅 150 张，折叠训练更稳健）
    - MixUp / CutMix 数据增强（小数据集正则化）
-   - 更大 backbone（EfficientNet-B4/B5）
-   - 多模型 ensemble（不同 seed 或 backbone 平均概率）
+   - 更大骨干网络（EfficientNet-B4/B5）
+   - 多模型 ensemble（不同 seed 或骨干网络平均概率）
 2. Section 3：实现对抗攻击（FGSM / PGD）
 3. Section 4：填写 notebook 讨论部分
 4. 填写学生姓名（notebook cell 0）
@@ -364,7 +364,7 @@
 - 实验：`convnext_tiny_320`。
 - 评估 checkpoint：`best_model.pth`。
 - val mAP：**0.8932642162**。
-- 最优验证 loss：Stage 2 第 4 epoch **0.0293972875**。
+- 最优验证 loss：第二阶段第 4 个 epoch **0.0293972875**。
 - Stage 3 最终训练 loss：**0.0075267962**。
 - 最弱 AP 类别：diningtable **0.5732**、sofa **0.7582**、bottle **0.7645**、pottedplant **0.7916**、chair **0.8308**。
 - 最强 AP 类别：train **1.0000**、boat **1.0000**、cow **1.0000**、cat **0.9922**、aeroplane **0.9909**。
@@ -401,7 +401,7 @@
 
 ---
 
-## 会话：2026-04-29 - ConvNeXt 默认与 findings 同步
+## 会话：2026-04-29 - ConvNeXt 默认设置与发现文档同步
 
 ### 状态
 已完成。
@@ -421,262 +421,246 @@
 
 ---
 
-## Session: 2026-05-09 - ConvNeXt Larger Variants
+## 会话：2026-05-09 - ConvNeXt 更大变体
 
-### Status
-Implementation complete, training not run.
+### 状态
+实现已完成，当时尚未运行训练。
 
-### Actions taken
-- Read the existing planning files, CLAUDE.md, README.md, experiment README,
-  shared configuration, and model implementation.
-- Compared enabled Claude plugins with Codex plugin configuration. Codex keeps
-  native GitHub/Superpowers equivalents enabled and disables duplicate Claude
-  variants, matching the repository policy.
-- Confirmed in the `biometrics` environment that torchvision provides
-  ConvNeXt Tiny/Small/Base/Large and ImageNet-1K weights for each.
-- Checked `CV_GA2.pdf` Sect. 2.1 and Kaggle practicalities; the assignment
-  allows transfer learning/fine-tuning from library pre-trained models, while
-  warning that final notebooks should be self-contained and resource-aware.
-- Added `convnext_small`, `convnext_base`, and `convnext_large` to
-  `Image classification/03_model.py`.
-- Added experiment configs for:
-  - `convnext_small_320` with batch size 8.
-  - `convnext_base_320` with batch size 4.
-  - `convnext_large_320` with batch size 2.
-- Added train/evaluate/predict wrappers and README files for the three new
-  experiments.
-- Updated README.md, CLAUDE.md, experiments README, structure.txt, task_plan.md,
-  findings.md, and progress.md.
+### 已执行操作
+- 阅读现有 planning 文件、CLAUDE.md、README.md、实验 README、共享配置和模型实现。
+- 比较 Claude 启用插件与 Codex 插件配置。Codex 保留原生 GitHub/Superpowers 等价插件，并禁用重复 Claude 变体，符合仓库策略。
+- 在 `biometrics` 环境确认 torchvision 提供 ConvNeXt Tiny/Small/Base/Large，并且每个都有 ImageNet-1K 权重。
+- 检查 `CV_GA2.pdf` 第 2.1 节和 Kaggle 实际要求；作业允许使用库内预训练模型做迁移学习/fine-tuning，同时提醒最终 notebook 需要自包含并注意资源消耗。
+- 将 `convnext_small`、`convnext_base` 和 `convnext_large` 加入 `Image classification/03_model.py`。
+- 新增实验配置：
+  - `convnext_small_320`，批大小 8。
+  - `convnext_base_320`，批大小 4。
+  - `convnext_large_320`，批大小 2。
+- 为三个新实验添加 train/evaluate/predict 封装脚本和 README 文件。
+- 更新 README.md、CLAUDE.md、实验 README、structure.txt、task_plan.md、findings.md 和 progress.md。
 
-### Validation
-- `py_compile` passed for `03_model.py`, `shared.py`, and all new experiment
-  wrapper scripts.
-- Smoke forward passes passed with `pretrained=False`:
-  - `convnext_small_320`: batch size 8, 49.86M params after classifier swap,
-    output `(1, 20)`.
-  - `convnext_base_320`: batch size 4, 88.10M params after classifier swap,
-    output `(1, 20)`.
-  - `convnext_large_320`: batch size 2, 197.02M params after classifier swap,
-    output `(1, 20)`.
-- `run_pipeline.py --help` lists all new experiments in `--experiment`.
-- Full model training/evaluation/prediction is not run yet due GPU time cost.
+### 验证
+- `03_model.py`、`shared.py` 和全部新增实验封装脚本通过 `py_compile`。
+- 使用 `pretrained=False` 的 smoke 前向传播均通过：
+  - `convnext_small_320`：批大小 8，替换分类头后参数量 49.86M，输出 `(1, 20)`。
+  - `convnext_base_320`：批大小 4，替换分类头后参数量 88.10M，输出 `(1, 20)`。
+  - `convnext_large_320`：批大小 2，替换分类头后参数量 197.02M，输出 `(1, 20)`。
+- `run_pipeline.py --help` 会在 `--experiment` 中列出所有新实验。
+- 由于 GPU 时间成本，当时尚未运行完整模型训练/评估/预测。
 
-### Error log
-| Error | Attempt | Resolution |
-|-------|---------|------------|
-| PowerShell rejected Bash heredoc syntax (`<<'PY'`) | 1 | Re-ran with a PowerShell here-string piped into Python |
-| `Start-Process` split `Image classification/run_pipeline.py` at the space | 1 | Restart with the script path quoted inside the argument string |
+### 错误记录
+| 错误 | 尝试次数 | 解决方案 |
+|------|---------|---------|
+| PowerShell 拒绝 Bash heredoc 语法（`<<'PY'`） | 1 | 改用 PowerShell here-string 管道传给 Python |
+| `Start-Process` 在路径空格处拆开了 `Image classification/run_pipeline.py` | 1 | 在参数字符串内对脚本路径加引号后重启 |
 
-### Stop hook follow-up
-- The planning hook reported the overall assignment plan as incomplete because
-  Phase 7 (notebook integration/adversarial/discussion) is still pending.
-- For the current user request, the directly relevant unfinished item is the
-  larger-ConvNeXt experiment itself. Continuing with `convnext_small_320`
-  training first instead of switching to the unrelated notebook phase.
+### Stop hook 后续
+- 规划 hook 报告整体作业计划未完成，因为第 7 阶段（notebook 集成/对抗攻击/讨论）仍待完成。
+- 对当前用户请求而言，直接相关的未完成事项是更大的 ConvNeXt 实验本身。因此先继续训练 `convnext_small_320`，没有切换到无关的 notebook 阶段。
 
-### `convnext_small_320` completed
-- Full pipeline completed successfully.
-- Best val loss: **0.02936561396** at Stage 2 epoch 2.
-- val mAP: **0.8995381256**, slightly above Tiny's **0.8932642162**.
-- Stage 3 final full-train loss: **0.0073612132**.
-- 1500-row submission generated at
-  `output/image_classification/convnext_small_320/submissions/submission_classification_convnext_small_320.csv`.
-- Because Small improved on local mAP, continue to `convnext_base_320`.
+### `convnext_small_320` 已完成
+- 完整流水线成功完成。
+- 最优 val loss：第二阶段第 2 个 epoch 为 **0.02936561396**。
+- val mAP：**0.8995381256**，略高于 Tiny 的 **0.8932642162**。
+- 第三阶段全量训练最终 loss：**0.0073612132**。
+- 已生成 1500 行提交文件：`output/image_classification/convnext_small_320/submissions/submission_classification_convnext_small_320.csv`。
+- 由于 Small 本地 mAP 有提升，继续尝试 `convnext_base_320`。
 
-### `convnext_base_320` interrupted
-- Started `convnext_base_320` full pipeline after Small improved locally.
-- Downloaded weights and reached Stage 1 epoch 3:
-  - S1 epoch 1: val loss **0.0428**
-  - S1 epoch 2: val loss **0.0388**
-  - S1 epoch 3: val loss **0.0331**
-- User shifted focus to GPU efficiency/capacity, so the background process was
-  stopped manually at PID 4888 to avoid unexpected GPU usage.
-- No complete Base evaluation/submission was produced.
+### `convnext_base_320` 已中断
+- Small 本地提升后启动了 `convnext_base_320` 完整流水线。
+- 已下载权重并运行到第一阶段第 3 个 epoch：
+  - S1 epoch 1：val loss **0.0428**
+  - S1 epoch 2：val loss **0.0388**
+  - S1 epoch 3：val loss **0.0331**
+- 随后用户转向讨论 GPU 效率/容量，因此手动停止 PID 4888 的后台进程，避免意外占用 GPU。
+- 没有产出完整 Base 评估或提交。
 
-### GPU capacity check
-- Current GPU after stopping Base: no running GPU processes, 0 MiB reported by
-  `nvidia-smi`.
-- One-step training benchmark on RTX 4060 Laptop GPU, using current experiment
-  batch sizes and `pretrained=False`:
-  - `convnext_tiny_320`: batch 16, peak allocated **3.51 GB**, **1.83 s/step**.
-  - `convnext_small_320`: batch 8, peak allocated **2.88 GB**, **1.40 s/step**.
-  - `convnext_base_320`: batch 4, peak allocated **2.19 GB**, **1.29 s/step**.
-  - `convnext_large_320`: batch 2, peak allocated **3.71 GB**, **1.40 s/step**.
-- Interpretation: all configured variants fit in memory for one train step, but
-  throughput per sample drops strongly as the model gets larger because batch
-  size must shrink.
+### GPU 容量检查
+- 停止 Base 后当前 GPU 无运行进程，`nvidia-smi` 报告 0 MiB 占用。
+- 在 RTX 4060 Laptop GPU 上使用当前实验批大小和 `pretrained=False` 做一步训练 benchmark：
+  - `convnext_tiny_320`：batch 16，峰值分配 **3.51 GB**，**1.83 s/step**。
+  - `convnext_small_320`：batch 8，峰值分配 **2.88 GB**，**1.40 s/step**。
+  - `convnext_base_320`：batch 4，峰值分配 **2.19 GB**，**1.29 s/step**。
+  - `convnext_large_320`：batch 2，峰值分配 **3.71 GB**，**1.40 s/step**。
+- 解读：所有配置变体都能容纳一步训练，但随着模型变大，批大小必须缩小，所以按样本计的吞吐明显下降。
 
-### Stop hook follow-up 2
-- The stop hook fired again because the global assignment plan still has
-  Phase 7 pending.
-- Re-read `task_plan.md` and updated its Current Phase to Phase 7.
-- Cleaned up the ConvNeXt larger-variant checklist: `convnext_small_320` is
-  complete, `convnext_base_320` was started and intentionally stopped, and
-  completing Base/Large is now treated as optional based on GPU time tradeoff.
-- No background training process is running.
+### Stop hook 后续 2
+- Stop hook 再次触发，因为全局作业计划仍有第 7 阶段待完成。
+- 重新阅读 `task_plan.md`，并将其当前阶段更新为第 7 阶段。
+- 清理 ConvNeXt 更大变体 checklist：`convnext_small_320` 已完成，`convnext_base_320` 已启动并主动停止，Base/Large 后续是否完成改为取决于 GPU 时间收益。
+- 当前没有后台训练进程。
 
-### Colab notebook for stronger GPU training
-- Created `Image classification/colab_train_convnext.ipynb`.
-- The notebook is self-contained for Colab and supports:
+### 面向更强 GPU 训练的 Colab notebook
+- 创建 `Image classification/colab_train_convnext.ipynb`。
+- 该 notebook 面向 Colab 自包含，并支持：
   - `convnext_tiny_320_colab`
   - `convnext_small_320_colab`
   - `convnext_base_320_colab`
   - `convnext_large_320_colab`
-- It mounts Google Drive, verifies/extracts the dataset, uses AMP mixed
-  precision, includes a one-step memory probe, trains with the same 3-stage
-  protocol, evaluates mAP/thresholds, and writes probabilities, binary
-  predictions, and a 1500-row classification submission.
-- Updated README, experiments README, structure.txt, task_plan.md, and
-  findings.md to mention the Colab workflow.
+- 它会挂载 Google Drive、验证/解压数据集、使用 AMP 混合精度、包含一步显存探测、按相同三阶段协议训练、评估 mAP/阈值，并写出概率、二值预测和 1500 行分类提交。
+- 已更新 README、实验 README、structure.txt、task_plan.md 和 findings.md，记录 Colab 工作流。
 
-### Phase 7 discussion draft
-- The stop hook fired again, so I re-read `task_plan.md` and inspected
-  `Discussion.md` plus the top-level notebook structure.
-- Rewrote `Discussion.md` from a note-filled draft into a complete discussion
-  section.
-- The new discussion uses concrete evidence from the project:
-  - 749 training images, average 1.43 labels/image.
-  - class imbalance, e.g. person 207 vs sheep 27 and cow 30.
-  - model comparison: ResNet-50, EfficientNet-B3, ConvNeXt-Tiny, and
-    ConvNeXt-Small.
-  - ConvNeXt-Small local mAP **0.8995**, ConvNeXt-Tiny Kaggle display
-    **0.43673** / adjusted classification Dice **0.87346**.
-  - weakest Small AP classes: diningtable, pottedplant, sofa, bottle, sheep.
-- Marked Section 4 discussion content complete in `task_plan.md`, while keeping
-  notebook insertion, student names, and Section 3 adversarial attack pending.
+### 第 7 阶段讨论草稿
+- Stop hook 再次触发，因此重新阅读 `task_plan.md`，并检查 `Discussion.md` 和顶层 notebook 结构。
+- 将 `Discussion.md` 从笔记式草稿改写成完整讨论章节。
+- 新讨论使用项目中的具体证据：
+  - 749 张训练图，平均每图 1.43 个标签。
+  - 类别不平衡，例如 person 207 vs sheep 27 和 cow 30。
+  - 模型对比：ResNet-50、EfficientNet-B3、ConvNeXt-Tiny 和 ConvNeXt-Small。
+  - ConvNeXt-Small 本地 mAP **0.8995**，ConvNeXt-Tiny Kaggle 显示 **0.43673** / 换算分类 Dice **0.87346**。
+  - Small 的最弱 AP 类别：diningtable、pottedplant、sofa、bottle、sheep。
+- 已在 `task_plan.md` 标记第 4 节讨论内容完成，同时保留 notebook 插入、学生姓名和第 3 节对抗攻击为待办。
 
-### Kaggle result update: `convnext_small_320`
-- User reported latest Kaggle test results:
-  - complete submission score: **0.87588**.
-  - `convnext_small_320` classification Kaggle display: **0.44905**.
-  - adjusted classification Dice: **0.89810**.
-- Updated README.md, CLAUDE.md, findings.md, task_plan.md, and progress.md.
-- Decision: `convnext_small_320` supersedes `convnext_tiny_320` as the current
-  best classification model.
-- Updated `DEFAULT_EXPERIMENT` in `Image classification/shared.py` to
-  `convnext_small_320`.
+### Kaggle 结果更新：`convnext_small_320`
+- 用户报告最新 Kaggle 测试结果：
+  - 完整提交分数：**0.87588**。
+  - `convnext_small_320` 分类 Kaggle 显示分数：**0.44905**。
+  - 换算后的分类 Dice：**0.89810**。
+- 已更新 README.md、CLAUDE.md、findings.md、task_plan.md 和 progress.md。
+- 决策：`convnext_small_320` 取代 `convnext_tiny_320`，成为当前最佳分类模型。
+- 已将 `Image classification/shared.py` 中的 `DEFAULT_EXPERIMENT` 更新为 `convnext_small_320`。
 
-### Notebook integration after stop hook
-- Stop hook fired again. Re-read `task_plan.md` and inspected the notebook
-  section cells.
-- Updated `ga2_group_6.ipynb`:
-  - inserted final classification results under Section 1,
-  - replaced the Section 4 template discussion with the completed
-    `Discussion.md` content.
-- Validation:
-  - notebook JSON loads successfully,
-  - all notebook code cells parse as Python.
-- Marked "show/reference final classification results in the notebook" complete
-  in `task_plan.md`.
-- Still pending: student names and Section 3 adversarial attack.
+### Stop hook 后的 Notebook 集成
+- Stop hook 再次触发。重新阅读 `task_plan.md` 并检查 notebook section cell。
+- 更新 `ga2_group_6.ipynb`：
+  - 在第 1 节下插入最终分类结果；
+  - 将第 4 节模板讨论替换为完成后的 `Discussion.md` 内容。
+- 验证：
+  - notebook JSON 可成功加载；
+  - 所有 notebook 代码 cell 可按 Python 解析。
+- 已在 `task_plan.md` 标记 “在 notebook 中展示/引用最终分类结果” 完成。
+- 仍待完成：学生姓名和第 3 节对抗攻击。
 
-### Colab notebook explanations and hyperparameter guidance
-- Updated `Image classification/colab_train_convnext.ipynb` with explanatory
-  markdown before every code cell.
-- Added a "Recommended Settings for 749 Training Images" section covering:
-  - batch-size ranges for local RTX 4060 8 GB, Colab T4, L4/V100, and A100,
-  - recommended ranges for image size, epochs, learning rates, weight decay,
-    validation split, and AsymmetricLoss parameters,
-  - current recommendation to prioritize `convnext_small_320_colab`, then try
-    `convnext_base_320_colab` only if GPU budget is available.
-- Validation:
-  - notebook JSON loads successfully,
-  - 12 code cells parse as Python,
-  - 13 generated explanation/guidance cells are present.
+### Colab notebook 解释与超参数建议
+- 更新 `Image classification/colab_train_convnext.ipynb`，在每个代码 cell 前加入解释性 markdown。
+- 新增 “Recommended Settings for 749 Training Images” 小节，覆盖：
+  - 本地 RTX 4060 8 GB、Colab T4、L4/V100 和 A100 的批大小范围；
+  - 图像尺寸、epoch、学习率、weight decay、验证集划分和 AsymmetricLoss 参数的推荐范围；
+  - 当前建议优先跑 `convnext_small_320_colab`，只有在 GPU 预算足够时再尝试 `convnext_base_320_colab`。
+- 验证：
+  - notebook JSON 可成功加载；
+  - 12 个代码 cell 可按 Python 解析；
+  - 13 个生成的解释/建议 cell 已存在。
 
-### Phase 7 adversarial attack implementation
-- Added `Image classification/07_adversarial_attack.py`.
-- Implemented targeted FGSM and PGD against the configured classifier.
-- Ran a smoke test on `convnext_small_320`, targeting `aeroplane`, with
-  `max_samples=8`, `epsilon=0.03`, `alpha=0.01`, and `pgd_steps=3`.
-- Smoke-test result:
-  - clean target probability mean **0.3257**,
-  - FGSM target probability mean **0.7112**,
-  - PGD target probability mean **0.9272**,
-  - PGD target activation rate **1.000**.
-- Saved summary to
-  `output/image_classification/convnext_small_320/metrics/adversarial_aeroplane.csv`.
-- Updated `ga2_group_6.ipynb` Section 3 with explanation, command, and result
-  table.
-- Validation:
-  - `07_adversarial_attack.py` passes `py_compile`,
-  - notebook JSON loads successfully,
-  - notebook code cells parse as Python.
-- Marked Section 3 complete in `task_plan.md`; remaining global blocker is
-  student names in notebook cell 0.
+### 第 7 阶段对抗攻击实现
+- 新增 `Image classification/07_adversarial_attack.py`。
+- 针对当前分类器实现 targeted FGSM 和 PGD。
+- 在 `convnext_small_320` 上运行冒烟测试，目标类别为 `aeroplane`，参数为 `max_samples=8`、`epsilon=0.03`、`alpha=0.01`、`pgd_steps=3`。
+- 冒烟测试结果：
+  - clean 目标概率均值 **0.3257**；
+  - FGSM 目标概率均值 **0.7112**；
+  - PGD 目标概率均值 **0.9272**；
+  - PGD 目标激活率 **1.000**。
+- 摘要保存到 `output/image_classification/convnext_small_320/metrics/adversarial_aeroplane.csv`。
+- 更新 `ga2_group_6.ipynb` 第 3 节，加入解释、命令和结果表。
+- 验证：
+  - `07_adversarial_attack.py` 通过 `py_compile`；
+  - notebook JSON 可成功加载；
+  - notebook 代码 cell 可按 Python 解析。
+- 已在 `task_plan.md` 中标记第 3 节完成；剩余全局阻塞是 notebook cell 0 中的学生姓名。
 
-### Colab figures directory fix
-- Investigated why
-  `I:\我的云端硬盘\CV-Assignment2\image_classification\convnext_large_320_colab\figures`
-  was empty.
-- Root cause: `Image classification/colab_train_convnext.ipynb` created
-  `FIGURES_DIR`, but did not import matplotlib or call `savefig`. The local
-  `05_evaluate.py` saves `eval_ap_per_class.png`, while the self-contained
-  Colab notebook only wrote CSV metrics.
-- Updated the Colab notebook to save:
+### Colab figures 目录修复
+- 调查为什么 `I:\我的云端硬盘\CV-Assignment2\image_classification\convnext_large_320_colab\figures` 为空。
+- 根因：`Image classification/colab_train_convnext.ipynb` 创建了 `FIGURES_DIR`，但没有导入 matplotlib 或调用 `savefig`。本地 `05_evaluate.py` 会保存 `eval_ap_per_class.png`，而自包含 Colab notebook 只写了 CSV 指标。
+- 更新 Colab notebook，使其保存：
   - `figures/training_history.png`
   - `figures/eval_ap_per_class.png`
-- Added an optional regeneration cell that recreates the figures from existing
-  `metrics/training_history.csv` and `metrics/ap_per_class.csv` without
-  retraining.
-- Used the existing Google Drive metrics CSVs to generate the missing PNGs
-  immediately:
+- 新增可选重生成 cell，可从已有 `metrics/training_history.csv` 和 `metrics/ap_per_class.csv` 重建图像，无需重新训练。
+- 已用现有 Google Drive 指标 CSV 立即生成缺失 PNG：
   - `I:\我的云端硬盘\CV-Assignment2\image_classification\convnext_large_320_colab\figures\training_history.png`
   - `I:\我的云端硬盘\CV-Assignment2\image_classification\convnext_large_320_colab\figures\eval_ap_per_class.png`
-- Validation:
-  - notebook JSON loads successfully,
-  - all code cells parse as Python after accounting for Colab `!nvidia-smi`.
+- 验证：
+  - notebook JSON 可成功加载；
+  - 在考虑 Colab `!nvidia-smi` 语法后，所有代码 cell 可按 Python 解析。
 
-### Stop hook follow-up: Phase 7 remaining work
-- Stop hook reported the global planning task is still incomplete.
-- Updating progress first as requested, then re-reading `task_plan.md` to
-  identify the remaining Phase 7 item.
-- Re-read `task_plan.md`; the only unfinished Phase 7 item is notebook cell 0
-  student names.
-- Inspected `ga2_group_6.ipynb` cell 0 and found template placeholders:
-  `name1, name2, ...` plus the old "replace X with group number" note.
-- Updated cell 0 to show **Group 6** and removed the obsolete notebook-name
-  TODO, because the repository and notebook filename already identify Group 6.
-- Remaining blocker: actual final group member names are not present anywhere
-  in the repo, so this needs user input before Phase 7 can be marked complete.
-- Validation: `ga2_group_6.ipynb` JSON loads successfully and all code cells
-  parse as Python.
+### Stop hook 后续：第 7 阶段剩余工作
+- Stop hook 报告全局规划任务仍未完成。
+- 按要求先更新 progress，再重新阅读 `task_plan.md`，定位剩余第 7 阶段事项。
+- 重新阅读 `task_plan.md` 后确认，唯一未完成的第 7 阶段事项是 notebook cell 0 的学生姓名。
+- 检查 `ga2_group_6.ipynb` cell 0，发现模板占位符 `name1, name2, ...` 以及旧的 “replace X with group number” 提示。
+- 已将 cell 0 更新为 **Group 6**，并移除过时的 notebook 名称 TODO，因为仓库和 notebook 文件名已经标识 Group 6。
+- 剩余阻塞：仓库任何位置都没有实际最终组员姓名，因此需要用户输入后才能标记第 7 阶段完成。
+- 验证：`ga2_group_6.ipynb` JSON 可成功加载，所有代码 cell 可按 Python 解析。
 
-### Colab AP figure style alignment
-- User pointed out that the desired AP figure style is the local
-  `05_evaluate.py` chart: VOC class order on the x-axis with a red dashed mAP
-  line.
-- Updated `Image classification/colab_train_convnext.ipynb` so
-  `plot_ap_per_class()` now matches the local evaluation style instead of the
-  earlier horizontal sorted bar chart.
-- Patched the evaluation cell itself to call
-  `plot_ap_per_class(ap_df, AP_PLOT, map_score=map_score)` immediately after
-  saving `ap_per_class.csv`.
-- Patched the optional regeneration cell to read `evaluation_summary.csv` and
-  use its stored `mAP` when redrawing the figure.
-- Regenerated the Drive figure:
-  `I:\我的云端硬盘\CV-Assignment2\image_classification\convnext_large_320_colab\figures\eval_ap_per_class.png`
-  with size **1200x400**, matching the attached example layout.
-- Validation: `Image classification/colab_train_convnext.ipynb` code cells
-  parse successfully.
+### Colab AP 图风格对齐
+- 用户指出期望的 AP 图风格是本地 `05_evaluate.py` 图：x 轴按 VOC 类别顺序，红色虚线表示 mAP。
+- 更新 `Image classification/colab_train_convnext.ipynb`，使 `plot_ap_per_class()` 匹配本地评估风格，而不是之前的横向排序柱状图。
+- 修改评估 cell，使其在保存 `ap_per_class.csv` 后立即调用 `plot_ap_per_class(ap_df, AP_PLOT, map_score=map_score)`。
+- 修改可选重生成 cell，使其读取 `evaluation_summary.csv`，并用其中保存的 `mAP` 重绘图像。
+- 已重新生成 Drive 图像：`I:\我的云端硬盘\CV-Assignment2\image_classification\convnext_large_320_colab\figures\eval_ap_per_class.png`，尺寸 **1200x400**，与用户给的示例布局一致。
+- 验证：`Image classification/colab_train_convnext.ipynb` 代码 cell 可成功解析。
 
-### Stop hook follow-up: re-check remaining task
-- Stop hook fired again after the Colab AP figure style fix.
-- Updating `progress.md` first as requested, then re-reading `task_plan.md`.
-- Expected remaining blocker is still the same: final student names in
-  `ga2_group_6.ipynb` cell 0 are not available in repository files.
+### Stop hook 后续：重新检查剩余任务
+- Colab AP 图风格修复后 Stop hook 再次触发。
+- 按要求先更新 `progress.md`，再重新阅读 `task_plan.md`。
+- 预期剩余阻塞仍相同：仓库文件中没有 `ga2_group_6.ipynb` cell 0 所需的最终学生姓名。
 
-### Stop hook follow-up: Phase 7 final blocker
-- Stop hook `stop:4` requested updating `progress.md`, then re-reading
-  `task_plan.md` and continuing the remaining phases.
-- Re-read `task_plan.md`; Phase 7 is 6/7 complete.
-- Remaining item: final student names in `ga2_group_6.ipynb` cell 0.
-- Next action: inspect repository files for any reliable source of group member
-  names before asking the user.
-- Repository text search did not find a final member list.
-- Git history contains possible author clues:
+### Stop hook 后续：第 7 阶段最终阻塞
+- Stop hook `stop:4` 要求更新 `progress.md`，然后重新阅读 `task_plan.md` 并继续剩余阶段。
+- 重新阅读 `task_plan.md`；第 7 阶段已完成 6/7。
+- 剩余事项：`ga2_group_6.ipynb` cell 0 中的最终学生姓名。
+- 下一步：在询问用户前，先检查仓库文件中是否有可靠的组员姓名来源。
+- 仓库文本搜索没有找到最终成员名单。
+- Git 历史中有可能的作者线索：
   - `Enmin Lin <enmin.lin@student.kuleuven.be>`
   - `121philip <ykx20010330@gmail.com>`
   - `hapgab <zhenyang.linguistics@outlook.com>`
-- These are not enough to safely replace the notebook TODO with formal student
-  names; user confirmation is required.
+- 这些线索不足以安全替换 notebook TODO 为正式学生姓名；需要用户确认。
+
+### 会话：2026-05-10 - Ensemble 与弱类别恢复实现
+- 实现 `Image classification/07_ensemble.py`：
+  - `--mode val-search` 用于搜索全局和逐类别 ensemble 权重；
+  - `--mode predict` 用于生成测试集概率、二值预测和提交 CSV；
+  - 默认跳过本地 checkpoint 不存在的实验。
+- 扩展 `ExperimentConfig`，新增 `transform_mode`、`sampler` 和 `early_stop_patience`。
+- 在 `02_dataset.py` 中新增方形 padding 图像变换。
+- 在 `04_train.py` 中新增弱类别加权采样和第二阶段 early stopping。
+- 注册 `convnext_small_320_pad_sampler`，并添加实验入口脚本。
+- 已完成验证：
+  - 修改后的脚本和新增入口均通过 `py_compile`。
+  - `07_ensemble.py --help` 和 `run_pipeline.py --help` 能显示新接口。
+  - 16 张验证样本的 ensemble 冒烟测试完成。
+  - `convnext_small_320_pad_sampler` 前向/反向冒烟测试完成：输入 `(8, 3, 320, 320)`，输出 `(8, 20)`。
+- 已运行完整 existing-model ensemble：
+  - 包含 `resnet50_224`、`efficientnet_b3_320`、`convnext_small_320`。
+  - 跳过缺失本地 checkpoint 的 `convnext_tiny_320`。
+  - 选择模式：逐类别加权。
+  - val mAP：**0.925702**。
+  - 弱类别平均 F1：**0.790040**。
+- 已生成：
+  - `output/image_classification/ensemble_existing/submissions/submission_classification_ensemble_existing.csv`
+  - `output/image_classification/ensemble_existing/submissions/submission_final_ensemble_existing__seg_submission_exp_v10_segman_b_iter25000.csv`
+
+### 会话：2026-05-10 - 中文文档整理
+- 新增 `Image classification/ensemble_method_explained.md`，用中文详细解释 ensemble 方法、`ensemble_smoke` 与 `ensemble_existing` 的区别、输出文件和复现命令。
+- 将本次新增/相关的 Markdown 文档改为中文表述，包括根 README 新增段落、实验 README、`findings.md`、`progress.md` 和 `task_plan.md` 的本次记录。
+- 记录偏好：以后项目工作记录、方案说明和新增 Markdown 默认使用中文；代码标识符、命令、文件名和实验名保持原文。
+
+### Stop hook 后续：规划状态解析误报
+- Stop hook `stop:4` 报告 planning-with-files 任务为 0/7 阶段完成。
+- 按要求先更新 `progress.md`，然后重新阅读 `task_plan.md`。
+- 重新核对后确认：前 6 个阶段均已完成；第 7 阶段除 notebook cell 0 的正式学生姓名外，其余项目也已完成。
+- 判断误报原因：我们按用户要求将 Markdown 记录中文化后，hook 可能无法识别原先的英文 `Status: complete` 状态字段。
+- 下一步：在保持中文记录为主的前提下，为 `task_plan.md` 补充机器可读的阶段状态标记，并再次检查是否还有可从仓库可靠推断的学生姓名。
+- 已在 `task_plan.md` 中恢复每个阶段的窄范围 `Status: complete/pending` 标记，同时保留中文状态说明，供 hook 解析。
+- 重新检查 `ga2_group_6.ipynb` cell 0：当前仍为 `Student names: TODO: add final group member names`。
+- 仓库文本搜索没有发现正式组员名单；git 历史只显示 `Enmin Lin`、`121philip`、`hapgab` 等作者线索，不足以作为正式学生姓名填写。
+- 当前唯一剩余阻塞仍是用户提供正式组员姓名。
+
+### 会话：2026-05-10 - 评估指标与超参数讲解补充
+- 用户希望补充解释 `mAP`、`per-class AP` 等评估指标如何计算，以及训练/评估/ensemble 超参数分别是什么意思。
+- 已扩展 `Image classification/ensemble_method_explained.md`：
+  - 解释验证集划分、概率矩阵和标签矩阵。
+  - 解释 AP、per-class AP、mAP、阈值、F1、TP、FP、FN 的计算方式。
+  - 说明为什么 mAP 高不一定等于 Kaggle Dice 高。
+  - 补充 `ExperimentConfig`、三阶段训练、AsymmetricLoss、图像增强、弱类别采样、ensemble 参数和 checkpoint 参数。
+- 已在 `README.md` 的实验结果段落加入该讲解文档链接，方便后续查阅。
+
+### Stop hook 后续：6/7 阶段完成
+- Stop hook `stop:4` 再次触发，这次识别为 6/7 阶段完成，说明 `task_plan.md` 中恢复的 `Status: complete/pending` 标记已被 hook 识别。
+- 按要求先更新 `progress.md`，然后重新阅读 `task_plan.md`。
+- 预计唯一剩余阶段仍是第 7 阶段中的 notebook cell 0 正式学生姓名。
+- 已重新核查 `ga2_group_6.ipynb`、`task_plan.md`、`progress.md` 和 `findings.md` 中的 TODO/姓名相关记录。
+- 当前 notebook cell 0 仍为 `Student names: TODO: add final group member names`。
+- Git 历史中的作者线索仍只有 `Enmin Lin`、`121philip`、`hapgab` 和 bot 作者，无法等同于正式学生姓名。
+- 结论：不能安全自动完成剩余 1/7；需要用户提供正式组员姓名后才能填写 notebook 并将第 7 阶段标记为完成。

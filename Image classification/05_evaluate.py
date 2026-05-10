@@ -71,7 +71,7 @@ def build_val_loader(data_dir: Path, config: ExperimentConfig, device: torch.dev
         df.iloc[val_idx],
         data_dir,
         split="train",
-        transform=get_val_transform(config.img_size),
+        transform=get_val_transform(config.img_size, mode=config.transform_mode),
     )
     return DataLoader(
         val_ds,

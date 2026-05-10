@@ -1,6 +1,6 @@
-# Findings & Decisions
+# 发现与决策
 
-## Requirements
+## 需求
 - **任务**: CV Assignment 2 — PASCAL VOC 2009 多标签图像分类（20类）
 - **提交格式**: 每个样本2行（`_classification` + `_segmentation`），RLE编码
 - **Section结构**: 分类(S1) + 语义分割(S2) + 对抗攻击(S3) + 讨论(S4)
@@ -8,7 +8,7 @@
 
 ---
 
-## Project Structure（当前）
+## 项目结构（当前）
 
 ```
 Image classification/
@@ -25,7 +25,7 @@ Image classification/
 
 ---
 
-## Research Findings
+## 调研发现
 
 ### 数据集特性（2026-04-23 观测）
 - 训练集：750张，测试集：750张，`.npy` numpy格式（RGB uint8）
@@ -107,12 +107,12 @@ val mAP 来自各实验目录下的 `evaluation_summary.csv`（使用 `best_mode
 - 论文：https://arxiv.org/abs/2009.14119
 
 ### 骨干网络：ConvNeXt-Small（当前最佳 v4）
-- 当前最佳分类实验为 `convnext_small_320`，替代 v3 `convnext_tiny_320` 作为默认/推荐分类 backbone。
+- 当前最佳分类实验为 `convnext_small_320`，替代 v3 `convnext_tiny_320` 作为默认/推荐分类骨干网络。
 - 通过 `torchvision.models.convnext_small` 加载 ImageNet-1K 预训练权重。
 - 特征提取路径：`nn.Sequential(model.features, model.avgpool)` + `flatten(1)`。
 - 池化特征维度：768（ConvNeXt-Tiny 同为 768，EfficientNet-B3 为 1536，ResNet-50 为 2048）。
 - 实测结果：val mAP **0.8995**，Kaggle 显示 **0.44905**，分类 Dice **0.89810**。
-- EfficientNet-B3 保留为 v2 对比实验，不再是当前最佳 backbone。
+- EfficientNet-B3 保留为 v2 对比实验，不再是当前最佳骨干网络。
 
 ### 输入尺寸：320×320（替代224×224）
 - 原始图像约333×500，224缩放损失大量细节
@@ -125,11 +125,24 @@ val mAP 来自各实验目录下的 `evaluation_summary.csv`（使用 `best_mode
 - RandomErasing(p=0.3, scale=(0.02, 0.2)) — 随机遮挡，增强对局部遮挡的鲁棒性
 
 ### 训练策略：3阶段
-| 阶段 | Backbone | Epochs | LR | 目的 |
+| 阶段 | 骨干网络 | Epochs | LR | 目的 |
 |------|----------|--------|----|------|
-| Stage 1 | 冻结 | 5 | 1e-3 | 快速训练分类头 |
-| Stage 2 | 解冻 | 20 | 1e-4 | 全网络细调 |
-| Stage 3 | 解冻 | 5 | 5e-5 | 全750样本重训（消除val holdout损失） |
+| 第一阶段 | 冻结 | 5 | 1e-3 | 快速训练分类头 |
+| 第二阶段 | 解冻 | 20 | 1e-4 | 全网络细调 |
+| 第三阶段 | 解冻 | 5 | 5e-5 | 全750样本重训（消除val holdout损失） |
+
+### Checkpoint 说明（best / last / final）
+
+训练过程产生三类 `.pth` 文件，保存在 `output/image_classification/<experiment>/checkpoints/` 下：
+
+| 文件 | 保存时机 | 用途 |
+|------|---------|------|
+| `best_model.pth` | 第一阶段 / 第二阶段的每个 epoch 结束后，若该 epoch 的 val loss **低于历史最优**，则覆盖保存（`04_train.py` line 147）。训练结束时指向整个 S1+S2 阶段 val loss 最低的权重。 | `05_evaluate.py` 用此文件计算 val mAP 和最优阈值；`06_predict.py` 在 `final_model.pth` 不存在时也 fallback 到此文件。 |
+| `last_model.pth` | 每个 epoch 结束时**无条件覆盖**保存（line 149）。始终是最新一个 epoch 的权重，不论验证性能好坏。 | 断点续训时的恢复入口；一般不用于最终推理。 |
+| `final_model.pth` | Stage 3 训练完毕后保存（line 269）。Stage 3 从 `best_model.pth` 加载权重，在**全量 750 张**训练样本上（无 val holdout）继续微调 5 个 epoch。 | `06_predict.py` 优先加载此文件做测试集推理（含 TTA）。它比 `best_model.pth` 多利用了 20% holdout 数据，通常可带来轻微的泛化提升。 |
+
+> 推理调用顺序：`final_model.pth` → (若不存在) `best_model.pth`。
+> 评估（`05_evaluate.py`）固定使用 `best_model.pth`，以确保 val mAP 的可比性。
 
 ### TTA（Test-Time Augmentation）
 - 推理时运行 original + horizontal flip，平均sigmoid概率
@@ -197,7 +210,7 @@ val mAP 来自各实验目录下的 `evaluation_summary.csv`（使用 `best_mode
 - 旧版分类脚本使用硬编码全局变量（`BACKBONE`、`IMG_SIZE`、`CKPT_PATH`、`THRESH_PATH`），
   所有输出写入同一 `output/` 路径，导致不同模型的 checkpoint、阈值、图表和提交 CSV 会互相覆盖。
 - 最佳简化方案不是为每个模型复制完整训练代码，而是用共享 `ExperimentConfig`
-  统一管理 backbone、输入尺寸、batch size、随机种子和输出路径；各模型文件夹仅作为薄封装入口。
+  统一管理骨干网络、输入尺寸、批大小、随机种子和输出路径；各模型文件夹仅作为薄封装入口。
 - `run_pipeline.py --ckpt last` 之前指向一个并未被一致保存的文件名；
   现在训练每个 epoch 写入 `last_model.pth`，全数据重训后写入 `final_model.pth`。
 - 预测现在同时保存可读 CSV 和 Kaggle 提交 CSV：概率文件、二值预测文件、RLE 提交文件分开保存。
@@ -221,7 +234,7 @@ output/image_classification/<experiment>/
 ### 验证说明
 - 所有修改的源文件通过 `py_compile` 检查。
 - 在 `biometrics` 环境中，共享脚本和实验封装脚本的帮助输出均正常。
-- 用虚拟输入验证两个 backbone 前向传播均返回 `(1, 20)`。
+- 用虚拟输入验证两个骨干网络前向传播均返回 `(1, 20)`。
 
 ### 2026-04-25 后续更新
 - 数据探索步骤不再重写 PNG（数据集已提前转换完毕），
@@ -283,74 +296,75 @@ output/image_classification/<experiment>/
 
 ---
 
-## 2026-05-09 ConvNeXt Larger Variant Findings
+## 2026-05-09 ConvNeXt 更大变体发现
 
-- Initial motivation: `convnext_tiny_320` had Kaggle display **0.43673** and
-  adjusted classification Dice **0.87346**. Later Kaggle testing confirmed
-  `convnext_small_320` improves this to display **0.44905** and adjusted
-  classification Dice **0.89810**.
-- There is no "Middle" ConvNeXt naming in torchvision. The available family is
-  Tiny, Small, Base, and Large.
-- Local `torchvision==0.26.0+cu130` exposes all four factories and all four
-  ImageNet-1K weight enums:
+- 初始动机：`convnext_tiny_320` 的 Kaggle 显示分数为 **0.43673**，换算后的分类 Dice 为 **0.87346**。后续 Kaggle 测试确认，`convnext_small_320` 提升到显示分数 **0.44905**，换算后的分类 Dice 为 **0.89810**。
+- `torchvision` 中没有名为 "Middle" 的 ConvNeXt 版本；可用系列是 Tiny、Small、Base 和 Large。
+- 本地 `torchvision==0.26.0+cu130` 暴露了全部四个模型构造函数和四组 ImageNet-1K 权重枚举：
   - `convnext_tiny` / `ConvNeXt_Tiny_Weights.IMAGENET1K_V1`
   - `convnext_small` / `ConvNeXt_Small_Weights.IMAGENET1K_V1`
   - `convnext_base` / `ConvNeXt_Base_Weights.IMAGENET1K_V1`
   - `convnext_large` / `ConvNeXt_Large_Weights.IMAGENET1K_V1`
-- Local parameter counts:
-  - Tiny: 28.59M, feature dim 768.
-  - Small: 50.22M, feature dim 768.
-  - Base: 88.59M, feature dim 1024.
-  - Large: 197.77M, feature dim 1536.
-- Recommended experiment order:
-  1. `convnext_small_320` as the most likely useful next step.
-  2. `convnext_base_320` if Small is promising.
-  3. `convnext_large_320` only if time/GPU budget allows; it may overfit and is
-     expensive on 8 GB VRAM.
-- `CV_GA2.pdf` confirms that the classification task allows choosing any known
-  architecture and encourages transfer learning/fine-tuning, as long as
-  pre-training did not use PASCAL VOC images. ImageNet-1K ConvNeXt weights fit
-  that constraint.
+- 本地参数量：
+  - Tiny：28.59M，特征维度 768。
+  - Small：50.22M，特征维度 768。
+  - Base：88.59M，特征维度 1024。
+  - Large：197.77M，特征维度 1536。
+- 推荐实验顺序：
+  1. `convnext_small_320` 作为最可能有效的下一步。
+  2. 如果 Small 表现有提升，再尝试 `convnext_base_320`。
+  3. 只有在时间和 GPU 预算允许时才尝试 `convnext_large_320`；它在 8 GB 显存上成本高，也更容易在 750 张训练图上过拟合。
+- `CV_GA2.pdf` 确认分类任务允许选择已知架构，并鼓励迁移学习和 fine-tuning；前提是预训练没有使用 PASCAL VOC 图像。ImageNet-1K ConvNeXt 权重符合这个约束。
 
-### `convnext_small_320` result
-- Full train/evaluate/predict pipeline completed locally.
-- val mAP: **0.8995381256**, which is above `convnext_tiny_320`
-  (**0.8932642162**) on the same validation protocol.
-- Best val loss: **0.02936561396** at Stage 2 epoch 2. Later Stage 2 epochs
-  overfit: training loss continues falling, while val loss rises.
-- Stage 3 final full-train loss: **0.0073612132**.
-- Weakest AP classes: diningtable **0.5570**, pottedplant **0.7518**,
-  sofa **0.7872**, bottle **0.7914**, sheep **0.8167**.
-- Submission generated with 1500 rows:
+### `convnext_small_320` 结果
+- 已在本地完成完整 train/evaluate/predict 流水线。
+- val mAP：**0.8995381256**，在相同验证协议下高于 `convnext_tiny_320`（**0.8932642162**）。
+- 最优 val loss：第二阶段第 2 个 epoch 为 **0.02936561396**。后续第二阶段 epoch 出现过拟合：训练 loss 继续下降，但 val loss 上升。
+- 第三阶段全量训练最终 loss：**0.0073612132**。
+- AP 最弱类别：diningtable **0.5570**、pottedplant **0.7518**、sofa **0.7872**、bottle **0.7914**、sheep **0.8167**。
+- 已生成 1500 行提交文件：
   `submission_classification_convnext_small_320.csv`.
-- Kaggle result received on 2026-05-09:
-  - complete submission score: **0.87588**.
-  - classification Kaggle display: **0.44905**.
-  - adjusted classification Dice: **0.89810**.
-  - decision: `convnext_small_320` supersedes `convnext_tiny_320` as the best
-    classification model.
+- 2026-05-09 收到 Kaggle 结果：
+  - 完整提交分数：**0.87588**。
+  - 分类 Kaggle 显示分数：**0.44905**。
+  - 换算后的分类 Dice：**0.89810**。
+  - 决策：`convnext_small_320` 取代 `convnext_tiny_320`，成为当前最佳分类模型。
 
-### Colab training decision
-- Local RTX 4060 Laptop 8 GB can fit all current ConvNeXt presets only because
-  batch size is reduced for larger models.
-- Small is a good local/Colab candidate; Base and Large are better suited for
-  Colab Pro/A100/L4-style runtimes if available.
-- Added `Image classification/colab_train_convnext.ipynb` with:
-  - ConvNeXt Tiny/Small/Base/Large presets.
-  - Conservative Colab batch sizes: Tiny 32, Small 16, Base 8, Large 4.
-  - AMP mixed precision to reduce memory and improve throughput.
-  - Google Drive dataset/output paths.
-  - A one-step `memory_probe()` before full training.
+### Colab 训练决策
+- 本地 RTX 4060 Laptop 8 GB 能运行当前全部 ConvNeXt 预设，主要依赖于更大模型使用更小批大小。
+- Small 适合本地或 Colab 运行；如果有 Colab Pro、A100、L4 等更强运行时，Base 和 Large 更适合放到那里尝试。
+- 已新增 `Image classification/colab_train_convnext.ipynb`，包含：
+  - ConvNeXt Tiny/Small/Base/Large 预设。
+  - 保守的 Colab 批大小：Tiny 32、Small 16、Base 8、Large 4。
+  - AMP 混合精度，用于降低显存占用并提高吞吐。
+  - Google Drive 数据集和输出路径。
+  - 完整训练前的一步 `memory_probe()` 显存检查。
 
-### Colab figure-output finding
-- `convnext_large_320_colab/figures` was empty because the Colab notebook only
-  created the directory and saved CSV metrics. It did not import matplotlib or
-  call `savefig`.
-- The local evaluation script `05_evaluate.py` already saves
-  `figures/eval_ap_per_class.png`; the Colab notebook had missed that plotting
-  step while being made self-contained.
-- Updated `Image classification/colab_train_convnext.ipynb` to save:
-  - `figures/training_history.png` from `metrics/training_history.csv`.
-  - `figures/eval_ap_per_class.png` from `metrics/ap_per_class.csv`.
-- Added an optional regeneration cell so existing Colab runs can create the
-  missing figures from CSV files without rerunning training.
+### Colab 图像输出发现
+- `convnext_large_320_colab/figures` 为空，是因为 Colab notebook 只创建了目录并保存 CSV 指标，没有导入 matplotlib，也没有调用 `savefig`。
+- 本地评估脚本 `05_evaluate.py` 已经会保存 `figures/eval_ap_per_class.png`；Colab notebook 在自包含改写时遗漏了这一步绘图。
+- 已更新 `Image classification/colab_train_convnext.ipynb`，现在会保存：
+  - 从 `metrics/training_history.csv` 生成的 `figures/training_history.png`。
+  - 从 `metrics/ap_per_class.csv` 生成的 `figures/eval_ap_per_class.png`。
+- 新增可选重生成 cell，使已有 Colab 运行可以直接从 CSV 文件补图，无需重新训练。
+
+---
+
+## 2026-05-10 Ensemble 与弱类别恢复
+
+- 在引入 transformer 依赖之前，新增了一个低成本的概率 ensemble 路径。CLI 为 `Image classification/07_ensemble.py`，支持 `--mode val-search` 和 `--mode predict`。
+- 最新本地 `val-search` 使用了可用 checkpoint：`resnet50_224`、`efficientnet_b3_320` 和 `convnext_small_320`；由于当前 checkout 中没有 `convnext_tiny_320` 的本地 `best_model.pth`，脚本跳过了它。
+- Ensemble 结果：自动选择逐类别加权，val mAP **0.925702**，弱类别平均 F1 **0.790040**。同一套 TTA 验证搜索中的单模型基线为：
+  - `resnet50_224`：mAP **0.828671**，弱类别 F1 **0.644744**。
+  - `efficientnet_b3_320`：mAP **0.860495**，弱类别 F1 **0.687839**。
+  - `convnext_small_320`：mAP **0.902909**，弱类别 F1 **0.740159**。
+- 弱类别 ensemble 权重：
+  - `diningtable`：0.75 EfficientNet-B3 + 0.25 ConvNeXt-Small。
+  - `bottle`：0.50 ResNet-50 + 0.125 EfficientNet-B3 + 0.375 ConvNeXt-Small。
+  - `pottedplant`、`sofa`：主要依赖 ConvNeXt-Small。
+  - `sheep`：0.333 EfficientNet-B3 + 0.667 ConvNeXt-Small。
+- 已生成：
+  - `output/image_classification/ensemble_existing/metrics/ensemble_weights.json`
+  - `output/image_classification/ensemble_existing/submissions/submission_classification_ensemble_existing.csv`
+  - `output/image_classification/ensemble_existing/submissions/submission_final_ensemble_existing__seg_submission_exp_v10_segman_b_iter25000.csv`
+- 新增 `convnext_small_320_pad_sampler`：保留 ConvNeXt-Small，但使用方形 padding 后再 resize、弱类别加权采样，以及第二阶段 patience=4 的 early stopping。

@@ -1,11 +1,11 @@
 # efficientnet_b3_320
 
-High-performing classification experiment.
+表现较强的 EfficientNet-B3 分类实验。
 
-- Backbone: EfficientNet-B3
-- Image size: 320 x 320
-- Loss: AsymmetricLoss
-- Output: `output/image_classification/efficientnet_b3_320/`
+- 骨干网络：EfficientNet-B3
+- 图像尺寸：320 x 320
+- 损失函数：AsymmetricLoss
+- 输出目录：`output/image_classification/efficientnet_b3_320/`
 
 ```bash
 python "Image classification/experiments/efficientnet_b3_320/train.py"

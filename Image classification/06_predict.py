@@ -127,7 +127,7 @@ def main(
         test_df,
         DATA_DIR,
         split="test",
-        transform=get_val_transform(config.img_size),
+        transform=get_val_transform(config.img_size, mode=config.transform_mode),
     )
     test_loader = DataLoader(
         test_ds,
