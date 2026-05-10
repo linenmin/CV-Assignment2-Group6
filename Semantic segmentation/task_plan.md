@@ -2,7 +2,12 @@
 
 ## Goal
 
-Build a maintainable `Semantic segmentation` project around `MMSegmentation + SegNeXt-S` with validated data analysis, preprocessing visualization, pretrained initialization, and iterative leaderboard experiments.
+Build a maintainable `Semantic segmentation` workspace that supports:
+
+- validated data analysis and preprocessing visualization
+- reproducible training and evaluation experiments
+- leaderboard-facing submission export and tracking
+- model-family iteration from `SegNeXt` to `SegFormer` and `SegMAN`
 
 ## Phases
 
@@ -62,7 +67,13 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 
 ## Status
 
-**Currently after Phase 16** - V5 CE + Dice has completed locally and its public Kaggle score has been recorded. The next iteration should prioritize validation/test mismatch analysis, classification merge, or conservative ensembling rather than simply chasing higher local `mIoU`.
+**Current state after V10 closeout**
+
+- The strongest segmentation-only result is `submission_exp_v10_segman_b_iter25000.csv` with Kaggle public score `0.42682`.
+- The strongest end-to-end result is `submission_exp_v10_segman_b_iter25000_with_classification.csv` with Kaggle public score `0.85725`.
+- The active best segmentation checkpoint is `external/SegMAN/segmentation/outputs/ga2_segman_b/best_mIoU_iter_25000.pth`.
+- The SegFormer line remains valuable as an ablation and ensemble track, but it is no longer the best-performing path.
+- The project is now in closeout mode: preserve reproducibility, keep only useful artifacts, and avoid restarting low-yield tuning directions.
 
 ## Current Diagnosis
 
@@ -444,3 +455,30 @@ Build a maintainable `Semantic segmentation` project around `MMSegmentation + Se
 - Current WSL blocker:
   - install CUDA toolkit / `nvcc` inside WSL before building the SegMAN selective scan extension
   - after `nvcc` is available, run `bash scripts/wsl_setup_segman.sh`, then place the official SegMAN-B encoder checkpoint and run `bash scripts/wsl_train_segman_b.sh`
+
+## Phase 26 Result
+
+- SegMAN-B training was completed successfully in WSL2.
+  - best checkpoint: `external/SegMAN/segmentation/outputs/ga2_segman_b/best_mIoU_iter_25000.pth`
+  - final checkpoint: `external/SegMAN/segmentation/outputs/ga2_segman_b/iter_30000.pth`
+  - retained checkpoint alias: `external/SegMAN/segmentation/outputs/ga2_segman_b/latest.pth`
+- Best local validation metrics:
+  - `mIoU=77.20`
+  - `mAcc=85.27`
+  - `aAcc=95.47`
+- Exported SegMAN segmentation-only submission:
+  - file: `outputs/submissions/submission_exp_v10_segman_b_iter25000.csv`
+  - Kaggle public score: `0.42682`
+- Exported final merged submission with teammate classification:
+  - file: `outputs/submissions/submission_exp_v10_segman_b_iter25000_with_classification.csv`
+  - classification source: `Image-Classification:output/submission_final.csv`
+  - Kaggle public score: `0.85725`
+- Storage policy was enforced for SegMAN outputs:
+  - keep only `best`, `last`, and `latest`
+  - remove redundant intermediate checkpoints
+
+## Closeout Decision
+
+- Do not spend more training budget on earlier `SegNeXt` loss/sampler/crop lines; they are now dominated by later model-family upgrades.
+- Do not restart `SegFormer` single-model tuning as the primary path; `V6/V7/V8/V9` should be kept as a strong ablation and ensemble record.
+- If any further score attempt is needed, prioritize low-cost inference-side work on top of the current SegMAN-B best checkpoint rather than another full retraining cycle.

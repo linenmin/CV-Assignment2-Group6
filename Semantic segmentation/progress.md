@@ -153,7 +153,11 @@
 
 ## Current Focus
 
-- Finish checkpoint cleanup and keep the repository storage footprint under control while preserving the reproducible main experiment artifacts.
+- Close out the segmentation track around the validated `SegMAN-B` result.
+- Keep the repository state reproducible and lightweight:
+  - preserve the final tracked submission CSV files
+  - preserve only useful SegMAN checkpoints in ignored training outputs
+  - keep planning, findings, and score-tracking documents aligned
 
 ## Verification Notes
 

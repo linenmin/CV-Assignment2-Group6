@@ -20,8 +20,9 @@ Core notes:
 ## Current scope
 
 - data analysis and preprocessing visualization
-- MMSegmentation-based training configs
-- train / validate scripts
+- iterative segmentation experiments from `SegNeXt` to `SegFormer` and `SegMAN`
+- training / validation / inference / submission tooling
+- Kaggle-facing submission tracking
 
 ## Training
 
@@ -41,6 +42,12 @@ python .\scripts\train.py --max-iters 3000 --val-interval 500
 python .\scripts\train.py --checkpoint-retention all
 ```
 
+Current historical note:
+
+- the strongest tracked result in this repository is no longer a `SegNeXt` run
+- the best segmentation-only submission is `submission_exp_v10_segman_b_iter25000.csv`
+- the best final merged submission is `submission_exp_v10_segman_b_iter25000_with_classification.csv`
+
 Checkpoint retention policy:
 
 - default is `best_last`
@@ -52,7 +59,7 @@ Checkpoint retention policy:
 ## Validation
 
 ```powershell
-python .\scripts\validate.py --checkpoint .\outputs\logs\exp_v1_ade20k_main\best_mIoU_iter_8000.pth
+python .\scripts\validate.py --checkpoint .\outputs\logs\exp_v8_segformer_b5\best_mIoU_iter_11000.pth
 ```
 
 ## Training Analysis
@@ -60,7 +67,7 @@ python .\scripts\validate.py --checkpoint .\outputs\logs\exp_v1_ade20k_main\best
 Generate training curves, runtime diagnostics, and a markdown summary:
 
 ```powershell
-python .\scripts\analyze_training_run.py --work-dir .\outputs\logs\exp_v3_region_rebalance --submission-file submission_exp_v3_region_rebalance.csv
+python .\scripts\analyze_training_run.py --work-dir .\outputs\logs\exp_v8_segformer_b5 --submission-file submission_exp_v8_segformer_b5.csv
 ```
 
 This writes:
@@ -75,7 +82,7 @@ This writes:
 Generate predicted segmentation masks for the full test set:
 
 ```powershell
-python .\scripts\predict_test_segmentation.py --config .\configs\experiments\segnext_s_512x512_adamw_poly_v3_region_rebalance.py --checkpoint .\outputs\logs\exp_v3_region_rebalance\best_mIoU_iter_5000.pth --output-dir .\outputs\predictions\exp_v3_region_rebalance_test
+python .\scripts\predict_test_segmentation.py --config .\configs\experiments\segformer_b5_512x512_adamw_poly_v8.py --checkpoint .\outputs\logs\exp_v8_segformer_b5\best_mIoU_iter_11000.pth --output-dir .\outputs\predictions\exp_v8_segformer_b5_test
 ```
 
 ## Submission Export
@@ -83,13 +90,14 @@ python .\scripts\predict_test_segmentation.py --config .\configs\experiments\seg
 Export a Kaggle-ready `submission.csv` from predicted test masks:
 
 ```powershell
-python .\scripts\export_submission.py --prediction-dir .\outputs\predictions\exp_v3_region_rebalance_test --output-path .\outputs\submissions\submission_exp_v3_region_rebalance.csv --classification-fill 0
+python .\scripts\export_submission.py --prediction-dir .\outputs\predictions\exp_v8_segformer_b5_test --output-path .\outputs\submissions\submission_exp_v8_segformer_b5.csv --classification-fill 0
 ```
 
 Notes:
 
 - `classification-fill 0` is only a placeholder workflow for segmentation-only iteration
 - final leaderboard interpretation must consider whether classification is still placeholder output
+- do not use the legacy generic `outputs/submissions/submission.csv`; prefer experiment-specific filenames
 
 ## Submission Ensemble
 
@@ -172,6 +180,11 @@ Notes:
 After training, export test predictions and a Kaggle CSV:
 
 ```powershell
-python .\scripts\predict_segman_test.py --config .\external\SegMAN\segmentation\local_configs\segman\ga2\segman_b_ga2.py --checkpoint .\external\SegMAN\segmentation\outputs\ga2_segman_b\best_mIoU_iter_XXXXX.pth --output-dir .\outputs\predictions\exp_v10_segman_b_test
-python .\scripts\export_submission.py --prediction-dir .\outputs\predictions\exp_v10_segman_b_test --output-path .\outputs\submissions\submission_exp_v10_segman_b.csv --classification-fill 0
+python .\scripts\predict_segman_test.py --config .\external\SegMAN\segmentation\local_configs\segman\ga2\segman_b_ga2.py --checkpoint .\external\SegMAN\segmentation\outputs\ga2_segman_b\best_mIoU_iter_25000.pth --output-dir .\outputs\predictions\exp_v10_segman_b_iter25000
+python .\scripts\export_submission.py --prediction-dir .\outputs\predictions\exp_v10_segman_b_iter25000 --output-path .\outputs\submissions\submission_exp_v10_segman_b_iter25000.csv --classification-fill 0
 ```
+
+Current best tracked outputs:
+
+- segmentation-only: [submission_exp_v10_segman_b_iter25000.csv](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/submissions/submission_exp_v10_segman_b_iter25000.csv)
+- merged final submission: [submission_exp_v10_segman_b_iter25000_with_classification.csv](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/submissions/submission_exp_v10_segman_b_iter25000_with_classification.csv)
