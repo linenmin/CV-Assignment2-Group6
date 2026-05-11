@@ -116,6 +116,10 @@ class ExperimentConfig:
         return self.metrics_dir / "training_history.csv"
 
     @property
+    def training_history_plot_path(self) -> Path:
+        return self.figures_dir / "training_history.png"
+
+    @property
     def eval_summary_path(self) -> Path:
         return self.metrics_dir / "evaluation_summary.csv"
 
@@ -184,6 +188,38 @@ EXPERIMENTS = {
         img_size=320,
         batch_size=2,
         eval_batch_size=4,
+    ),
+    "convnextv2_tiny_320": ExperimentConfig(
+        name="convnextv2_tiny_320",
+        backbone="convnextv2_tiny",
+        img_size=320,
+        batch_size=8,
+        eval_batch_size=16,
+        early_stop_patience=4,
+    ),
+    "convnextv2_base_320": ExperimentConfig(
+        name="convnextv2_base_320",
+        backbone="convnextv2_base",
+        img_size=320,
+        batch_size=4,
+        eval_batch_size=8,
+        early_stop_patience=4,
+    ),
+    "vit_b_16_224": ExperimentConfig(
+        name="vit_b_16_224",
+        backbone="vit_b_16",
+        img_size=224,
+        batch_size=8,
+        eval_batch_size=16,
+        early_stop_patience=4,
+    ),
+    "vit_l_16_224": ExperimentConfig(
+        name="vit_l_16_224",
+        backbone="vit_l_16",
+        img_size=224,
+        batch_size=2,
+        eval_batch_size=4,
+        early_stop_patience=4,
     ),
     "resnet50_224": ExperimentConfig(
         name="resnet50_224",

@@ -60,12 +60,12 @@
 - **Status:** complete
 
 ### Phase 7: Notebook 整合与交付
-- [ ] 填写学生姓名（notebook cell 0）
+- [x] 填写学生姓名（notebook cell 0）：Kaixi Yao, Enmin Lin, Taicheng Liu, Zhenyang Li
 - [x] Section 3: 实现对抗攻击（FGSM / PGD）
 - [x] Section 4: 填写讨论内容（已在 `Discussion.md` 中完成草稿）
 - [x] 在 notebook 中展示/引用分类代码结果
-- **状态：** 待完成
-- **Status:** pending
+- **状态：** 已完成
+- **Status:** complete
 
 ---
 
@@ -316,6 +316,16 @@
   `output/image_classification/ensemble_existing/submissions/submission_final_ensemble_existing__seg_submission_exp_v10_segman_b_iter25000.csv`.
 
 ### 下一步
-- 将 ensemble final CSV 上传到 Kaggle。
-- 如果 Kaggle 分数提升，将 `ensemble_existing` 作为最终提交的分类默认方案。
-- 如果 Kaggle 分数没有提升，训练 `convnext_small_320_pad_sampler`，比较弱类别 AP/F1 后再决定是否尝试 transformer 依赖。
+- 用户反馈 ensemble 结果不如 `convnext_small_320`，因此不采用 `ensemble_existing` 作为最终默认分类方案。
+- 下一步重点转向 Vision Transformer。
+
+---
+
+## 会话 2026-05-11：ViT 实验启动
+
+- 用户确认正式学生姓名：Kaixi Yao, Enmin Lin, Taicheng Liu, Zhenyang Li；Phase 7 已完成。
+- 用户反馈 `ensemble_existing` 的结果不如 `convnext_small_320`，因此 ensemble 只作为分析/对照保留。
+- 下一步重点转向 Vision Transformer：
+  - `vit_b_16_224`：主线实验，torchvision ViT-B/16 ImageNet-1K 预训练权重，224 x 224 输入，batch size 8。
+  - `vit_l_16_224`：可选重模型实验，batch size 2，更适合 Colab Pro 或更强 GPU。
+- ViT 先使用 224 输入，是为了保持 torchvision 预训练 positional embedding 的原生尺寸；如果 B/16 有希望，再单独实现 320 输入的 positional embedding 插值实验。

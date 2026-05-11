@@ -28,6 +28,22 @@ experiments/
     train.py
     evaluate.py
     predict.py
+  convnextv2_tiny_320/
+    train.py
+    evaluate.py
+    predict.py
+  convnextv2_base_320/
+    train.py
+    evaluate.py
+    predict.py
+  vit_b_16_224/
+    train.py
+    evaluate.py
+    predict.py
+  vit_l_16_224/
+    train.py
+    evaluate.py
+    predict.py
   resnet50_224/
     train.py
     evaluate.py
@@ -41,6 +57,7 @@ output/image_classification/<experiment>/
   checkpoints/
   metrics/
   figures/
+    training_history.png
   predictions/
     test_probabilities_<experiment>.csv
     test_binary_predictions_<experiment>.csv
@@ -65,9 +82,29 @@ python "Image classification/experiments/convnext_small_320_pad_sampler/train.py
 python "Image classification/run_pipeline.py" --experiment convnext_small_320_pad_sampler
 
 python "Image classification/run_pipeline.py" --experiment convnext_base_320
+
+python "Image classification/experiments/convnextv2_tiny_320/train.py"
+python "Image classification/run_pipeline.py" --experiment convnextv2_tiny_320
+
+python "Image classification/run_pipeline.py" --experiment convnextv2_base_320
+
+python "Image classification/experiments/vit_b_16_224/train.py"
+python "Image classification/run_pipeline.py" --experiment vit_b_16_224
+
+python "Image classification/run_pipeline.py" --experiment vit_l_16_224
 ```
 
 `convnext_small_320_pad_sampler` 保留 ConvNeXt-Small 骨干网络，但将图像预处理改为先方形填充再缩放；训练时对 `bottle`、`diningtable`、`pottedplant`、`sheep`、`sofa` 做温和加权采样；第二阶段使用 patience=4 的提前停止。
+
+`convnextv2_tiny_320` 使用 Hugging Face Transformers 的 `facebook/convnextv2-tiny-1k-224` 作为 backbone，并继续使用本项目的多标签分类头和 AsymmetricLoss。它需要在 `biometrics` 环境安装 `transformers`。`convnextv2_base_320` 是更重的可选对照，建议 Tiny 有希望后再跑。
+
+本地训练结束后会自动根据 `metrics/training_history.csv` 生成 `figures/training_history.png`。如需为已有实验补图，可以运行：
+
+```bash
+python "Image classification/08_plot_training_history.py" --all
+```
+
+`vit_b_16_224` 是当前推荐先跑的 Vision Transformer 基线。它使用 torchvision 的 ViT-B/16 ImageNet-1K 预训练权重，并保持 224 x 224 输入，避免一开始就引入 positional embedding 插值变量。`vit_l_16_224` 已注册为更重的可选实验，更适合放到 Colab Pro 或更强 GPU 上跑。
 
 如果要在不重新训练的情况下集成已有分类模型：
 
@@ -77,6 +114,8 @@ python "Image classification/07_ensemble.py" --mode predict --name ensemble_exis
 ```
 
 输出会写入 `output/image_classification/ensemble_existing/`，包括 ensemble 指标、概率文件、二值预测和分类提交 CSV。
+
+当前 Kaggle 反馈显示 `ensemble_existing` 不如 `convnext_small_320`，因此它只作为分析/对照保留，不作为默认最终分类方案。
 
 `convnext_large_320` 也已注册，但它在 8 GB GPU 上批大小只有 2，训练成本较高。除非明确要测试最大 torchvision ConvNeXt 骨干网络，否则建议先跑 Small 和 Base。
 

@@ -96,6 +96,8 @@ output/image_classification/<experiment>/
 | `convnext_small_320` | ConvNeXt-Small | 320×320 | AsymmetricLoss | 当前最佳分类结果（v4） |
 | `convnext_base_320` | ConvNeXt-Base | 320×320 | AsymmetricLoss | 待测，计算量更高 |
 | `convnext_large_320` | ConvNeXt-Large | 320×320 | AsymmetricLoss | 待测，高显存/过拟合风险 |
+| `vit_b_16_224` | ViT-B/16 | 224×224 | AsymmetricLoss | Vision Transformer 主线基线 |
+| `vit_l_16_224` | ViT-L/16 | 224×224 | AsymmetricLoss | 可选重模型，更适合 Colab/强 GPU |
 | `resnet50_224` | ResNet-50 | 224×224 | AsymmetricLoss | 基线对比（v1.1） |
 
 ## 运行方式
@@ -120,6 +122,7 @@ python "Image classification/experiments/convnext_tiny_320/predict.py"
 
 python "Image classification/run_pipeline.py" --experiment convnext_small_320 --skip-explore
 python "Image classification/run_pipeline.py" --experiment convnext_base_320 --skip-explore
+python "Image classification/run_pipeline.py" --experiment vit_b_16_224 --skip-explore
 
 python "Image classification/experiments/efficientnet_b3_320/train.py"
 python "Image classification/experiments/resnet50_224/train.py"
@@ -129,6 +132,11 @@ ConvNeXt 在当前 `torchvision` 环境中可用的系列为 Tiny/Small/Base/Lar
 Small 已经超过 Tiny，成为当前最佳分类结果；若继续冲分，再考虑
 `convnext_base_320`。`convnext_large_320` 参数量约 198M，在 8 GB 显存上 batch
 size 已降到 2，训练慢且更容易在 750 张训练图上过拟合。
+
+ViT 路线从 `vit_b_16_224` 开始。它使用 torchvision 的 ViT-B/16 ImageNet-1K
+预训练权重，并保持 224×224 输入，以避免一开始就引入 positional embedding
+插值变量。如果这个基线接近或超过 ConvNeXt-Small，再单独做 320 输入或 ViT-L
+实验。
 
 ## 关键设计决策
 
@@ -207,7 +215,7 @@ python "Image classification/merge_submission.py" \
 
 ## Ensemble 与弱类别恢复
 
-在尝试新的 transformer 依赖之前，当前成本最低的提升路径是先做概率 ensemble：
+概率 ensemble 已实现并可复现：
 
 ```bash
 python "Image classification/07_ensemble.py" --mode val-search --name ensemble_existing
@@ -218,7 +226,7 @@ python "Image classification/merge_submission.py" \
   --out-csv output/image_classification/ensemble_existing/submissions/submission_final_ensemble_existing__seg_submission_exp_v10_segman_b_iter25000.csv
 ```
 
-ensemble 搜索使用与单模型实验相同的验证集划分，先拟合全局权重和逐类别权重，然后保存阈值和权重 JSON。最新本地运行中，由于 `convnext_tiny_320` 的本地 checkpoint 缺失，脚本跳过了它，并集成了 `resnet50_224`、`efficientnet_b3_320` 和 `convnext_small_320`，验证集 mAP 达到 **0.9257**。
+ensemble 搜索使用与单模型实验相同的验证集划分，先拟合全局权重和逐类别权重，然后保存阈值和权重 JSON。最新本地运行中，由于 `convnext_tiny_320` 的本地 checkpoint 缺失，脚本跳过了它，并集成了 `resnet50_224`、`efficientnet_b3_320` 和 `convnext_small_320`，验证集 mAP 达到 **0.9257**。Kaggle 反馈显示该 ensemble 不如 `convnext_small_320`，因此它只作为分析/对照保留，不作为默认最终方案。
 
 详细方法说明见：
 

@@ -7,6 +7,7 @@ Image classification/
   05_evaluate.py         # configurable mAP + threshold search
   06_predict.py          # configurable test prediction + submission CSV
   07_ensemble.py         # val-search and prediction for probability ensembles
+  08_plot_training_history.py  # generate training_history.png from training_history.csv
   run_pipeline.py        # end-to-end experiment runner
   merge_submission.py    # merge classification and segmentation CSVs
   kaggle_train.ipynb     # self-contained Kaggle GPU training notebook
@@ -44,6 +45,26 @@ Image classification/
       train.py
       evaluate.py
       predict.py
+    convnextv2_tiny_320/
+      README.md
+      train.py
+      evaluate.py
+      predict.py
+    convnextv2_base_320/
+      README.md
+      train.py
+      evaluate.py
+      predict.py
+    vit_b_16_224/
+      README.md
+      train.py
+      evaluate.py
+      predict.py
+    vit_l_16_224/
+      README.md
+      train.py
+      evaluate.py
+      predict.py
     resnet50_224/
       README.md
       train.py
@@ -57,6 +78,7 @@ output/image_classification/
     checkpoints/
     metrics/
     figures/
+      training_history.png
     predictions/
       test_probabilities_<experiment>.csv
       test_binary_predictions_<experiment>.csv

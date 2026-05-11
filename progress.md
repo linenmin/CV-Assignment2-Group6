@@ -664,3 +664,23 @@
 - 当前 notebook cell 0 仍为 `Student names: TODO: add final group member names`。
 - Git 历史中的作者线索仍只有 `Enmin Lin`、`121philip`、`hapgab` 和 bot 作者，无法等同于正式学生姓名。
 - 结论：不能安全自动完成剩余 1/7；需要用户提供正式组员姓名后才能填写 notebook 并将第 7 阶段标记为完成。
+### Stop hook 2026-05-11: Phase 7 final blocker
+- Hook `stop:4` reported planning-with-files status as 6/7 phases complete.
+- Updated this progress log before re-reading `task_plan.md`, per hook instruction.
+- Expected remaining blocker: official student names for `ga2_group_6.ipynb` cell 0.
+- Next action: re-read `task_plan.md`, inspect notebook cell 0 and repository evidence for a reliable group member list. If no authoritative source exists, ask the user for the final names instead of guessing from Git authors.
+- Confirmed after inspection: `ga2_group_6.ipynb` cell 0 still contains `Student names: TODO: add final group member names`.
+- Repository text search did not find an authoritative member list. Git history only exposes author hints (`Enmin Lin`, `121philip`, `hapgab`), which are not reliable enough to write into the grading notebook without user confirmation.
+- User provided the official names: Kaixi Yao, Enmin Lin, Taicheng Liu, Zhenyang Li.
+- Updated `ga2_group_6.ipynb` cell 0 with those names and marked Phase 7 complete in `task_plan.md`.
+
+### 会话：2026-05-11 - ViT 实验启动
+- 用户反馈 `ensemble_existing` 的 Kaggle 结果不如 `convnext_small_320`，因此不采用 ensemble 作为最终默认分类方案。
+- 下一步转向 Vision Transformer。首选低风险基线为 `vit_b_16_224`：使用 `torchvision.models.vit_b_16` 的 ImageNet-1K 预训练权重、224x224 输入、AsymmetricLoss、三阶段训练、per-class 阈值和 TTA。
+- `vit_l_16_224` 作为更重的可选实验入口，建议放到 Colab 或更强 GPU 上跑。
+- 已在 `03_model.py` 中加入 ViT class-token feature extractor，并注册 `vit_b_16`、`vit_l_16`。
+- 已在 `shared.py` 中注册 `vit_b_16_224` 和 `vit_l_16_224`，并新增对应 train/evaluate/predict 入口与 README。
+- 验证完成：
+  - 11 个相关 Python 文件可解析；
+  - `vit_b_16_224` 和 `vit_l_16_224` 前向输出均为 `(1, 20)`；
+  - `ga2_group_6.ipynb` JSON 可加载，cell 0 已包含正式姓名，代码 cell 在忽略合法 Jupyter shell/magic 行后可编译。

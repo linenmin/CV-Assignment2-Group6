@@ -368,3 +368,15 @@ output/image_classification/<experiment>/
   - `output/image_classification/ensemble_existing/submissions/submission_classification_ensemble_existing.csv`
   - `output/image_classification/ensemble_existing/submissions/submission_final_ensemble_existing__seg_submission_exp_v10_segman_b_iter25000.csv`
 - 新增 `convnext_small_320_pad_sampler`：保留 ConvNeXt-Small，但使用方形 padding 后再 resize、弱类别加权采样，以及第二阶段 patience=4 的 early stopping。
+
+## 2026-05-11 Vision Transformer 方向
+
+- 用户反馈 `ensemble_existing` 的 Kaggle 结果不如 `convnext_small_320`，因此 ensemble 不作为最终默认分类方案。
+- ViT 主线先从 `vit_b_16_224` 开始：
+  - `torchvision.models.vit_b_16`
+  - ImageNet-1K 预训练权重
+  - 224 x 224 输入
+  - batch size 8
+  - AsymmetricLoss、三阶段训练、per-class 阈值、TTA 沿用现有分类流水线
+- `vit_l_16_224` 作为可选重模型入口，batch size 2；更适合 Colab Pro 或更强 GPU。
+- 暂不直接做 320 输入 ViT，因为 torchvision 官方 ViT 权重的 positional embedding 原生对应 224 输入；如果 `vit_b_16_224` 结果有希望，再实现 positional embedding 插值版本。

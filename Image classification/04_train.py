@@ -306,10 +306,13 @@ def main(config: ExperimentConfig | None = None):
 
     torch.save(model.state_dict(), config.final_checkpoint)
     pd.DataFrame(history).to_csv(config.training_history_path, index=False)
+    plot_module = load_module("plot_training_history", _here / "08_plot_training_history.py")
+    plot_module.plot_experiment(config)
 
     print(f"\nTraining complete. Best val loss: {best_val_loss:.4f}")
     print(f"Checkpoints: {config.checkpoints_dir}")
     print(f"Training history: {config.training_history_path}")
+    print(f"Training history figure: {config.training_history_plot_path}")
     return config
 
 
