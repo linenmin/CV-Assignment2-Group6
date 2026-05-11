@@ -552,3 +552,31 @@
   - `leftImg8bit/val` exists on the external drive.
   - `gtFine/val` is missing; the current extracted labels contain only `gtFine/test`.
   - the script correctly raises `FileNotFoundError` and tells the user to extract the correct `gtFine_trainvaltest.zip` so `gtFine/val` exists.
+
+### 2026-05-11 (Cityscapes External Evaluation Completed)
+
+- Rechecked the external drive after re-extraction:
+  - `G:\Datasets\leftImg8bit_trainvaltest\leftImg8bit` contains `train`, `val`, and `test`
+  - `G:\Datasets\gtFine_trainvaltest\gtFine` contains `train`, `val`, and `test`
+  - `gtFine/val` contains `500` `*_gtFine_labelIds.png` files
+- WSL2 execution details:
+  - mounted `G:` into WSL with `drvfs`
+  - used the existing WSL `segman` Conda environment
+  - used the current SegMAN-B best checkpoint `best_mIoU_iter_25000.pth`
+- Smoke evaluation:
+  - `--limit 1` completed successfully and wrote outputs under `outputs/cityscapes_generalization/smoke_segman_b_iter25000`
+- Full evaluation:
+  - evaluated all `500` Cityscapes validation samples
+  - output directory: `outputs/cityscapes_generalization/segman_b_iter25000`
+  - overlap-class `mIoU=0.3484`
+- Per-class IoU:
+  - `car=0.8249`
+  - `person=0.5241`
+  - `bus=0.5092`
+  - `motorbike=0.1874`
+  - `bicycle=0.0382`
+  - `train=0.0066`
+- Interpretation:
+  - the result is strong evidence for real-world domain shift
+  - large/common road objects transfer much better than small or rare overlap classes
+  - the result should be reported as an external-domain robustness check, not as a full VOC-20 metric

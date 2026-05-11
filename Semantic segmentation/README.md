@@ -265,3 +265,13 @@ outputs/cityscapes_generalization/segman_b_iter25000/metrics.csv
 outputs/cityscapes_generalization/segman_b_iter25000/summary.md
 outputs/cityscapes_generalization/segman_b_iter25000/visualizations/
 ```
+
+Current SegMAN-B result on Cityscapes `val`:
+
+- samples: `500`
+- metric: overlap-class `mIoU`
+- score: `0.3484`
+- strongest classes: `car=0.8249`, `person=0.5241`, `bus=0.5092`
+- weakest classes: `train=0.0066`, `bicycle=0.0382`, `motorbike=0.1874`
+
+This result should be used as external-domain evidence in the final discussion, not as a direct comparison against VOC validation or Kaggle.

@@ -521,3 +521,26 @@ Build a maintainable `Semantic segmentation` workspace that supports:
 - Required user action:
   - make sure the downloaded/extracted `gtFine_trainvaltest.zip` contains `gtFine/train`, `gtFine/val`, and `gtFine/test`
   - if only `gtFine/test` exists, download or re-extract the correct train/val/test fine-annotation archive
+
+## Phase 27 Result
+
+- Cityscapes validation evaluation completed in WSL2 using the `segman` environment.
+- Command basis:
+  - checkpoint: `external/SegMAN/segmentation/outputs/ga2_segman_b/best_mIoU_iter_25000.pth`
+  - image root: `G:\Datasets\leftImg8bit_trainvaltest`
+  - label root: `G:\Datasets\gtFine_trainvaltest`
+  - split: `val`
+- Samples evaluated: `500`
+- Metric: overlap-class `mIoU`, using only Cityscapes/VOC comparable classes.
+- Result:
+  - overlap-class `mIoU=0.3484`
+  - `car`: `0.8249`
+  - `person`: `0.5241`
+  - `bus`: `0.5092`
+  - `motorbike`: `0.1874`
+  - `bicycle`: `0.0382`
+  - `train`: `0.0066`
+- Interpretation:
+  - the model transfers reasonably on large/common street objects such as `car`, `person`, and `bus`
+  - it fails badly on rare or visually/domain-shifted overlap classes such as `train`, `bicycle`, and `motorbike`
+  - this supports the report argument that high VOC/Kaggle performance does not imply deployment-ready real-world robustness

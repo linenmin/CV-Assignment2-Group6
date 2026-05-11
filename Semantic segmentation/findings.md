@@ -395,3 +395,12 @@
   - Cityscapes image data on the external drive is available at `G:\Datasets\leftImg8bit_trainvaltest\leftImg8bit\val`.
   - Current fine-label data at `G:\Datasets\gtFine_trainvaltest\gtFine` only contains `test`; it does not contain the required `val` split.
   - The evaluation script must not run on the planned validation protocol until `gtFine/val` is present.
+- Evaluation result after fixing the Cityscapes extraction:
+  - `500` Cityscapes validation samples were evaluated.
+  - overlap-class `mIoU=0.3484`.
+  - strongest transfer classes: `car=0.8249`, `person=0.5241`, `bus=0.5092`.
+  - weakest transfer classes: `train=0.0066`, `bicycle=0.0382`, `motorbike=0.1874`.
+- Report interpretation:
+  - the model learned useful object appearance for large, common street-scene categories
+  - the sharp failures on `train`, `bicycle`, and `motorbike` show that the VOC/Kaggle result should not be framed as real-world deployment readiness
+  - this Cityscapes result is useful precisely because it exposes domain-shift limitations rather than producing another leaderboard-style number
