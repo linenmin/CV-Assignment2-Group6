@@ -177,6 +177,30 @@ Notes:
 - `wsl_run_segman_b_with_notify.sh` does not store the webhook URL; it only reads `DISCORD_WEBHOOK_URL` from the WSL environment
 - for faster long training, consider copying the repo and dataset into the WSL filesystem instead of reading many small files through `/mnt/d`
 
+### Shared SegMAN Weights
+
+The trained SegMAN weights are not stored in Git because the checkpoint files are too large for a normal GitHub repository.
+
+Google Drive folder:
+
+```text
+https://drive.google.com/drive/u/1/folders/1orzpwFwAnjh5cne7Odm8prCkF8GfkLvP?dmr=1&ec=wgc-drive-%5Bmodule%5D-goto
+```
+
+Required Drive permission:
+
+- general access: `Anyone with the link`
+- role: `Viewer`
+
+Download the files from Drive and place them at these paths:
+
+```text
+external/SegMAN/pretrained/SegMAN_Encoder_b.pth.tar
+external/SegMAN/segmentation/outputs/ga2_segman_b/best_mIoU_iter_25000.pth
+```
+
+The second file is the current best trained model used for the V10 submission.
+
 After training, export test predictions and a Kaggle CSV:
 
 ```powershell
