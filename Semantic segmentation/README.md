@@ -245,3 +245,23 @@ data/cityscapes/
 ```
 
 The Cityscapes files are ignored by Git. Keep only the placeholder [data/cityscapes/README.md](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/data/cityscapes/README.md) tracked.
+
+If the archives are kept on an external drive, pass the extracted roots directly:
+
+```powershell
+python .\scripts\evaluate_cityscapes_generalization.py --left-img-root "G:\Datasets\leftImg8bit_trainvaltest" --gt-fine-root "G:\Datasets\gtFine_trainvaltest" --split val --limit 20
+```
+
+The full SegMAN-B evaluation command is:
+
+```powershell
+python .\scripts\evaluate_cityscapes_generalization.py --left-img-root "G:\Datasets\leftImg8bit_trainvaltest" --gt-fine-root "G:\Datasets\gtFine_trainvaltest" --split val --checkpoint .\external\SegMAN\segmentation\outputs\ga2_segman_b\best_mIoU_iter_25000.pth --output-dir .\outputs\cityscapes_generalization\segman_b_iter25000
+```
+
+Expected outputs:
+
+```text
+outputs/cityscapes_generalization/segman_b_iter25000/metrics.csv
+outputs/cityscapes_generalization/segman_b_iter25000/summary.md
+outputs/cityscapes_generalization/segman_b_iter25000/visualizations/
+```

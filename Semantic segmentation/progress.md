@@ -532,3 +532,23 @@
   - `task_plan.md`
   - `findings.md`
   - `progress.md`
+
+### 2026-05-11 (Cityscapes Evaluation Script Implementation)
+
+- Added Cityscapes generalization implementation files:
+  - `src/ga2_seg/cityscapes_generalization.py`
+  - `scripts/evaluate_cityscapes_generalization.py`
+  - `tests/test_cityscapes_generalization.py`
+- Added support for reading Cityscapes directly from an external drive via:
+  - `--left-img-root`
+  - `--gt-fine-root`
+- Updated `README.md` with the external-drive command using the user's paths:
+  - `G:\Datasets\leftImg8bit_trainvaltest`
+  - `G:\Datasets\gtFine_trainvaltest`
+- Verification:
+  - `python .\scripts\evaluate_cityscapes_generalization.py --help` works in the base environment after moving the `mmseg` import into runtime inference.
+  - `python -m pytest .\tests\test_cityscapes_generalization.py -q` passed with `3 passed`.
+- Current blocker:
+  - `leftImg8bit/val` exists on the external drive.
+  - `gtFine/val` is missing; the current extracted labels contain only `gtFine/test`.
+  - the script correctly raises `FileNotFoundError` and tells the user to extract the correct `gtFine_trainvaltest.zip` so `gtFine/val` exists.

@@ -391,3 +391,7 @@
 - The result should not be compared directly against Kaggle segmentation score or VOC validation `mIoU`.
   - It answers a different question: how much the trained model degrades under a realistic street-scene domain shift.
   - A lower score can still strengthen the final report if the failure modes are visualized and interpreted clearly.
+- Implementation finding:
+  - Cityscapes image data on the external drive is available at `G:\Datasets\leftImg8bit_trainvaltest\leftImg8bit\val`.
+  - Current fine-label data at `G:\Datasets\gtFine_trainvaltest\gtFine` only contains `test`; it does not contain the required `val` split.
+  - The evaluation script must not run on the planned validation protocol until `gtFine/val` is present.

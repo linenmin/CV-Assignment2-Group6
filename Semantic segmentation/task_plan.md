@@ -503,3 +503,21 @@ Build a maintainable `Semantic segmentation` workspace that supports:
   - add a class-mapping utility from Cityscapes labels to GA2/VOC labels
   - add an evaluation script that produces per-class IoU, overlap-class mIoU, and several qualitative prediction figures
   - record the result in `progress.md` and summarize the interpretation in `findings.md`
+
+## Phase 27 Implementation Status
+
+- Added reusable Cityscapes support:
+  - `src/ga2_seg/cityscapes_generalization.py`
+  - `scripts/evaluate_cityscapes_generalization.py`
+  - `tests/test_cityscapes_generalization.py`
+- Added external-drive support so the dataset can be read directly from `G:\Datasets\...` without copying it into the repository.
+- Validation completed:
+  - `python -m pytest .\tests\test_cityscapes_generalization.py -q`
+  - result: `3 passed`
+- Current blocker:
+  - `G:\Datasets\leftImg8bit_trainvaltest\leftImg8bit\val` exists
+  - `G:\Datasets\gtFine_trainvaltest\gtFine\val` is missing
+  - the script correctly stops with a clear error before running inference
+- Required user action:
+  - make sure the downloaded/extracted `gtFine_trainvaltest.zip` contains `gtFine/train`, `gtFine/val`, and `gtFine/test`
+  - if only `gtFine/test` exists, download or re-extract the correct train/val/test fine-annotation archive
