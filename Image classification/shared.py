@@ -217,7 +217,7 @@ EXPERIMENTS = {
         name="vit_l_16_224",
         backbone="vit_l_16",
         img_size=224,
-        batch_size=2,
+        batch_size=4,
         eval_batch_size=4,
         early_stop_patience=4,
     ),

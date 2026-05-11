@@ -5,7 +5,7 @@ ImageNet-1K weights.
 
 - Backbone: ViT-L/16
 - Image size: 224 x 224
-- Batch size: 2
+- Batch size: 4
 - Loss: AsymmetricLoss
 - Output directory: `output/image_classification/vit_l_16_224/`
 
