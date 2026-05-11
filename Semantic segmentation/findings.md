@@ -369,3 +369,25 @@
   - `selective_scan` must be built with `--no-build-isolation` because its setup script imports the active environment's PyTorch
   - the WSL `segman` environment now imports all critical runtime dependencies and is ready for SegMAN-B smoke/full training
   - the official SegMAN-B encoder checkpoint is available locally, while larger unused encoder checkpoints were removed to avoid wasting disk space
+
+## Cityscapes External Generalization Findings
+
+- The latest SegMAN-B segmentation model did not use Cityscapes or COCO in the project training pipeline.
+  - documented initialization: official ImageNet-pretrained SegMAN encoder
+  - project fine-tuning data: GA2/PASCAL VOC subset only
+- Cityscapes is the better fit for the report's real-world generalization discussion than COCO.
+  - COCO has better VOC-20 category coverage, but it is still a broad natural-image benchmark and is less clearly a real-world domain shift.
+  - Cityscapes provides dense pixel-level annotations in urban street scenes from a different acquisition setting, so it better tests whether the model transfers beyond the VOC-style image distribution.
+- The main limitation is label-space mismatch.
+  - Cityscapes does not contain most VOC categories such as `cat`, `dog`, `cow`, `sheep`, `sofa`, `tvmonitor`, or `diningtable`.
+  - The evaluation should therefore use only overlapping classes and report `overlap-class mIoU`.
+- Candidate overlap classes:
+  - `person`
+  - `car`
+  - `bus`
+  - `bicycle`
+  - `motorbike` mapped from Cityscapes `motorcycle`
+  - `train`
+- The result should not be compared directly against Kaggle segmentation score or VOC validation `mIoU`.
+  - It answers a different question: how much the trained model degrades under a realistic street-scene domain shift.
+  - A lower score can still strengthen the final report if the failure modes are visualized and interpreted clearly.

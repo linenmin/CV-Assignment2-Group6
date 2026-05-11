@@ -482,3 +482,24 @@ Build a maintainable `Semantic segmentation` workspace that supports:
 - Do not spend more training budget on earlier `SegNeXt` loss/sampler/crop lines; they are now dominated by later model-family upgrades.
 - Do not restart `SegFormer` single-model tuning as the primary path; `V6/V7/V8/V9` should be kept as a strong ablation and ensemble record.
 - If any further score attempt is needed, prioritize low-cost inference-side work on top of the current SegMAN-B best checkpoint rather than another full retraining cycle.
+
+## Phase 27 Plan: Cityscapes External Generalization Check
+
+- Goal: add a lightweight external-domain evaluation for the report's real-world generalization discussion.
+- Dataset decision: use `Cityscapes` rather than `COCO`.
+  - Rationale: Cityscapes has pixel-level semantic labels and a street-scene acquisition domain that is visibly different from the PASCAL/VOC-style training data.
+  - Tradeoff: Cityscapes only overlaps with a subset of VOC classes, so the result must be reported as `overlap-class mIoU`, not full VOC-20 `mIoU`.
+- Evaluation scope:
+  - no retraining and no fine-tuning on Cityscapes
+  - run the trained SegMAN-B model on Cityscapes validation samples
+  - map only comparable classes, likely `person`, `car`, `bus`, `bicycle`, `motorbike/motorcycle`, and `train`
+  - treat all non-overlap classes as ignored for the metric
+- Expected report framing:
+  - this is not another leaderboard experiment
+  - this is a real-world domain-shift sanity check
+  - a performance drop is still useful evidence because it shows the gap between closed benchmark performance and deployment robustness
+- Implementation plan:
+  - add a small Cityscapes download/path convention in documentation or config
+  - add a class-mapping utility from Cityscapes labels to GA2/VOC labels
+  - add an evaluation script that produces per-class IoU, overlap-class mIoU, and several qualitative prediction figures
+  - record the result in `progress.md` and summarize the interpretation in `findings.md`

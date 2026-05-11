@@ -514,3 +514,21 @@
   - The merged submission validates the end-to-end strategy and is now the best public result.
 - Disk cleanup:
   - retain only the best checkpoint and final/latest checkpoint for the SegMAN-B run.
+
+### 2026-05-11 (Cityscapes External Generalization Planning)
+
+- Decided to add a lightweight external generalization experiment for the final discussion.
+- Chosen dataset: `Cityscapes`.
+  - reason: it has pixel-level semantic labels and a street-scene domain that is clearly different from the GA2/PASCAL VOC training subset
+  - tradeoff: it only overlaps with a subset of VOC classes, so the metric must be reported as overlap-class `mIoU`
+- Rejected `COCO` as the primary plan for this specific report goal.
+  - reason: COCO has better VOC category coverage but is less compelling as a real-world domain-shift test
+- Planned evaluation scope:
+  - no Cityscapes training or fine-tuning
+  - evaluate the existing SegMAN-B checkpoint only
+  - use overlapping classes such as `person`, `car`, `bus`, `bicycle`, `motorbike`, and `train`
+  - generate quantitative per-class IoU plus qualitative visual examples for the report
+- Updated persistent planning files:
+  - `task_plan.md`
+  - `findings.md`
+  - `progress.md`
