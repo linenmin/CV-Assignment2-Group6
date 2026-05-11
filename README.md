@@ -28,9 +28,21 @@ Kaggle 显示分数需×2 得到真实分类 Dice（提交文件含 1500 行：7
 | v2 | `efficientnet_b3_320` | EfficientNet-B3 | AsymmetricLoss | 320 + TTA | 0.860 | 0.428 | 0.856 |
 | v3 | `convnext_tiny_320` | ConvNeXt-Tiny | AsymmetricLoss | 320 + TTA | **0.893** | **0.437** | **0.873** |
 | v4 | `convnext_small_320` | ConvNeXt-Small | AsymmetricLoss | 320 + TTA | **0.900** | **0.449** | **0.898** |
+| v5 | `convnext_base_320` | ConvNeXt-Base | AsymmetricLoss | 320 + TTA | **0.911** | —¹ | —¹ |
+| v6 | `efficientnet_v2_s_320` | EfficientNet-V2-S | AsymmetricLoss | 320 + TTA | **0.881** | —¹ | —¹ |
+| v7 | `ensemble_small_v2`（Small + V2-S） | per-class 加权融合 | — | 320 + TTA | **0.924**² | —¹ | —¹ |
 
 **当前最佳分类模型：** `convnext_small_320`，Kaggle 显示 **0.44905**，
 分类 Dice = **0.89810**。当前最佳完整提交总分：**0.87588**。
+
+¹ v5/v6/v7 均未单独测试纯分类提交。完整提交分数（含分割v10）：
+`convnext_base_320` **0.86425**（val mAP 最高但大模型过拟合）；
+`efficientnet_v2_s_320` **0.86649**；
+`ensemble_small_v2` **0.86657**（略优于单模型 V2-S，但低于 Small 单模型 0.87588）。
+Single-model 最佳仍为 `convnext_small_320`。
+
+² v7 val mAP 为 kaggle_ensemble notebook 在 150 张验证集上的 per-class 加权融合结果，
+  阈值在相同 150 张样本上搜索，存在轻微过拟合风险，Kaggle 实际得分低于 Small 单模型。
 
 **关于 Kaggle 显示分数：** 完整提交包含分类行和分割行，Kaggle 在 1500 行上统一计算一个 Dice 值；
 仅含分类行的提交因缺少分割行得 0，显示分数减半。×2 后的数值才是真实的分类性能。
@@ -94,8 +106,9 @@ output/image_classification/<experiment>/
 | `efficientnet_b3_320` | EfficientNet-B3 | 320×320 | AsymmetricLoss | 强模型（v2） |
 | `convnext_tiny_320` | ConvNeXt-Tiny | 320×320 | AsymmetricLoss | 强结果（v3） |
 | `convnext_small_320` | ConvNeXt-Small | 320×320 | AsymmetricLoss | 当前最佳分类结果（v4） |
-| `convnext_base_320` | ConvNeXt-Base | 320×320 | AsymmetricLoss | 待测，计算量更高 |
-| `convnext_large_320` | ConvNeXt-Large | 320×320 | AsymmetricLoss | 待测，高显存/过拟合风险 |
+| `convnext_base_320` | ConvNeXt-Base | 320×320 | AsymmetricLoss | 已测（v5），val mAP 0.911，Kaggle 0.86425，小数据集过拟合 |
+| `convnext_large_320` | ConvNeXt-Large | 320×320 | AsymmetricLoss | 未测，高显存/过拟合风险更大，不建议尝试 |
+| `efficientnet_v2_s_320` | EfficientNet-V2-S | 320×320 | AsymmetricLoss | 已测（v6），val mAP 0.881，Kaggle 0.86649，pottedplant 最强 |
 | `vit_b_16_224` | ViT-B/16 | 224×224 | AsymmetricLoss | Vision Transformer 主线基线 |
 | `vit_l_16_224` | ViT-L/16 | 224×224 | AsymmetricLoss | 可选重模型，更适合 Colab/强 GPU |
 | `resnet50_224` | ResNet-50 | 224×224 | AsymmetricLoss | 基线对比（v1.1） |
@@ -129,9 +142,9 @@ python "Image classification/experiments/resnet50_224/train.py"
 ```
 
 ConvNeXt 在当前 `torchvision` 环境中可用的系列为 Tiny/Small/Base/Large。
-Small 已经超过 Tiny，成为当前最佳分类结果；若继续冲分，再考虑
-`convnext_base_320`。`convnext_large_320` 参数量约 198M，在 8 GB 显存上 batch
-size 已降到 2，训练慢且更容易在 750 张训练图上过拟合。
+`convnext_small_320` 为当前最佳单模型（Kaggle 0.87588）。`convnext_base_320`
+val mAP 更高（0.911）但在 750 张图上发生测试集过拟合，Kaggle 完整得分（0.86425）
+反而低于 Small。`convnext_large_320` 参数量约 198M，过拟合风险更大，不建议继续尝试。
 
 ViT 路线从 `vit_b_16_224` 开始。它使用 torchvision 的 ViT-B/16 ImageNet-1K
 预训练权重，并保持 224×224 输入，以避免一开始就引入 positional embedding
@@ -156,44 +169,17 @@ lr=1e-4，保存 `best_model.pth`）→ 在全部 750 个样本上重训（5 epo
 **TTA（测试时增强）** — 推理时对原图和水平翻转图分别计算 sigmoid 概率并取均值，
 无训练开销。
 
-## Kaggle GPU Notebook
+## Kaggle / Colab Notebooks
 
-在 Kaggle 上训练时，上传或打开：
+`Image classification/` 目录下包含以下 Kaggle/Colab 训练和推理 notebook：
 
-```text
-Image classification/kaggle_train.ipynb                      # efficientnet_b3_320
-Image classification/kaggle_train_convnext_tiny_320.ipynb    # convnext_tiny_320
-```
-
-启用 GPU 加速器后运行所有单元格。Notebook 将输出写入
-`/kaggle/working/image_classification/<experiment>/`，
-生成的 `submission_classification_<experiment>.csv` 可直接下载提交。
-
-## Colab 强 GPU Notebook
-
-如需在 Colab/Colab Pro 上用更强 GPU 尝试更大的 ConvNeXt 或更大的批大小，使用：
-
-```text
-Image classification/colab_train_convnext.ipynb
-```
-
-该 notebook 支持：
-
-- `convnext_tiny_320_colab`
-- `convnext_small_320_colab`
-- `convnext_base_320_colab`
-- `convnext_large_320_colab`
-
-默认使用 `convnext_small_320_colab`，并启用 AMP 混合精度。将数据集目录放到
-`/content/drive/MyDrive/CV-Assignment2/kul-computer-vision-ga-2-2026/`，或在 notebook
-中设置 `DATA_ZIP` 后解压。输出默认写入 Google Drive：
-
-```text
-/content/drive/MyDrive/CV-Assignment2/image_classification/<experiment>/
-```
-
-建议先用 notebook 里的 `memory_probe()` 检查当前 Colab GPU，再逐步增大批大小。
-本地 8GB GPU 已足够跑 Tiny/Small；Base/Large 更适合在 Colab 强 GPU 上试。
+| Notebook | 用途 |
+|----------|------|
+| `kaggle_train_convnext_base_320.ipynb` | ConvNeXt-Base 320 训练（已完成，结果见 v5） |
+| `kaggle_train_efficientnet_v2_s_320.ipynb` | EfficientNet-V2-S 320 训练（已完成，结果见 v6） |
+| `kaggle_ensemble.ipynb` | Small + V2-S 概率加权融合（已完成，结果见 v7） |
+| `kaggle_kfold_convnext_small_320.ipynb` | 5-fold CV 阈值校准（T4 约 45 分钟） |
+| `colab_train_convnext.ipynb` | Colab 训练，支持 Tiny/Small/Base/Large，含 AMP |
 
 ## 合并分割提交
 

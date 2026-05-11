@@ -45,42 +45,52 @@ val mAP 来自各实验目录下的 `evaluation_summary.csv`（使用 `best_mode
 | v2 | `efficientnet_b3_320` | EfficientNet-B3 | AsymmetricLoss | 320+TTA+S3 | **0.8599** | 0.42813 | 0.85626 |
 | v3 | `convnext_tiny_320` | ConvNeXt-Tiny | AsymmetricLoss | 320+TTA+S3 | **0.8933** | **0.43673** | **0.87346** |
 | v4 | `convnext_small_320` | ConvNeXt-Small | AsymmetricLoss | 320+TTA+S3 | **0.8995** | **0.44905** | **0.89810** |
+| v5 | `convnext_base_320` | ConvNeXt-Base | AsymmetricLoss | 320+TTA+S3 | **0.9111** | —（见注²） | —（见注²） |
+| v6 | `efficientnet_v2_s_320` | EfficientNet-V2-S | AsymmetricLoss | 320+TTA+S3 | **0.8807** | —（见注²） | —（见注²） |
 
-注：Kaggle 显示分数需×2 得到真实分类 Dice（因提交含 1500 行，750 行为分割占位）。
+注¹：Kaggle 显示分数需×2 得到真实分类 Dice（因提交含 1500 行，750 行为分割占位）。
 当前最佳分类模型：`convnext_small_320`，分类 Dice = **0.89810**。当前最佳完整提交总分：
 **0.87588**（`convnext_small_320` + `submission_exp_v10_segman_b_iter25000.csv`）。
 
-### 逐类 AP 对比（三个当前实验，best_model.pth）
+注²：v5/v6 均未单独测试纯分类提交，仅有完整提交分数（含分割v10）：
+`convnext_base_320` **0.86425**（val mAP 高但大模型过拟合，低于 Small）；
+`efficientnet_v2_s_320` **0.86649**（val mAP 介于 v2/v3 之间，完整提交优于 Base）。
+两者均低于 `convnext_small_320`（0.87588）。**当前最佳提交模型仍为 `convnext_small_320`**。
 
-| 类别 | resnet50_224 | efficientnet_b3_320 | convnext_tiny_320 |
-|------|-------------|---------------------|-------------------|
-| aeroplane | 0.981 | 0.959 | **0.991** |
-| bicycle | 0.967 | 0.837 | **0.967** |
-| bird | 0.899 | 0.927 | **0.977** |
-| boat | 0.981 | 0.992 | **1.000** |
-| bottle | **0.785** | 0.800 | 0.764 |
-| bus | 0.944 | **0.976** | **0.976** |
-| car | 0.886 | 0.866 | **0.897** |
-| cat | 0.911 | 0.950 | **0.992** |
-| chair | 0.737 | 0.807 | **0.831** |
-| cow | 0.792 | **1.000** | **1.000** |
-| diningtable | 0.386 | 0.675 | **0.573** |
-| dog | 0.723 | 0.774 | **0.856** |
-| horse | 0.825 | 0.882 | **0.883** |
-| motorbike | 0.877 | 0.922 | **0.944** |
-| person | 0.915 | 0.937 | **0.943** |
-| pottedplant | 0.629 | 0.603 | **0.792** |
-| sheep | 0.651 | 0.738 | **0.841** |
-| sofa | 0.709 | 0.667 | **0.758** |
-| train | 0.963 | **1.000** | **1.000** |
-| tvmonitor | 0.791 | 0.886 | **0.880** |
-| **mAP** | **0.8175** | **0.8599** | **0.8933** |
+### 逐类 AP 对比（五个实验，best_model.pth）
+
+| 类别 | resnet50_224 | efficientnet_b3_320 | convnext_tiny_320 | convnext_base_320 | efficientnet_v2_s_320 |
+|------|-------------|---------------------|-------------------|--------------------|------------------------|
+| aeroplane | 0.981 | 0.959 | **0.991** | **0.991** | **0.991** |
+| bicycle | **0.967** | 0.837 | **0.967** | 0.911 | 0.900 |
+| bird | 0.899 | 0.927 | 0.977 | **1.000** | **1.000** |
+| boat | 0.981 | 0.992 | **1.000** | **1.000** | 0.992 |
+| bottle | 0.785 | **0.800** | 0.764 | 0.794 | 0.727 |
+| bus | 0.944 | 0.976 | 0.976 | **1.000** | **1.000** |
+| car | 0.886 | 0.866 | 0.897 | **0.911** | 0.897 |
+| cat | 0.911 | 0.950 | 0.992 | 0.996 | **1.000** |
+| chair | 0.737 | 0.807 | 0.831 | 0.820 | **0.853** |
+| cow | 0.792 | **1.000** | **1.000** | **1.000** | 0.917 |
+| diningtable | 0.386 | **0.675** | 0.573 | 0.667 | 0.416 |
+| dog | 0.723 | 0.774 | 0.856 | **0.898** | 0.869 |
+| horse | 0.825 | 0.882 | 0.883 | **0.884** | 0.883 |
+| motorbike | 0.877 | 0.922 | 0.944 | **0.992** | 0.923 |
+| person | 0.915 | 0.937 | 0.943 | **0.962** | 0.957 |
+| pottedplant | 0.629 | 0.603 | 0.792 | 0.714 | **0.947** |
+| sheep | 0.651 | 0.738 | 0.841 | **1.000** | 0.888 |
+| sofa | 0.709 | 0.667 | 0.758 | **0.771** | 0.630 |
+| train | 0.963 | **1.000** | **1.000** | **1.000** | **1.000** |
+| tvmonitor | 0.791 | 0.886 | 0.880 | **0.912** | 0.824 |
+| **mAP** | **0.8175** | **0.8599** | **0.8933** | **0.9111** | **0.8807** |
 
 关键观察：
-- **diningtable**：所有模型仍是最弱类（ASL 虽有改善，但 false-negative 噪声根本问题未解）
-- **pottedplant**：ConvNeXt-Tiny 大幅领先（0.792 vs 0.629/0.603），受益于更好的局部特征提取
-- **bottle**：ResNet-50 意外领先（0.785），ConvNeXt 较低（0.764）
-- **EfficientNet vs ConvNeXt**：ConvNeXt 在 17/20 类上更强，仅 bottle/diningtable 落后
+- **diningtable**：五个模型均是最弱类；EfficientNet-B3（0.675）最高，EfficientNet-V2-S（0.416）最低，不同架构差异极大
+- **pottedplant**：EfficientNet-V2-S 大幅领先（**0.947**），比第二名 ConvNeXt-Tiny（0.792）高 0.155；ConvNeXt-Base 反而最低（0.714）
+- **bottle**：EfficientNet-B3 最高（0.800）；EfficientNet-V2-S 最低（0.727）——架构升级反而退步
+- **sheep**：ConvNeXt-Base 达到 1.000，改善最大；EfficientNet-V2-S（0.888）处于中游
+- **cat / chair**：EfficientNet-V2-S 新最高（cat 1.000、chair 0.853），ConvNeXt-Base 的 cat 0.996 不再是最高
+- **架构间弱点互补**：EfficientNet-V2-S 擅长 pottedplant，ConvNeXt-Base 擅长 sheep/diningtable，提示 ensemble 可以填补各自弱点
+- **val mAP vs Kaggle 泛化**：Base（0.9111）> Small（0.8995）> V2-S（0.8807），但完整提交：Small（0.87588）> V2-S（0.86649）> Base（0.86425）；更大模型 val mAP 更高，但测试集泛化更差
 
 ### Val mAP vs Kaggle Dice 的根本差距
 - val mAP = 0.801（AUC指标，阈值无关）
@@ -350,6 +360,38 @@ output/image_classification/<experiment>/
 
 ---
 
+## 2026-05-10 新增 Kaggle Notebooks
+
+### 新增文件
+
+| Notebook | 说明 |
+|----------|------|
+| `Image classification/kaggle_train_convnext_base_320.ipynb` | ConvNeXt-Base 320 Kaggle 训练 notebook，batch=8，early stop patience=4，feat_dim=1024 |
+| `Image classification/kaggle_train_efficientnet_v2_s_320.ipynb` | EfficientNet-V2-S 320 Kaggle 训练 notebook，batch=16，feat_dim=1280 |
+| `Image classification/kaggle_ensemble.ipynb` | 多模型概率加权融合 notebook，支持三种数据来源方式 |
+
+### EfficientNet-V2-S 简介
+
+- torchvision 0.26 通过 `models.efficientnet_v2_s(weights=models.EfficientNet_V2_S_Weights.IMAGENET1K_V1)` 加载。
+- 特征提取路径：`model.features` + `model.avgpool` + `flatten(1)` → **1280 维**。
+- 参数量 ~21.5M（约为 ConvNeXt-Small 的 43%），T4 上 batch_size=16 安全。
+- ImageNet-1K top-1: **84.2%**（高于 EfficientNet-B3 的 81.6%），计算量远小于 ConvNeXt-Base。
+- 本项目尚未完成训练，val mAP 待测。
+
+### Ensemble Notebook 设计
+
+`kaggle_ensemble.ipynb` 支持三种数据来源（在配置 cell 中切换）：
+
+| 方案 | 实现 | 适用场景 |
+|------|------|---------|
+| **A** | 在 notebook 内部训练后立即融合 | 同一 Kaggle session 内全流程 |
+| **B** | 从概率 CSV 加载（`PROB_SOURCES`） | 将 `test_probabilities_*.csv` 上传为 Kaggle Dataset |
+| **C（默认）** | 从 checkpoint 推理（`CHECKPOINT_SOURCES`） | 将各模型 `best_model.pth` 上传为 Kaggle Dataset |
+
+权重搜索逻辑与本地 `07_ensemble.py` 一致：全局权重搜索 + per-class 权重搜索，最终选择 val mean-F1 更高的方案。
+
+---
+
 ## 2026-05-10 Ensemble 与弱类别恢复
 
 - 在引入 transformer 依赖之前，新增了一个低成本的概率 ensemble 路径。CLI 为 `Image classification/07_ensemble.py`，支持 `--mode val-search` 和 `--mode predict`。
@@ -380,3 +422,159 @@ output/image_classification/<experiment>/
   - AsymmetricLoss、三阶段训练、per-class 阈值、TTA 沿用现有分类流水线
 - `vit_l_16_224` 作为可选重模型入口，batch size 2；更适合 Colab Pro 或更强 GPU。
 - 暂不直接做 320 输入 ViT，因为 torchvision 官方 ViT 权重的 positional embedding 原生对应 224 输入；如果 `vit_b_16_224` 结果有希望，再实现 positional embedding 插值版本。
+
+---
+
+## 2026-05-11 ConvNeXt-Base 320 结果
+
+### 训练情况
+- 在 Kaggle 完成 `convnext_base_320` 完整三阶段训练（S1 5 epochs → S2 early stop → S3 全量重训）。
+- S1 最终 val loss：0.03340（epoch 5 最优）。
+- S2：共运行 7 个 epoch 后 early stop（patience=4，best 在 epoch 3）；
+  best val loss = **0.026864**（S2 epoch 3）；训练 loss 继续下降（0.028→0.005），val loss 从 epoch 3 起上升，过拟合特征明显。
+- S3 全量重训完成。
+
+### 评估结果
+- 评估 checkpoint：`best_model.pth`（S2 epoch 3）。
+- val mAP：**0.9111068831**。
+- Kaggle 完整提交（含 `submission_exp_v10_segman_b_iter25000.csv`）：**0.86425**。
+
+### AP 详情
+AP 最强类别：bird / boat / bus / cow / sheep / train（均 **1.000**）。
+AP 最弱类别：diningtable **0.6669**、pottedplant **0.7140**、sofa **0.7708**、bottle **0.7937**、chair **0.8196**。
+
+### 关键结论
+- val mAP（0.9111）为目前四个模型最高，但 Kaggle 完整提交得分（0.86425）低于 `convnext_small_320`（0.87588）。
+- ConvNeXt-Base（88M 参数，批大小 4）在 750 张训练图上发生了测试集过拟合；val 集 150 张，优化后的 mAP 高估了真实泛化能力。
+- **`convnext_small_320` 仍为当前最佳提交分类模型。**
+- Base 相比 Small 对 diningtable（+0.110）和 sheep（+0.183）有显著改善，但整体测试集未能转化为更高提交分。
+- 结论：对于本数据集规模（750 张），ConvNeXt-Small 是容量与泛化之间更好的平衡点；更大的 Base/Large 在不引入更强正则化或数据增强的情况下难以获得收益。
+
+---
+
+## 2026-05-11 EfficientNet-V2-S 320 结果
+
+### 训练情况
+- 在 Kaggle 完成 `efficientnet_v2_s_320` 完整三阶段训练（S1 5 epochs → S2 early stop → S3 全量重训）。
+- S1 最终 val loss：0.03674（epoch 5 最优）。
+- S2：共运行 11 个 epoch 后 early stop（patience=5，best 在 epoch 6）；
+  best val loss = **0.028788**（S2 epoch 6）；训练 loss 继续下降（0.030→0.005），val loss 从 epoch 7 起波动上升。
+- S3 全量重训完成（`final_model_effv2s.pth`）。
+
+### 评估结果
+- 评估 checkpoint：`best_model_effv2s.pth`（S2 epoch 6）。
+- val mAP：**0.8806511089**（介于 v2 EfficientNet-B3 和 v3 ConvNeXt-Tiny 之间）。
+- Kaggle 完整提交（含 `submission_exp_v10_segman_b_iter25000.csv`）：**0.86649**。
+
+### AP 详情
+AP 最强类别：bird / bus / cat / train（均 **1.000**）。
+AP 最弱类别：diningtable **0.4161**（五个模型最低）、sofa **0.6298**、bottle **0.7269**、sheep **0.8875**、tvmonitor **0.8241**。
+AP 最强亮点：pottedplant **0.9470**（五个模型最高，远超其他模型）。
+
+### 关键结论
+- EfficientNet-V2-S（~21.5M 参数）在 val mAP（0.8807）和 Kaggle 完整提交（0.86649）上均介于 EfficientNet-B3 和 ConvNeXt-Small 之间。
+- pottedplant **0.947** 为五个模型最高，比第二名（ConvNeXt-Tiny 0.792）领先 0.155，与其他模型弱点形成鲜明互补。
+- diningtable **0.416** 是五个模型最低，sofa **0.630** 也显著低于所有 ConvNeXt 模型（均在 0.758 以上）。
+- 完整提交分（0.86649）优于 ConvNeXt-Base（0.86425），但低于 ConvNeXt-Small（0.87588）。
+- **EfficientNet-V2-S 与 ConvNeXt-Small 的 pottedplant/diningtable/sofa 互补性极强，是 ensemble 的优先候选组合。**
+- **`convnext_small_320` 仍为当前最佳单模型提交。**
+
+---
+
+## 2026-05-11 5-Fold CV 阈值校准方案
+
+### 动机
+当前 `best_thresholds.npy` 由 `05_evaluate.py` 在 150 张验证样本上搜索，样本量较少，阈值估计方差较高。
+5-fold CV 使用全部 750 张训练样本的 OOF 预测做阈值校准，统计基础更稳健。
+
+### 实现文件
+
+| 文件 | 说明 |
+|------|------|
+| `Image classification/09_kfold_cv.py` | 主脚本：5-fold 训练 + OOF 收集 + 阈值校准 |
+| `Image classification/experiments/convnext_small_320/kfold_cv.py` | 薄封装，等价于 `--experiment convnext_small_320` |
+| `Image classification/kaggle_kfold_convnext_small_320.ipynb` | Kaggle 自包含 notebook，T4 约 45 分钟 |
+| `Image classification/06_predict.py` | 新增 `--thresholds-path` 参数，可指定 kfold 阈值文件 |
+
+### 输出目录结构
+```
+output/image_classification/convnext_small_320/kfold/
+├── fold0/ ... fold4/
+│   ├── checkpoints/best_model.pth
+│   ├── metrics/training_history.csv
+│   ├── metrics/oof_probabilities.csv  (150×20)
+│   └── metrics/thresholds.npy
+├── oof_probabilities_all.csv           (750×20 全量 OOF)
+├── best_thresholds_kfold.npy           (全量 OOF 搜索，主要结果)
+├── best_thresholds_kfold_avg.npy       (5 折阈值均值，备用)
+├── ap_per_class_kfold.csv
+└── kfold_summary.csv
+```
+
+### 使用方式
+```bash
+# 本地运行（约 5×单折训练时间）
+python "Image classification/09_kfold_cv.py" --experiment convnext_small_320
+
+# 仅训练指定折（支持断点续训）
+python "Image classification/09_kfold_cv.py" --experiment convnext_small_320 --mode train-folds --folds 0 1
+
+# 仅汇总已训练折的 OOF（折模型已存在）
+python "Image classification/09_kfold_cv.py" --experiment convnext_small_320 --mode aggregate
+
+# 用 kfold 阈值生成提交
+python "Image classification/06_predict.py" --experiment convnext_small_320 \
+    --thresholds-path output/image_classification/convnext_small_320/kfold/best_thresholds_kfold.npy
+```
+
+### 设计说明
+- 每折训练 S1+S2（不含 S3，避免 750 样本无法验证）
+- OOF 概率使用 TTA（与 `06_predict.py` 一致），确保阈值校准分布与测试推理分布对齐
+- 每折种子为 `config.random_seed + fold_k`，保证折间独立性
+- `--grid-step 0.01` 默认搜索 91 个候选值（0.05→0.95），比 `05_evaluate.py` 的 17 个更精细
+- Kaggle notebook 支持两种 checkpoint 格式（本地 `MultiLabelClassifier.state_dict()` 和 notebook 内部格式）
+
+---
+
+## 2026-05-11 Ensemble Small + V2-S 结果（`ensemble_small_v2`）
+
+### 实验配置
+- 模型：`convnext_small_320` + `efficientnet_v2_s_320`
+- 方法：`kaggle_ensemble.ipynb`，方案 C（从 checkpoint 推理），per-class 加权融合
+- 权重搜索步长：0.25
+
+### 验证集基线（150 张，80/20 划分）
+| 模型 | val mAP | 弱类别 F1 |
+|------|---------|----------|
+| `convnext_small_320` | 0.9029 | 0.7402 |
+| `efficientnet_v2_s_320` | 0.8837 | 0.7738 |
+| **ensemble（per-class）** | **0.9236** | — |
+| ensemble（全局 75/25）| 0.9144 | — |
+
+### 权重搜索结果
+- 自动选择 **per-class 模式**（val mAP 0.9236 > 全局 0.9144）
+- 典型 per-class 权重分配：
+
+| 类别 | Small 权重 | V2-S 权重 | 说明 |
+|------|-----------|----------|------|
+| pottedplant | 0.00 | **1.00** | V2-S 绝对优势（0.935 vs 0.777） |
+| aeroplane | 0.00 | **1.00** | V2-S 满分（1.000 vs 0.991） |
+| cat | 0.00 | **1.00** | V2-S 满分（1.000 vs 0.962） |
+| bus / cow | 0.00 | **1.00** | V2-S 满分 |
+| bicycle | **1.00** | 0.00 | Small 满分（1.000 vs 0.911） |
+| diningtable | **1.00** | 0.00 | Small 明显更强（0.559 vs 0.435） |
+| sheep / bird / car / chair | 0.50 | 0.50 | 相近，取均值 |
+
+### Kaggle 结果
+- 完整提交（含分割 v10）：**0.86657**
+- 对比：
+  - `convnext_small_320` 单模型：**0.87588**（仍最佳）
+  - `efficientnet_v2_s_320` 单模型：**0.86649**
+  - `convnext_base_320` 单模型：**0.86425**
+- Ensemble 仅比 V2-S 单模型高 **+0.00008**，显著低于 Small 单模型（-0.00931）
+
+### 关键结论
+- Ensemble val mAP（0.9236）高于任何单模型，但 Kaggle 实际得分（0.86657）低于 Small 单模型，再次验证 **150 张验证集上的 per-class 权重搜索存在过拟合**。
+- pottedplant/aeroplane/cat 全部由 V2-S 主导的融合策略在测试集上未能泛化：这些类别在 150 张 val 样本上的权重差异被放大，测试集上并不稳定。
+- **结论**：对于 750 张训练图的规模，per-class 权重搜索（每类独立选最优权重）自由度过高，验证样本太少，难以可靠估计。全局权重（75% Small + 25% V2-S，val mAP 0.9144）更保守，但得分仍低于 Small 单模型。
+- **下一步建议**：若要继续尝试 ensemble，考虑固定全局权重（如 0.7 Small + 0.3 V2-S）并用 5-fold OOF 阈值替代 150 张 val 搜索阈值，以减少过拟合。

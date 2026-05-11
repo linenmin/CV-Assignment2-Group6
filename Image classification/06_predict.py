@@ -47,6 +47,13 @@ def parse_args():
         default="auto",
         help="Checkpoint from the experiment folder. auto prefers final, then best.",
     )
+    parser.add_argument(
+        "--thresholds-path",
+        type=Path,
+        default=None,
+        help="Override threshold file (e.g. kfold/best_thresholds_kfold.npy). "
+             "Default: config.thresholds_path (metrics/best_thresholds.npy).",
+    )
     return parser.parse_args()
 
 
@@ -75,15 +82,18 @@ def rle_encode(arr: np.ndarray) -> str:
     return " ".join(str(x) for x in runs)
 
 
-def load_thresholds(config: ExperimentConfig) -> np.ndarray:
-    if config.thresholds_path.exists():
-        thresholds = np.load(config.thresholds_path)
+def load_thresholds(
+    config: ExperimentConfig, explicit_path: Path | None = None
+) -> np.ndarray:
+    path = explicit_path if explicit_path is not None else config.thresholds_path
+    if path.exists():
+        thresholds = np.load(path)
         if len(thresholds) != len(LABELS):
             raise ValueError(
-                f"Threshold length mismatch in {config.thresholds_path}: "
+                f"Threshold length mismatch in {path}: "
                 f"{len(thresholds)} != {len(LABELS)}"
             )
-        print(f"Loaded per-class thresholds from {config.thresholds_path}")
+        print(f"Loaded per-class thresholds from {path}")
         return thresholds
 
     print(f"Using default threshold {config.threshold:.2f} for all classes.")
@@ -94,11 +104,13 @@ def main(
     config: ExperimentConfig | None = None,
     ckpt_path: Path | None = None,
     ckpt_name: str = "auto",
+    thresholds_path: Path | None = None,
 ):
     if config is None:
         args = parse_args()
         config = get_experiment_config(args.experiment)
         ckpt_name = args.ckpt
+        thresholds_path = args.thresholds_path
 
     ensure_experiment_dirs(config)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -112,7 +124,7 @@ def main(
     print(f"Device: {device}")
     print(f"Experiment: {describe_experiment(config)}")
     print(f"Checkpoint: {path}")
-    thresholds = load_thresholds(config)
+    thresholds = load_thresholds(config, explicit_path=thresholds_path)
 
     model = MultiLabelClassifier(
         backbone=config.backbone,

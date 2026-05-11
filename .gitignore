@@ -1,6 +1,8 @@
 kul-computer-vision-ga-2-2026/
+output/image_classification/
 __pycache__/
 *.py[cod]
+*.pth
 output/test_png/
 output/train_png/
 Image classification/__pycache__/03_model.cpython-310.pyc
@@ -8,3 +10,4 @@ Image classification/__pycache__/shared.cpython-310.pyc
 .claude/
 .agent/
 .gstack/
+.DS_Store

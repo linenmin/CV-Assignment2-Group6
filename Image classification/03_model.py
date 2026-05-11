@@ -169,6 +169,13 @@ _BACKBONE_CONFIGS = {
         "features_fn": lambda model: _ViTFeatures(model),
         "smoke_size": 224,
     },
+    "efficientnet_v2_s": {
+        "factory": lambda pretrained: models.efficientnet_v2_s(
+            weights=models.EfficientNet_V2_S_Weights.IMAGENET1K_V1 if pretrained else None
+        ),
+        "feat_dim": 1280,
+        "features_fn": lambda model: nn.Sequential(model.features, model.avgpool),
+    },
 }
 
 
