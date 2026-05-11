@@ -3,9 +3,13 @@ __pycache__/
 src/*.egg-info/
 data/metadata/resources.json
 data/segman_ga2/
+data/cityscapes/*
+!data/cityscapes/README.md
 external/
 outputs/checkpoints/
 outputs/logs/
 outputs/predictions/
+outputs/cityscapes_generalization/*
+!outputs/cityscapes_generalization/.gitkeep
 outputs/submissions/*
 !outputs/submissions/*.csv

@@ -212,3 +212,36 @@ Current best tracked outputs:
 
 - segmentation-only: [submission_exp_v10_segman_b_iter25000.csv](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/submissions/submission_exp_v10_segman_b_iter25000.csv)
 - merged final submission: [submission_exp_v10_segman_b_iter25000_with_classification.csv](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/submissions/submission_exp_v10_segman_b_iter25000_with_classification.csv)
+
+## Cityscapes External Generalization
+
+Cityscapes is planned as a no-training external domain-shift check for the final report. It will evaluate only VOC-overlap classes such as `person`, `car`, `bus`, `bicycle`, `motorbike`, and `train`.
+
+Download Cityscapes manually from:
+
+```text
+https://www.cityscapes-dataset.com/downloads/
+```
+
+Required files:
+
+```text
+leftImg8bit_trainvaltest.zip
+gtFine_trainvaltest.zip
+```
+
+Extract both archives into:
+
+```text
+Semantic segmentation/data/cityscapes/
+```
+
+Expected final layout:
+
+```text
+data/cityscapes/
+  leftImg8bit/val/*/*_leftImg8bit.png
+  gtFine/val/*/*_gtFine_labelIds.png
+```
+
+The Cityscapes files are ignored by Git. Keep only the placeholder [data/cityscapes/README.md](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/data/cityscapes/README.md) tracked.
