@@ -47,6 +47,13 @@ _BACKBONE_CONFIGS = {
         "feat_dim": 1536,
         "features_fn": lambda model: nn.Sequential(model.features, model.avgpool),
     },
+    "efficientnet_v2_s": {
+        "factory": lambda pretrained: models.efficientnet_v2_s(
+            weights=models.EfficientNet_V2_S_Weights.IMAGENET1K_V1 if pretrained else None
+        ),
+        "feat_dim": 1280,
+        "features_fn": lambda model: nn.Sequential(model.features, model.avgpool),
+    },
 }
 
 

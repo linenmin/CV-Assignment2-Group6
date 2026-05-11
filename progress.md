@@ -647,6 +647,147 @@
 - 仓库文本搜索没有发现正式组员名单；git 历史只显示 `Enmin Lin`、`121philip`、`hapgab` 等作者线索，不足以作为正式学生姓名填写。
 - 当前唯一剩余阻塞仍是用户提供正式组员姓名。
 
+---
+
+## 会话：2026-05-11 - EfficientNet-V2-S 320 Kaggle 结果记录
+
+### 状态
+已完成。
+
+### 已执行操作
+- 读取 `output/image_classification/efficientnet_v2_s_320/metrics/` 下三份 CSV 及 `figures/eval_ap_per_class.png`。
+- 更新 `findings.md`：
+  - 实验结果表新增 v6 行（`efficientnet_v2_s_320`），更新注²同时涵盖 v5/v6。
+  - 逐类 AP 对比表扩展为五列，更新加粗（cat/chair/pottedplant 最高值转移到 V2-S）。
+  - 末尾新增 "2026-05-11 EfficientNet-V2-S 320 结果" 章节，含 ensemble 互补性结论。
+- 更新 `progress.md`（本条记录）。
+- 更新 `README.md`：实验结果表新增 v6 行。
+
+### 记录结果
+
+| 指标 | 值 |
+|------|-----|
+| val mAP | **0.8807** |
+| S2 best val loss | **0.028788**（S2 epoch 6） |
+| S2 总 epoch | 11（patience=5 early stop） |
+| S3 完成 | 是 |
+| Kaggle 完整提交（含分割v10） | **0.86649** |
+
+AP 最弱：diningtable 0.4161（五模型最低）、sofa 0.6298、bottle 0.7269。
+AP 最强亮点：pottedplant **0.9470**（五模型最高，远超其他）。
+
+### 关键发现
+
+- pottedplant 0.947 与 ConvNeXt-Small 的弱点（diningtable/sofa）形成互补，是 ensemble 优先候选组合。
+- 完整提交（0.86649）优于 Base（0.86425），但低于 Small（0.87588）。
+- **决策：`convnext_small_320` 仍是最佳单模型；下一步优先尝试 Small + EfficientNet-V2-S ensemble。**
+
+---
+
+## 会话：2026-05-11 - ConvNeXt-Base 320 Kaggle 结果记录
+
+### 状态
+已完成。
+
+### 已执行操作
+- 读取 `output/image_classification/convnext_base_320/metrics/` 下三份 CSV：
+  `evaluation_summary.csv`、`ap_per_class.csv`、`training_history.csv`。
+- 更新 `findings.md`：
+  - 实验结果表新增 v5 行（`convnext_base_320`），附注说明 Kaggle 完整提交分数及过拟合结论。
+  - 逐类 AP 对比表扩展为四列，修正部分旧行加粗错误（bottle 最优为 effnet 0.800，diningtable 最优为 effnet 0.675）。
+  - 末尾新增 "2026-05-11 ConvNeXt-Base 320 结果" 章节。
+- 更新 `progress.md`（本条记录）。
+- 更新 `README.md`：实验结果表新增 v5 行，说明更新为 small 仍是最佳。
+
+### 记录结果
+
+| 指标 | 值 |
+|------|-----|
+| val mAP | **0.9111** |
+| S2 best val loss | **0.026864**（S2 epoch 3） |
+| S2 总 epoch | 7（patience=4 early stop） |
+| S3 完成 | 是 |
+| Kaggle 完整提交（含分割v10） | **0.86425** |
+
+AP 最弱：diningtable 0.6669、pottedplant 0.7140、sofa 0.7708、bottle 0.7937、chair 0.8196。
+AP 最强：bird / boat / bus / cow / sheep / train 均为 1.000。
+
+### 关键发现
+
+- val mAP（0.9111）是当前四个实验最高，但 Kaggle 完整提交（0.86425）低于 `convnext_small_320`（0.87588）。
+- 训练 loss 单调下降（0.028→0.005）而 val loss 在 S2 epoch 3 后上升，为典型大模型在小数据集上的过拟合表现。
+- **决策：`convnext_small_320` 仍是当前最佳提交分类模型；不再继续尝试 `convnext_large_320`。**
+
+### 下一步
+
+- 若要继续提升分类分数，优先路径为 ensemble（已有脚本：`07_ensemble.py`）而非更大骨干网络。
+- 最后剩余阻塞：notebook cell 0 学生姓名（需用户提供）。
+
+---
+
+## 会话：2026-05-11 - 5-Fold CV 阈值校准实现
+
+### 状态
+已完成。
+
+### 已执行操作
+- 新建 `Image classification/09_kfold_cv.py`：
+  - 参数：`--experiment`、`--n-folds`、`--folds`（断点续训）、`--mode train-folds|aggregate|all`、`--grid-step`
+  - 训练逻辑：每折 S1+S2（无 S3），每折种子独立（`config.random_seed + fold_k`）
+  - OOF 收集：每折 val 集 TTA 概率（与 `06_predict.py` 分布一致）
+  - 汇总：全量 OOF 搜索阈值（主）+ 5 折均值阈值（备）
+  - 输出：`kfold/fold{k}/`（per-fold 制品）+ `kfold/`（全量汇总）
+- 新建 `Image classification/experiments/convnext_small_320/kfold_cv.py`：3 行薄封装，与现有 train/evaluate/predict 封装风格一致
+- 新建 `Image classification/kaggle_kfold_convnext_small_320.ipynb`：9-cell 自包含 Kaggle notebook
+  - 支持本地 `MultiLabelClassifier.state_dict()` 和 notebook 内部两种 checkpoint 格式
+  - 使用 AMP 混合精度加速
+  - 最终用已有 `final_model.pth` + 新阈值生成测试集提交
+- 修改 `Image classification/06_predict.py`：
+  - `parse_args()` 新增 `--thresholds-path` 可选参数
+  - `load_thresholds()` 接受 `explicit_path` 参数
+  - `main()` 新增 `thresholds_path` 参数并传递给 `load_thresholds`
+  - 默认行为不变（仍使用 `config.thresholds_path`）
+- 更新 `findings.md` 和 `progress.md`
+
+### 验证
+- `09_kfold_cv.py` 和 `experiments/convnext_small_320/kfold_cv.py` 语法正常（`py_compile` 已验证）
+- `06_predict.py` 修改范围最小，不改变默认行为
+
+### 运行方式
+```bash
+# Kaggle T4 约 45 分钟，上传 kul-cv 数据集 + convnext-small-final 数据集（含 final_model.pth）
+# 本地（biometrics 环境）：
+python "Image classification/09_kfold_cv.py" --experiment convnext_small_320
+
+# 完成后生成 kfold 阈值提交：
+python "Image classification/06_predict.py" --experiment convnext_small_320 \
+    --thresholds-path output/image_classification/convnext_small_320/kfold/best_thresholds_kfold.npy
+```
+
+### 会话：2026-05-10 - 创建三个 Kaggle Notebooks
+
+#### 状态
+已完成。
+
+#### 新增文件
+
+| 文件 | 内容 |
+|------|------|
+| `Image classification/kaggle_train_convnext_base_320.ipynb` | ConvNeXt-Base 320 Kaggle 训练 notebook |
+| `Image classification/kaggle_train_efficientnet_v2_s_320.ipynb` | EfficientNet-V2-S 320 Kaggle 训练 notebook（新模型） |
+| `Image classification/kaggle_ensemble.ipynb` | 多模型概率加权融合 notebook |
+
+#### 关键设计说明
+
+- **ConvNeXt-Base notebook**：沿用三阶段训练协议，feat_dim=1024，batch=8，Stage-2 early stop patience=4。
+- **EfficientNet-V2-S notebook**：首次引入 `efficientnet_v2_s`（torchvision 0.26 可用），feat_dim=1280，参数量 ~21.5M，batch=16，ImageNet-1K top-1 84.2%，计算效率优于 ConvNeXt-Base。
+- **Ensemble notebook**：支持三种模式（方案 A/B/C），默认从 checkpoint 推理（方案 C），与本地 `07_ensemble.py` 权重搜索逻辑一致，输出 `ensemble_weights.json` + 1500 行提交 CSV。
+
+#### 验证
+- 三个 notebook 均为合法 Jupyter JSON（`nbformat=4`），结构与现有 `colab_train_convnext.ipynb` 保持一致。
+
+---
+
 ### 会话：2026-05-10 - 评估指标与超参数讲解补充
 - 用户希望补充解释 `mAP`、`per-class AP` 等评估指标如何计算，以及训练/评估/ensemble 超参数分别是什么意思。
 - 已扩展 `Image classification/ensemble_method_explained.md`：
@@ -664,3 +805,33 @@
 - 当前 notebook cell 0 仍为 `Student names: TODO: add final group member names`。
 - Git 历史中的作者线索仍只有 `Enmin Lin`、`121philip`、`hapgab` 和 bot 作者，无法等同于正式学生姓名。
 - 结论：不能安全自动完成剩余 1/7；需要用户提供正式组员姓名后才能填写 notebook 并将第 7 阶段标记为完成。
+
+---
+
+## 会话：2026-05-11 - Ensemble Small + V2-S Kaggle 结果记录
+
+### 状态
+已完成。
+
+### 已执行操作
+- 读取 `output/image_classification/ensemble_small_v2/metrics/` 下所有结果文件：
+  `ensemble_baselines.csv`、`ensemble_weights.json`、`ap_per_class_comparison.csv`
+- 更新 `findings.md`：新增 "2026-05-11 Ensemble Small + V2-S 结果" 章节
+- 更新 `README.md`：实验结果表新增 v7 行，更新注释
+- 更新 `progress.md`（本条记录）
+
+### 记录结果
+
+| 指标 | 值 |
+|------|-----|
+| 模型组合 | convnext_small_320 + efficientnet_v2_s_320 |
+| 融合方式 | per-class 加权（自动选择，优于全局权重） |
+| val mAP（150 张） | **0.9236** |
+| 全局权重（75% Small + 25% V2-S）val mAP | 0.9144 |
+| Kaggle 完整提交（含分割v10） | **0.86657** |
+
+### 关键发现
+- Ensemble val mAP（0.9236）高于所有单模型，但 Kaggle 实际得分（0.86657）仅比 V2-S 单模型（0.86649）高 **+0.00008**，比 Small 单模型（0.87588）低 **-0.00931**。
+- per-class 权重搜索在 150 张 val 样本上过拟合明显；全局权重更保守但仍不如 Small 单模型。
+- **决策：`convnext_small_320` 仍为当前最佳分类模型（0.87588）。Ensemble 路径暂时不如单模型。**
+- 若继续尝试，建议改用 5-fold OOF 阈值 + 固定全局权重以减少 val 过拟合。

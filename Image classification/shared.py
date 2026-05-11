@@ -192,6 +192,14 @@ EXPERIMENTS = {
         batch_size=32,
         eval_batch_size=32,
     ),
+    "efficientnet_v2_s_320": ExperimentConfig(
+        name="efficientnet_v2_s_320",
+        backbone="efficientnet_v2_s",
+        img_size=320,
+        batch_size=16,
+        eval_batch_size=32,
+        early_stop_patience=5,
+    ),
 }
 
 
