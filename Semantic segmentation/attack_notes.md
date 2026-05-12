@@ -28,7 +28,7 @@ adv_image = clip(clean_image + delta, 0, 255)
 ```
 
 They also keep `eps=4/255`, so the human-visible image difference should remain very small.
-
+>>>>>>> 6dffe60 (Document adversarial attack experiments)
 ## Trainable vs Non-Trainable Attacks
 
 ### Trainable Attacks
@@ -43,11 +43,12 @@ Used in:
 - Attack V5: ResNet generator
 - Attack V6: ASPP generator
 - Attack V7: Feature-ASPP generator
+<<<<<<< HEAD
 - Attack V8: Feature-ASPP generator adapted to V17 EoMT-DINOv3
 - Attack V9: CE-margin Feature-ASPP generator adapted to V17 EoMT-DINOv3
 - Attack V11: PGD-distilled Feature-ASPP generator adapted to V17 EoMT-DINOv3
 - Attack V12: query-level Feature-ASPP generator adapted to V17 EoMT-DINOv3
-
+=======
 ### Non-Trainable Attacks
 
 Non-trainable attacks directly optimize each input image using gradients, without learning a reusable generator.
@@ -55,7 +56,7 @@ Non-trainable attacks directly optimize each input image using gradients, withou
 Used in:
 
 - Attack V2: FGSM and PGD
-- Attack V10: FGSM and PGD on V17 EoMT-DINOv3
+- Attack V10: FGSM and PGD on V17 EoMT-DINOv3>>>>>>> 6dffe60 (Document adversarial attack experiments)
 
 FGSM and PGD are very strong white-box baselines, but they are not trainable adversarial models.
 
@@ -102,6 +103,7 @@ V6: attack final segmentation output
 V7: attack final segmentation output + internal feature representation
 ```
 
+<<<<<<< HEAD
 ### EoMT Query-Based Semantic Scores
 
 Attack V8 and V9 target V17 EoMT-DINOv3. Unlike SegFormer, EoMT is query-based:
@@ -198,7 +200,7 @@ mIoU_drop: -0.764625
 
 This suggests that query-level losses alone are not enough for the current Feature-ASPP generator on V17.
 
-## Model Progression
+=======## Model Progression
 
 ### Attack V1
 
@@ -316,7 +318,7 @@ This suggests that query-level losses alone are not enough for the current Featu
 - Interpretation:
   - query-level losses damage a few classes locally, but do not reduce global mIoU.
   - the current generator still cannot exploit V17 the way direct PGD can.
-
+>>>>>>> 6dffe60 (Document adversarial attack experiments)
 ## Reporting Guidance
 
 Recommended report framing:
@@ -327,6 +329,7 @@ Recommended report framing:
   - V5 changes generator architecture to ResNet.
   - V6 changes generator architecture to multi-scale ASPP.
   - V7 changes attack objective to output plus feature-level attack.
+<<<<<<< HEAD
 - Include Attack V8, V9, V11, and V12 as negative V17 trainable-generator experiments:
   - V8 shows that V7's targeted-background + feature objective does not transfer to EoMT-DINOv3.
   - V9 shows that even a direct CE + margin objective does not reduce global mIoU under the same `eps=4/255` budget.
@@ -335,13 +338,16 @@ Recommended report framing:
 - Include Attack V10 as the V17 white-box diagnostic:
   - it proves V17 is attackable by FGSM/PGD.
   - it justifies the next direction: PGD-guided trainable generator training.
-
+=======
 ## Known Caveats
 
 - V2 PGD is much stronger than trainable attacks because it optimizes perturbations per image.
 - Trainable generators are harder because one generator must generalize across validation images.
 - V4 was not a model failure; it was an environment compatibility blocker.
+<<<<<<< HEAD
 - V8, V9, V11, and V12 are evaluated on the V17 37-image validation split, so small per-class drops can be offset by improvements elsewhere.
 - Attack V10 completed the V17 PGD/FGSM sanity check and showed V17 is strongly vulnerable to direct per-image PGD.
 - The next open question is how to transfer PGD's strength into a reusable trainable generator.
+=======
+>>>>>>> 6dffe60 (Document adversarial attack experiments)
 - Some output CSV files may only exist in Colab/Drive unless explicitly copied back locally. The local notebooks still preserve the displayed results.

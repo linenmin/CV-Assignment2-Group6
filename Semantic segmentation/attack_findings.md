@@ -24,7 +24,7 @@ This file records adversarial-attack results separately from the main semantic-s
 | V10 FGSM 4/255 | V17 EoMT-DINOv3 | FGSM white-box | No | 79.232563 | 45.792824 | 33.439740 | Strong one-step attack on V17. |
 | V10 PGD 4/255 | V17 EoMT-DINOv3 | PGD white-box, 10 steps | No | 79.232563 | 4.777270 | 74.455294 | Very strong V17 white-box diagnostic; not trainable. |
 | V11 | V17 EoMT-DINOv3 | PGD-distilled Feature-ASPP generator | Yes | 79.232563 | 79.243165 | -0.010602 | PGD final-delta distillation produces too little effective perturbation. |
-| V12 | V17 EoMT-DINOv3 | query-level Feature-ASPP generator | Yes | 79.232563 | 79.997189 | -0.764625 | Query-level EoMT objective still fails to reduce global mIoU. |
+| V12 | V17 EoMT-DINOv3 | query-level Feature-ASPP generator | Yes | 79.232563 | 79.997189 | -0.764625 | Query-level EoMT objective still fails to reduce global mIoU. |>>>>>>> 6dffe60 (Document adversarial attack experiments)
 
 ## Key Findings
 
@@ -42,6 +42,7 @@ This file records adversarial-attack results separately from the main semantic-s
   - V7 Feature-ASPP generator: `8.621014` drop
 - V6 confirms that generator architecture matters.
 - V7 confirms that attack objective design matters, not only generator capacity.
+<<<<<<< HEAD
 - V8 and V9 show that the V7 attack family does not directly transfer to V17 EoMT-DINOv3:
   - V8 targeted-background + feature loss gives `-0.366917` mIoU drop.
   - V9 untargeted CE + margin + feature loss gives `-0.343444` mIoU drop.
@@ -58,7 +59,7 @@ This file records adversarial-attack results separately from the main semantic-s
   - V17 appears substantially more robust than V8 SegFormer-B5 under these trainable generator attacks.
   - The 37-image validation split is small, so per-class damage can be offset by small improvements elsewhere.
   - EoMT is query-based, so dense-output attack objectives may be too indirect.
-
+=======
 ## Per-Class Observations
 
 ### Attack V1
@@ -207,7 +208,7 @@ Top affected classes:
 | cow | 85.336040 | 84.904602 | 0.431439 |
 
 V12 attacks EoMT's query outputs more directly, including query no-object, foreground-class, mask-suppression, entropy, dense CE, and dense margin losses. It still does not reduce global V17 mIoU: `79.232563` clean vs. `79.997189` attacked.
-
+>>>>>>> 6dffe60 (Document adversarial attack experiments)
 ## Current Conclusion
 
 For report writing, the most defensible story is:
@@ -216,6 +217,8 @@ For report writing, the most defensible story is:
 2. V1 and V3 show basic trainable adversarial generators are possible but weak.
 3. V5 to V7 show a systematic trainable-generator design progression.
 4. V7 should be used as the main trainable adversarial model result.
+<<<<<<< HEAD
 5. V8, V9, V11, and V12 should be reported as negative but informative trainable-generator attempts against V17 EoMT-DINOv3.
 6. V10 should be reported as the V17 white-box diagnostic showing that V17 is attackable under direct per-image FGSM/PGD.
 7. The next trainable V17 attempt should use PGD as teacher supervision rather than relying only on dense or query-level generator losses.
+=======

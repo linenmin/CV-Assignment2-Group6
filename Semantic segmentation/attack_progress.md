@@ -10,7 +10,7 @@ This file tracks implementation progress for adversarial-attack notebooks separa
 - V4 SegMAN-B attack was designed but not completed because of Colab Python 3.12 dependency incompatibility.
 - Latest target tested: V17 EoMT-DINOv3, Hugging Face checkpoint format (`model.safetensors`).
 - Attack V8, V9, V11, and V12 did not reduce V17 global mIoU; V17 appears robust to the current trainable Feature-ASPP generator family.
-- Attack V10 confirmed V17 is strongly attackable by direct FGSM/PGD, so the current bottleneck is reusable trainable-generator design rather than target-model immunity.
+- Attack V10 confirmed V17 is strongly attackable by direct FGSM/PGD, so the current bottleneck is reusable trainable-generator design rather than target-model immunity.>>>>>>> 6dffe60 (Document adversarial attack experiments)
 
 ## Attack V1
 
@@ -173,6 +173,7 @@ This file tracks implementation progress for adversarial-attack notebooks separa
   - strongest trainable adversarial model so far.
   - the feature-level objective gives a major gain over V6.
 
+<<<<<<< HEAD
 ## Attack V8
 
 - Notebook: `attack_v8_feature_aspp_generator_eomt_v17_colab.ipynb`
@@ -359,3 +360,11 @@ This file tracks implementation progress for adversarial-attack notebooks separa
   - evaluate V17 attacks on a larger validation subset instead of only the 37-image split;
   - design an EoMT query-level attack objective;
   - test stronger perturbation budgets only if the assignment allows visible-budget comparison.
+=======
+## Next Steps
+
+- Preserve V7 as the current main trainable adversarial-attack result.
+- If more time is available, possible follow-up experiments:
+  - tune `LAMBDA_FEATURE` for V7;
+  - compare V7 against a boundary-focused generator;
+  - evaluate the same attack family on V10 SegMAN-B if a compatible Python 3.10 GPU environment becomes available.
