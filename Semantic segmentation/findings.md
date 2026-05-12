@@ -461,3 +461,74 @@
   - https://huggingface.co/tue-mps/eomt-dinov3-ade-semantic-large-512
   - https://huggingface.co/docs/transformers/v5.7.0/en/model_doc/eomt_dinov3
   - https://docs.lightly.ai/train/stable/semantic_segmentation.html
+
+## V16 TTA Findings
+
+- V16 keeps the V15 best checkpoint and only changes the inference path; no new training.
+- Implementation: `scripts/predict_eomt_tta.py` performs a Mask2Former-style soft-semantic forward at each requested input side, dynamically rewrites `model.grid_size` so EoMT's token reshape is valid at non-512 inputs, averages soft scores at a common 512×512 reference resolution, then argmaxes and nearest-resizes back to the original image size.
+- Architectural constraint that shaped the ablation: EoMT-DINOv3 hard-codes `self.grid_size = (image_size // patch_size, image_size // patch_size) = (32, 32)`. The DINOv3 backbone tolerates variable input via interpolated positional embeddings, but the EoMT decoder reshape and several `F.interpolate(..., size=self.grid_size, ...)` calls assume that exact 32×32 grid. Without patching `model.grid_size`, any non-512 input raises a `RuntimeError` in `conv1`.
+- Multi-scale + horizontal-flip ablation on the 112-image validation split (V15 best, reference `mIoU=0.8020`):
+  - `512` no flip = `0.8020` (matches reported V15 result, sanity check passes)
+  - `512` + hflip = `0.8007`, mostly from a `diningtable` collapse `0.794 -> 0.548`
+  - `{448, 512, 576}` no flip = `0.7984`
+  - `{448, 512, 576}` + hflip = `0.8013`
+  - `{480, 512, 544}` no flip = `0.7978`
+  - `{496, 512}` no flip = `0.8027`
+  - `{512, 528}` no flip = `0.8018`
+  - `{496, 512, 528}` + hflip = `0.8025`
+  - `{496, 512, 528}` no flip = `0.8030` ← chosen as the V16 export recipe
+- Two robust findings emerged:
+  - EoMT-DINOv3 fine-tuned at fixed `512×512` is much more scale-fragile than typical hierarchical encoders. Even a single step out of the patch grid (`448` or `576`) systematically drags multiple foreground classes; only the `±16` window around `512` (one patch on each side) gives a stable gain.
+  - Horizontal-flip TTA helps some near-symmetric or right-skewed classes (`bicycle`, `dog`, `train`, `chair`) but tanks `diningtable` so heavily that the overall mIoU drops. This is consistent with `diningtable` images in the training set having strong left-right context priors (chairs, place settings) that flip breaks.
+- Test-set behavior:
+  - V16 changed `0.73%` of pixels on average versus the V15 best single-scale prediction.
+  - This is comparable to the V13->V14 (`0.19%`) and V12->V14 (`0.36%`) pixel-change magnitudes that each gave non-trivial Kaggle gains.
+- V16 Kaggle public score: `0.88882`, beating V15 `0.88857` by `+0.00025`.
+- The transfer ratio from validation to Kaggle is now stable at about `0.25x`, i.e. each `+0.001` validation mIoU buys roughly `+0.00025` public score. The recent V14 -> V15 -> V16 deltas all sit in the same band.
+- This is strong evidence the segmentation track is in a plateau dominated by validation/test variance and by the contribution of the classification component (which makes up roughly half of the public score).
+
+## V17 Re-Split Merge-Val Fine-Tune
+
+- Confirmed that the segmentation `train/val` split is project-defined, not assignment-defined: `scripts/build_splits.py` calls `build_train_val_split(seed=42, val_ratio=0.15)` and writes `data/splits/train.txt` and `data/splits/val.txt`. The assignment only ships `train_set.csv` and `test_set.csv`.
+- Compared the segmentation split against the Image-Classification branch's split:
+  - segmentation: `random.Random(42).shuffle(sorted_ids)`, `val_ratio=0.15` -> 637/112
+  - classification: `sklearn.train_test_split(random_state=42, test_size=0.2)` -> 599/150
+  - the two validation sets share only `22` images. 90 images are seg-val but cls-train; 128 are cls-val but seg-train. There is no project-wide held-out subset.
+- This means the segmentation 112 val is not a Kaggle-faithful reference, and earlier mini-deltas (V14 -> V15: `+0.0001` local) reflect that fact: such gains may simply be characteristics of this specific 112-image subset rather than true generalization improvements.
+- V17 lowers the segmentation `val_ratio` to `0.05`, keeping the same seed, which produces a new validation set that is a strict subset of the old one. 75 images move `validation -> training`, 0 move the other way. Old split is backed up to `training_v15split.txt` / `validation_v15split.txt`.
+- The model is then continued from V15 best at `lr=1e-5, unfreeze_last_layers=2, max_steps=2000, early_stop_patience=8`. Best `val_mIoU=0.7923` at step `1000`, early-stopped at step `1800`.
+- Fair comparison on the new 37 val with `ms{496,512,528}` no-flip TTA:
+  - V15 best: `mIoU=0.7859`
+  - V17 best: `mIoU=0.7930`
+  - delta `+0.0071` is the strongest training-side gain since V12 -> V14
+- V17 test predictions changed `0.41%` of pixels versus V16 on average.
+- V17 Kaggle public score: `0.89139`, beating V16 `0.88882` by `+0.00257`. This is the largest single-step Kaggle gain since V11 -> V12 (`+0.00260`).
+- The realised local-to-Kaggle transfer ratio is `0.00257 / 0.0071 ≈ 0.36x`, modestly above the recent `~0.25x` band, which is consistent with the gain reflecting genuinely new training signal rather than 37-val noise.
+- This is empirical confirmation that the original `val_ratio=0.15` was an over-conservative project-internal choice: 75 of those 112 images were carrying real training value that the model could not access until V17 released them.
+
+## Sliding-Window Negative Finding (internal experiment, no Kaggle submission)
+
+- Motivation: V11 training warps every image to `512x512` before the EoMT processor, so the network has only seen perspective-distorted inputs. Sliding-window inference was meant to feed the model `512x512` crops from an aspect-preserving resize, preserving both the trained resolution and the hard-coded `32x32` token grid for free, while showing the model un-warped content that small / thin objects (`bicycle`, `chair`) need.
+- Implementation: `scripts/predict_eomt_sliding_window.py`. Each image is resized to short-side `= 512` keeping aspect ratio, then square `512x512` windows are slid with a configurable stride. Soft Mask2Former semantic scores are averaged in image space with a per-pixel count buffer, then argmaxed and nearest-resized to the original size. Validation is reported both at the `512x512` warped protocol (matching V11..V16) and at the native image size (closer to what Kaggle actually scores).
+- Result on the V15 best checkpoint (112 validation images):
+  - `window=512, stride=256, no flip`: primary `mIoU=0.7941`, original-size `mIoU=0.7968`
+  - `window=512, stride=128, no flip`: primary `mIoU=0.7952`, original-size `mIoU=0.7979`
+  - V16 baseline for comparison: primary `mIoU=0.8030`, original-size `mIoU=0.8049`
+- Per-class diagnosis at `stride=256, no flip` versus V16:
+  - `diningtable` collapsed from `0.779` to `0.575` (`-0.20`)
+  - `train` dropped from `0.882` to `0.832`
+  - `pottedplant` dropped from `0.771` to `0.758`
+  - `dog`, `bus`, `sheep`, and `sofa` improved by `+0.05` to `+0.13`
+  - `bicycle` stayed near `0.21` regardless of stride, so the hypothesis that sliding-window would rescue the thin-object class is not supported here
+- Interpretation:
+  - the model was fine-tuned on full-image-warped `512x512` inputs and has learned strong "this image fits in one 512 square" priors
+  - aspect-preserving sliding-window crops are out-of-distribution relative to training, particularly for classes that depend on full-image context (`diningtable`)
+  - the same failure pattern appeared earlier with horizontal-flip TTA, where `diningtable` also collapsed by ~`0.24`; both are consistent with the model relying on warped-frame layout priors that aspect-preserving crops and flipped contexts do not satisfy
+- Methodological value:
+  - this is a clean negative result that strengthens, rather than weakens, the report
+  - it shows that the V11 preprocessing choice is effectively locked in once fine-tuning begins, and that recovering the cost would require retraining with aspect-preserving augmentation rather than another inference-time trick
+  - the practical implication is that the segmentation track has now exhausted both training-side and inference-side cheap improvements; further gains require a structural change such as retraining at native aspect ratio or improving the classification half of the Kaggle pipeline
+- Decision:
+  - do not submit the sliding-window candidate to Kaggle; spending a leaderboard slot to confirm a regression would not provide additional information
+  - V16 (`outputs/submissions/submission_exp_v16_eomt_dinov3_tta_ms496_512_528_noflip_with_convnext_small_320.csv`, public score `0.88882`) remains the recommended segmentation submission
+- Implication: the next inference-side TTA candidate that has a chance of further help is a true sliding-window pass at the native aspect ratio (each window fed at exactly `512×512` so the grid assumption is honoured). Anything else that breaks the trained grid is risky on this checkpoint.

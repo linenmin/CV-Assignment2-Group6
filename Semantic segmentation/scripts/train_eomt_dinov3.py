@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import random
 import time
 from dataclasses import dataclass
@@ -186,6 +187,68 @@ def set_trainable_scope(model: torch.nn.Module, unfreeze_last_layers: int) -> No
                     parameter.requires_grad = True
 
 
+def build_param_groups(
+    model: torch.nn.Module,
+    base_lr: float,
+    weight_decay: float,
+    unfreeze_last_layers: int,
+    backbone_lr: float | None,
+    backbone_lr_decay: float,
+) -> list[dict[str, object]]:
+    if backbone_lr is None:
+        return [
+            {
+                "params": [parameter for parameter in model.parameters() if parameter.requires_grad],
+                "lr": base_lr,
+                "weight_decay": weight_decay,
+                "name": "trainable",
+            }
+        ]
+
+    head_params: list[torch.nn.Parameter] = []
+    for module_name in ("class_predictor", "mask_head"):
+        module = getattr(model, module_name)
+        head_params.extend([parameter for parameter in module.parameters() if parameter.requires_grad])
+
+    param_groups: list[dict[str, object]] = [
+        {
+            "params": head_params,
+            "lr": base_lr,
+            "weight_decay": weight_decay,
+            "name": "heads",
+        }
+    ]
+
+    layers = getattr(model, "layers", None)
+    if isinstance(layers, torch.nn.ModuleList) and unfreeze_last_layers > 0:
+        selected_layers = list(layers[-unfreeze_last_layers:])
+        for offset, layer in enumerate(selected_layers):
+            distance_from_output = unfreeze_last_layers - offset - 1
+            layer_lr = backbone_lr * (backbone_lr_decay ** distance_from_output)
+            layer_params = [parameter for parameter in layer.parameters() if parameter.requires_grad]
+            if layer_params:
+                param_groups.append(
+                    {
+                        "params": layer_params,
+                        "lr": layer_lr,
+                        "weight_decay": weight_decay,
+                        "name": f"backbone_layer_{len(layers) - unfreeze_last_layers + offset}",
+                    }
+                )
+
+    return param_groups
+
+
+def compute_lr_scale(step: int, warmup_steps: int, max_steps: int, min_lr_ratio: float) -> float:
+    if warmup_steps > 0 and step < warmup_steps:
+        return max((step + 1) / warmup_steps, min_lr_ratio)
+    if max_steps <= warmup_steps:
+        return 1.0
+    progress = (step - warmup_steps) / max(1, max_steps - warmup_steps)
+    cosine = 0.5 * (1.0 + math.cos(math.pi * min(max(progress, 0.0), 1.0)))
+    return min_lr_ratio + (1.0 - min_lr_ratio) * cosine
+
+
 def compute_miou(pred: np.ndarray, target: np.ndarray, num_classes: int) -> tuple[float, dict[int, float]]:
     per_class: dict[int, float] = {}
     for class_id in range(num_classes):
@@ -267,8 +330,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--eval-every", type=int, default=500)
     parser.add_argument("--early-stop-patience", type=int, default=6)
     parser.add_argument("--lr", type=float, default=1e-4)
+    parser.add_argument("--backbone-lr", type=float, default=None)
+    parser.add_argument("--backbone-lr-decay", type=float, default=0.5)
     parser.add_argument("--weight-decay", type=float, default=0.05)
     parser.add_argument("--unfreeze-last-layers", type=int, default=0)
+    parser.add_argument("--scheduler", choices=("constant", "cosine"), default="constant")
+    parser.add_argument("--warmup-steps", type=int, default=0)
+    parser.add_argument("--min-lr-ratio", type=float, default=0.1)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--smoke-steps", type=int, default=0)
@@ -311,10 +379,30 @@ def main() -> None:
         collate_fn=lambda batch: collate_eval(batch, processor),
     )
 
-    optimizer = torch.optim.AdamW(
-        [p for p in model.parameters() if p.requires_grad],
-        lr=args.lr,
+    param_groups = build_param_groups(
+        model=model,
+        base_lr=args.lr,
         weight_decay=args.weight_decay,
+        unfreeze_last_layers=args.unfreeze_last_layers,
+        backbone_lr=args.backbone_lr,
+        backbone_lr_decay=args.backbone_lr_decay,
+    )
+    base_lrs = [float(group["lr"]) for group in param_groups]
+    optimizer = torch.optim.AdamW(param_groups)
+    print(
+        "param_groups="
+        + json.dumps(
+            [
+                {
+                    "name": group.get("name", f"group_{index}"),
+                    "lr": float(group["lr"]),
+                    "params": sum(parameter.numel() for parameter in group["params"]),
+                }
+                for index, group in enumerate(param_groups)
+            ],
+            indent=2,
+        ),
+        flush=True,
     )
     scaler = torch.amp.GradScaler("cuda", enabled=device.type == "cuda")
     max_steps = args.smoke_steps if args.smoke_steps > 0 else args.max_steps
@@ -334,6 +422,16 @@ def main() -> None:
     while step < max_steps:
         model.train()
         for batch in train_loader:
+            if args.scheduler == "cosine":
+                lr_scale = compute_lr_scale(
+                    step=step,
+                    warmup_steps=args.warmup_steps,
+                    max_steps=max_steps,
+                    min_lr_ratio=args.min_lr_ratio,
+                )
+                for group, base_lr in zip(optimizer.param_groups, base_lrs):
+                    group["lr"] = base_lr * lr_scale
+
             batch = move_batch_to_device(batch, device)
             with torch.amp.autocast("cuda", enabled=device.type == "cuda"):
                 outputs = model(

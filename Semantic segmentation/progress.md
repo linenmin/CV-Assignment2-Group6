@@ -693,3 +693,279 @@
 - Generated training-curve artifacts:
   - `outputs/analysis/eomt_dinov3_v11_unfreeze2/training_curve.png`
   - `outputs/analysis/eomt_dinov3_v11_unfreeze2/training_curve_summary.md`
+
+### 2026-05-12 (V12 EoMT Continue Training)
+
+- Continued from V11 best checkpoint:
+  - source: `outputs/checkpoints/eomt_dinov3_v11_unfreeze2/best`
+  - output: `outputs/checkpoints/eomt_dinov3_v12_continue_unfreeze2_lr1e5`
+  - image size: `512x512`
+  - trainable scope: classification head, mask head, and last 2 Transformer layers
+  - learning rate: `1e-5`
+  - max steps: `3000`
+  - validation interval: `500`
+- Result:
+  - best validation mIoU: `0.8002` at step `2000`
+  - final validation mIoU: `0.7954` at step `3000`
+  - comparison to V11: local validation improved from about `0.7926/0.7864` to `0.8002`
+- Exported submissions:
+  - segmentation-only: `outputs/submissions/submission_exp_v12_eomt_dinov3_continue_lr1e5_fixed_preprocess.csv`
+  - merged with ConvNeXt-small classification: `outputs/submissions/submission_exp_v12_eomt_dinov3_continue_lr1e5_fixed_preprocess_with_convnext_small_320.csv`
+- Training-curve artifacts:
+  - `outputs/analysis/eomt_dinov3_v12_continue_unfreeze2_lr1e5/training_curve.png`
+  - `outputs/analysis/eomt_dinov3_v12_continue_unfreeze2_lr1e5/training_curve_summary.md`
+- Current recommendation:
+  - upload the V12 merged candidate to Kaggle
+  - expected gain is likely modest because local validation improved only slightly
+
+### 2026-05-12 (V12 Kaggle Result and Curve Interpretation)
+
+- V12 Kaggle public score:
+  - file: `outputs/submissions/submission_exp_v12_eomt_dinov3_continue_lr1e5_fixed_preprocess_with_convnext_small_320.csv`
+  - score: `0.88602`
+- Comparison:
+  - V10 final: `0.85725`
+  - V11 corrected: `0.88342`
+  - V12 continued: `0.88602`
+  - V12 gain over V11: `+0.00260`
+- Training-curve interpretation:
+  - V12 starts from V11 best at `0.7926`
+  - mIoU rises to `0.7994` at step `1000`
+  - it peaks at `0.8002` at step `2000`
+  - it slightly drops to `0.7954` by step `3000`
+- Conclusion:
+  - continued training still helps, but the return is now small
+  - the best checkpoint is not the final checkpoint, so future runs should stop earlier or use lower learning rate
+  - the next training-only attempt should be smaller and more conservative, not another long run at the same learning rate
+
+### 2026-05-12 (V13 Smoke: Unfreeze-2 vs Unfreeze-4)
+
+- Goal: compare configuration curves at the same validation steps rather than only checking whether a run beats the previous best.
+- Shared setup:
+  - initialization: `outputs/checkpoints/eomt_dinov3_v12_continue_unfreeze2_lr1e5/best`
+  - image size: `512x512`
+  - preprocessing: fixed EoMT preprocessing
+  - learning rate: `5e-6`
+  - max steps: `1000`
+  - validation interval: `250`
+  - batch size: `1`
+  - gradient accumulation: `8`
+- Unfreeze-2 result:
+  - trainable params: about `28.4M`
+  - step 1: `0.8002`
+  - step 250: `0.7931`
+  - step 500: `0.8011`
+  - step 750: `0.8011`
+  - step 1000: `0.8012`
+- Unfreeze-4 result:
+  - trainable params: about `53.6M`
+  - step 1: `0.8002`
+  - step 250: `0.7900`
+  - step 500: `0.7998`
+  - step 750: `0.8000`
+  - step 1000: `0.8005`
+- Interpretation:
+  - unfreeze-4 is lower than unfreeze-2 at every matched validation step
+  - unfreezing more layers increases trainable parameters substantially but does not improve the curve
+  - the current evidence supports staying with last-2-layer unfreezing
+- Exported V13 candidate:
+  - segmentation-only: `outputs/submissions/submission_exp_v13_eomt_dinov3_unfreeze2_lr5e6_fixed_preprocess.csv`
+  - merged with ConvNeXt-small classification: `outputs/submissions/submission_exp_v13_eomt_dinov3_unfreeze2_lr5e6_fixed_preprocess_with_convnext_small_320.csv`
+- Recommendation:
+  - V13 is safe to submit, but expected gain is very small because local mIoU only improved from `0.8002` to `0.8012`
+
+### 2026-05-12 (V14 Continue V13 Until Early Stop)
+
+- Continued from V13 unfreeze-2 best:
+  - source: `outputs/checkpoints/eomt_dinov3_v13_smoke_unfreeze2_lr5e6/best`
+  - output: `outputs/checkpoints/eomt_dinov3_v14_continue_unfreeze2_lr5e6_earlystop`
+  - learning rate: `5e-6`
+  - trainable scope: heads plus last 2 Transformer layers
+  - validation interval: `250`
+  - early-stop patience: `4`
+- Result:
+  - step 1: `0.8012`
+  - step 500: `0.8017`
+  - step 1000: `0.8019`
+  - step 1250: `0.7961`
+  - step 1500: `0.7962`
+  - step 1750: `0.7961`
+  - step 2000: `0.7949`
+  - early stopped at step `2000`
+  - best validation mIoU: `0.8019` at step `1000`
+- Exported submissions:
+  - segmentation-only: `outputs/submissions/submission_exp_v14_eomt_dinov3_unfreeze2_lr5e6_earlystop_fixed_preprocess.csv`
+  - merged with ConvNeXt-small classification: `outputs/submissions/submission_exp_v14_eomt_dinov3_unfreeze2_lr5e6_earlystop_fixed_preprocess_with_convnext_small_320.csv`
+- Interpretation:
+  - local gain over V13 is only about `+0.0007`
+  - this confirms low-learning-rate continuation is nearly saturated
+  - after V14, further same-config continuation is not a good use of training budget
+
+### 2026-05-12 (V14 Kaggle Result and Next-Step Analysis)
+
+- V14 Kaggle public score:
+  - file: `outputs/submissions/submission_exp_v14_eomt_dinov3_unfreeze2_lr5e6_earlystop_fixed_preprocess_with_convnext_small_320.csv`
+  - score: `0.88830`
+- Comparison:
+  - V11 corrected: `0.88342`
+  - V12: `0.88602`
+  - V14: `0.88830`
+  - V14 gain over V12: `+0.00228`
+- Pixel-level submission change:
+  - V12 vs V13: about `0.2617%` pixels changed
+  - V13 vs V14: about `0.1896%` pixels changed
+  - V12 vs V14: about `0.3607%` pixels changed
+- Interpretation:
+  - the model is still making high-value small corrections, but the total changed area is already tiny
+  - repeated same-config continuation is now close to saturation
+  - the next meaningful gain is more likely from inference-time robustness or resolution strategy than another low-learning-rate continuation
+- Highest-value next candidates:
+  - horizontal-flip test-time augmentation with probability/mask averaging if logits can be exported safely
+  - controlled `640x640` smoke test for inference and short fine-tuning, only if GPU memory permits
+  - checkpoint/submission-level ensemble across V12/V13/V14 only if validation/TTA supports it; naive majority voting may erase V14's small high-value corrections
+
+### 2026-05-12 (V15 Layer-Wise LR + Cosine Scheduler)
+
+- Motivation:
+  - V12/V14 improvements showed fixed learning-rate fine-tuning still had room
+  - the earlier unfreeze-4 comparison may have been unfair because all unfrozen layers used the same learning rate
+- Script update:
+  - added parameter groups to `scripts/train_eomt_dinov3.py`
+  - supports `--backbone-lr`, `--backbone-lr-decay`, `--scheduler cosine`, `--warmup-steps`, and `--min-lr-ratio`
+- V15 configuration:
+  - initialization: `outputs/checkpoints/eomt_dinov3_v14_continue_unfreeze2_lr5e6_earlystop/best`
+  - output: `outputs/checkpoints/eomt_dinov3_v15_layerlr_cosine_unfreeze4`
+  - unfrozen layers: last `4`
+  - head/mask learning rate: `5e-6`
+  - deepest backbone layer lr: `2e-6`
+  - layer-wise decay: `0.5`
+  - resulting backbone layer learning rates: `2.5e-7`, `5e-7`, `1e-6`, `2e-6`
+  - scheduler: warmup + cosine
+  - warmup steps: `150`
+  - min lr ratio: `0.1`
+  - validation interval: `250`
+  - early-stop patience: `5`
+- Result:
+  - step 1: `0.8019`
+  - step 250: `0.7994`
+  - step 500: `0.8020`
+  - step 750: `0.8014`
+  - step 1000: `0.8019`
+  - step 1250: `0.8003`
+  - step 1500: `0.7962`
+  - step 1750: `0.7962`
+  - early stopped at step `1750`
+  - best validation mIoU: `0.8020` at step `500`
+- Interpretation:
+  - layer-wise LR fixed the obvious unfreeze-4 instability, but did not produce a meaningful local improvement over V14
+  - unfreeze-4 remains only marginal under current data/validation conditions
+- Exported submissions:
+  - segmentation-only: `outputs/submissions/submission_exp_v15_eomt_dinov3_layerlr_cosine_unfreeze4_fixed_preprocess.csv`
+  - merged with ConvNeXt-small classification: `outputs/submissions/submission_exp_v15_eomt_dinov3_layerlr_cosine_unfreeze4_fixed_preprocess_with_convnext_small_320.csv`
+
+### 2026-05-12 (V16 TTA + Multi-Scale Inference)
+
+- Goal: improve the V15 best checkpoint without retraining, using inference-time augmentation only. Ensembling across multiple checkpoints was explicitly out of scope so the final submission stays a single model.
+- Implementation: `scripts/predict_eomt_tta.py` averages Mask2Former-style soft semantic score maps across input sides and an optional horizontal flip, with `model.grid_size` rewritten per forward so EoMT's hard-coded `32×32` reshape stays valid at non-512 inputs.
+- Sanity check: single-scale `512`, no flip, full 112-image validation set reproduces `mIoU=0.8020`, exactly matching the V15 reported best.
+- Ablation (V15 best checkpoint, 112 validation samples):
+  - `512` + hflip = `0.8007` (diningtable collapses `0.794 -> 0.548`)
+  - `{448, 512, 576}` no flip = `0.7984`
+  - `{448, 512, 576}` + hflip = `0.8013`
+  - `{480, 512, 544}` no flip = `0.7978`
+  - `{496, 512}` no flip = `0.8027`
+  - `{512, 528}` no flip = `0.8018`
+  - `{496, 512, 528}` + hflip = `0.8025`
+  - `{496, 512, 528}` no flip = `0.8030` ← chosen
+- Final recipe: narrow multi-scale `{496, 512, 528}` with no horizontal flip. Reason: EoMT-DINOv3 was trained at fixed `512×512` and only a `±16` (one patch) window stays stable; horizontal flip helps small classes but tanks `diningtable` enough to regress the overall score.
+- Generated artifacts:
+  - test predictions: `outputs/predictions/eomt_dinov3_v16_tta_ms496_512_528_noflip` (`750` `.npy` files)
+  - segmentation-only CSV: `outputs/submissions/submission_exp_v16_eomt_dinov3_tta_ms496_512_528_noflip.csv`
+  - merged candidate: `outputs/submissions/submission_exp_v16_eomt_dinov3_tta_ms496_512_528_noflip_with_convnext_small_320.csv`
+- Pixel-level change versus V15 best: `0.73%` mean, comparable in magnitude to earlier V12->V14 / V14->V15 deltas that produced clear Kaggle gains.
+- Kaggle result:
+  - file: `outputs/submissions/submission_exp_v16_eomt_dinov3_tta_ms496_512_528_noflip_with_convnext_small_320.csv`
+  - public score: `0.88882`
+  - versus V15: `0.88857 -> 0.88882`, `+0.00025`
+- Interpretation:
+  - V16 is the new best public result, but the gain is in the same `~+0.0003` band as V14->V15
+  - the local-to-Kaggle transfer ratio is now stable at roughly `0.25x` (every `+0.001` local mIoU buys about `+0.00025` public)
+  - to win another `+0.005` Kaggle requires roughly `+0.02` local mIoU, which the current single-checkpoint training plateau cannot deliver without a structural change
+
+### 2026-05-12 (V17 Re-Split Merge-Val Fine-Tune)
+
+- Goal: free up training data by lowering the locally-defined validation ratio. The original `0.15` split was chosen by this project, not by the assignment; the only true held-out split for grading is the Kaggle test set, so the 112 validation images were inflating the "no data leakage" cost beyond what the assignment requires.
+- Cross-branch split analysis (computed against the actual `train_set.csv` `Id` order):
+  - segmentation branch used `random.Random(42).shuffle()` with `val_ratio=0.15` -> 637 train / 112 val
+  - image classification branch used `sklearn.train_test_split(random_state=42)` with `val_split=0.20` -> 599 train / 150 val
+  - the two validation sets only overlap on `22` images; `90` segmentation-val images were already in the classification branch's training set, and `128` classification-val images were already in segmentation training
+- Re-split:
+  - new `val_ratio=0.05` -> 712 train / 37 val
+  - script: `scripts/resplit_segman_ga2.py`
+  - the new val is a strict prefix of the old `random.Random(42)` shuffle, so 75 images move `validation -> training` and 0 images move the other way
+  - old `training.txt` / `validation.txt` backed up to `training_v15split.txt` / `validation_v15split.txt`
+- Training:
+  - initialization: `outputs/checkpoints/eomt_dinov3_v15_layerlr_cosine_unfreeze4/best`
+  - output: `outputs/checkpoints/eomt_dinov3_v17_merge_val_lr1e5`
+  - recipe: `lr=1e-5`, `unfreeze_last_layers=2`, constant LR (V12-style, the historically strongest single training jump)
+  - `max_steps=2000`, `eval_every=100`, `early_stop_patience=8`, `batch_size=1`, `grad_accum=8`, fixed `512x512` warp preprocessing
+  - result: best `val_mIoU=0.7923` at step `1000`, early-stopped at step `1800`
+- Fair comparison on the new 37 val with `ms{496,512,528}` no-flip TTA:
+  - V15 best (the checkpoint behind V16): `mIoU=0.7859`
+  - V17 best: `mIoU=0.7930`
+  - delta: `+0.0071`, roughly seven times the V14 -> V15 and V15 -> V16 deltas, so this is the strongest training-side gain since V12 -> V14
+- Test predictions: `outputs/predictions/eomt_dinov3_v17_tta_ms496_512_528_noflip` (`750` `.npy` files)
+- Segmentation-only CSV: `outputs/submissions/submission_exp_v17_merge_val_tta_ms496_512_528_noflip.csv`
+- Merged candidate: `outputs/submissions/submission_exp_v17_merge_val_tta_ms496_512_528_noflip_with_convnext_small_320.csv`
+- Pixel-level change vs V16 on the test set: `0.41%` mean, `0.12%` median, `43.5%` max
+- Kaggle result:
+  - file: `outputs/submissions/submission_exp_v17_merge_val_tta_ms496_512_528_noflip_with_convnext_small_320.csv`
+  - public score: `0.89139`
+  - versus V16: `0.88882 -> 0.89139`, `+0.00257`
+- Interpretation:
+  - V17 is the new best public result and the largest single-step Kaggle gain since V11 -> V12 (`+0.00260`)
+  - the realised local-to-Kaggle transfer ratio is `0.00257 / 0.0071 ≈ 0.36x`, slightly above the recent `~0.25x` band, which is consistent with the gain being a real training signal rather than 37-val noise
+  - this validates the strategic insight that the 112-image val was being held out at the cost of training data, with no assignment-defined reason to do so
+
+### 2026-05-12 (Sliding-Window Negative Result, internal only)
+
+- Goal: investigate whether sliding-window inference at the trained `512x512` resolution can recover the cost of the V11 full-image-warp preprocessing, particularly for small or thin classes like `bicycle` and `chair`.
+- Script: `scripts/predict_eomt_sliding_window.py`. Resizes the image so its shorter side equals the window size while preserving aspect ratio, then slides square `512x512` windows with a configurable stride. Soft Mask2Former scores are averaged across overlapping windows in image space, then argmax-resized to the original size. Validation reports `mIoU` at both the `512x512` warped protocol (for direct comparison to V16) and at the native image size (Kaggle-relevant).
+- Also updated `scripts/predict_eomt_tta.py` to report both `mIoU` protocols so the comparison is apples-to-apples.
+- Validation results on the V15 best checkpoint:
+  - V16 TTA `ms{496,512,528}` no flip: primary `mIoU=0.8030`, original-size `mIoU=0.8049`
+  - Sliding window `w=512, s=256, no flip`: primary `mIoU=0.7941`, original-size `mIoU=0.7968`
+  - Sliding window `w=512, s=128, no flip`: primary `mIoU=0.7952`, original-size `mIoU=0.7979`
+- Per-class diagnosis at `s=256` vs V16:
+  - `diningtable`: `0.779 -> 0.575`, collapse of `-0.20`
+  - `train`: `0.882 -> 0.832`
+  - `pottedplant`: `0.771 -> 0.758`
+  - `dog`, `bus`, `sheep`, `sofa` improved by `+0.05` to `+0.13`
+  - `bicycle` stayed near `0.21`, so the original "small-object rescue" hypothesis is not supported here
+- Interpretation:
+  - the V11 training pipeline warps every image to `512x512`, so the model has learned strong "image fits in one 512 square" priors
+  - sliding-window inference shows the model un-warped local crops, which is out-of-distribution for the fine-tuned head
+  - the failure pattern matches the earlier horizontal-flip TTA collapse on `diningtable`, suggesting both are symptoms of the same warp-induced layout prior
+- Decision:
+  - do not generate a sliding-window Kaggle submission; the local regression is large enough that confirming it on Kaggle would not be informative
+  - V16 (`submission_exp_v16_eomt_dinov3_tta_ms496_512_528_noflip_with_convnext_small_320.csv`, public score `0.88882`) remains the recommended segmentation submission
+  - the segmentation track is now considered closed for further inference-side experiments on this checkpoint; the next meaningful gain would require retraining with aspect-preserving augmentation or improving the classification half of the pipeline
+
+### 2026-05-12 (V15 Kaggle Result)
+
+- V15 Kaggle public score:
+  - file: `outputs/submissions/submission_exp_v15_eomt_dinov3_layerlr_cosine_unfreeze4_fixed_preprocess_with_convnext_small_320.csv`
+  - score: `0.88857`
+- Comparison:
+  - V14: `0.88830`
+  - V15: `0.88857`
+  - gain: `+0.00027`
+- Interpretation:
+  - layer-wise learning rate and cosine scheduling gave a real but tiny improvement
+  - the result supports the user's concern that the previous fixed-learning-rate setup was not optimal
+  - however, the marginal gain is now close to leaderboard noise / diminishing returns
+  - training-side improvements are likely mostly exhausted unless a more structural change is made
+- Recommendation:
+  - use V15 as the current best checkpoint/submission
+  - prioritize inference-side TTA or controlled resolution/sliding-window testing next
+  - avoid more same-resolution fine-tuning unless there is a clearly different hypothesis

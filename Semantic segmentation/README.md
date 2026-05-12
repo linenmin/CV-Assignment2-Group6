@@ -20,9 +20,55 @@ Core notes:
 ## Current scope
 
 - data analysis and preprocessing visualization
-- iterative segmentation experiments from `SegNeXt` to `SegFormer` and `SegMAN`
+- iterative segmentation experiments from `SegNeXt` to `SegFormer`, `SegMAN`, and `EoMT-DINOv3`
 - training / validation / inference / submission tooling
 - Kaggle-facing submission tracking
+
+## Current Best (V17)
+
+The current best segmentation model is **V17**, EoMT-DINOv3 fine-tuned on a 712/37 re-split of the GA2 training set, with `ms{496, 512, 528}` no-flip multi-scale TTA at inference.
+
+- checkpoint: `outputs/checkpoints/eomt_dinov3_v17_merge_val_lr1e5/best/` (about `1.2 GB`)
+- local fair-comparison validation (new 37 val, V16 TTA recipe): `mIoU=0.7930` versus V15 `0.7859` (`+0.0071`)
+- Kaggle public score (segmentation + ConvNeXt-small classification): **`0.89139`** (V16 baseline `0.88882`, `+0.00257`)
+- recommended submission: `outputs/submissions/submission_exp_v17_merge_val_tta_ms496_512_528_noflip_with_convnext_small_320.csv`
+
+## Shared Weights (Current)
+
+Checkpoint files are larger than what GitHub will accept, so they are shared via Google Drive instead of Git. The current production share point is V17.
+
+Google Drive folder (replace this URL after creating the new share):
+
+```text
+TODO: paste the V17 Google Drive folder URL here once it is created
+```
+
+Required Drive permission:
+
+- general access: `Anyone with the link`
+- role: `Viewer`
+
+Folder layout to mirror locally after download:
+
+```text
+outputs/checkpoints/eomt_dinov3_v17_merge_val_lr1e5/best/
+  config.json
+  metrics.json
+  model.safetensors          (about 1.2 GB)
+  preprocessor_config.json
+```
+
+Optional, for ablations against V16 / V15:
+
+```text
+outputs/checkpoints/eomt_dinov3_v15_layerlr_cosine_unfreeze4/best/
+```
+
+Notes:
+
+- only the `best/` subdirectory is required to reproduce the V17 submission; `last/` and intermediate checkpoints are not needed for inference and are not redistributed
+- the ConvNeXt-small classification CSV that V17 is merged with lives at `outputs/submissions/submission_classification_convnext_small_320.csv` and is committed to Git (small file)
+- the SegMAN V10 weights described later in this README are no longer the current best model and are not redistributed any more; if you need them, regenerate from the WSL scripts
 
 ## Training
 
@@ -42,11 +88,12 @@ python .\scripts\train.py --max-iters 3000 --val-interval 500
 python .\scripts\train.py --checkpoint-retention all
 ```
 
-Current historical note:
+Historical note on prior baselines:
 
-- the strongest tracked result in this repository is no longer a `SegNeXt` run
-- the best segmentation-only submission is `submission_exp_v10_segman_b_iter25000.csv`
-- the best final merged submission is `submission_exp_v10_segman_b_iter25000_with_classification.csv`
+- the strongest tracked result in this repository is no longer a `SegNeXt` or `SegMAN` run
+- the V10 SegMAN-B segmentation-only submission was `0.42682`, and merged with classification was `0.85725`
+- V11..V16 EoMT-DINOv3 fine-tunes pushed this to `0.88857` -> `0.88882`
+- V17 (merge-val fine-tune on `712/37` split) is currently `0.89139` and is the recommended baseline
 
 Checkpoint retention policy:
 
@@ -177,31 +224,18 @@ Notes:
 - `wsl_run_segman_b_with_notify.sh` does not store the webhook URL; it only reads `DISCORD_WEBHOOK_URL` from the WSL environment
 - for faster long training, consider copying the repo and dataset into the WSL filesystem instead of reading many small files through `/mnt/d`
 
-### Shared SegMAN Weights
+### Shared SegMAN Weights (Historical, V10 only)
 
-The trained SegMAN weights are not stored in Git because the checkpoint files are too large for a normal GitHub repository.
-
-Google Drive folder:
-
-```text
-https://drive.google.com/drive/u/1/folders/1orzpwFwAnjh5cne7Odm8prCkF8GfkLvP?dmr=1&ec=wgc-drive-%5Bmodule%5D-goto
-```
-
-Required Drive permission:
-
-- general access: `Anyone with the link`
-- role: `Viewer`
-
-Download the files from Drive and place them at these paths:
+The SegMAN V10 checkpoint is no longer the current best model; V17 EoMT-DINOv3 supersedes it. The SegMAN files are kept only so the V10 ablation can still be reproduced.
 
 ```text
 external/SegMAN/pretrained/SegMAN_Encoder_b.pth.tar
 external/SegMAN/segmentation/outputs/ga2_segman_b/best_mIoU_iter_25000.pth
 ```
 
-The second file is the current best trained model used for the V10 submission.
+These files are not redistributed any more. If you need them, regenerate from the WSL training scripts in this README or contact the original maintainer.
 
-After training, export test predictions and a Kaggle CSV:
+The remainder of this section is preserved as historical V10 reproduction notes only.
 
 ```powershell
 python .\scripts\predict_segman_test.py --config .\external\SegMAN\segmentation\local_configs\segman\ga2\segman_b_ga2.py --checkpoint .\external\SegMAN\segmentation\outputs\ga2_segman_b\best_mIoU_iter_25000.pth --output-dir .\outputs\predictions\exp_v10_segman_b_iter25000
@@ -261,6 +295,98 @@ Important V11 preprocessing note:
 - earlier V11 CSVs without `fixed_preprocess` used mismatched preprocessing and should not be used for model comparison
 
 Keep only `best` and `last` under `outputs/checkpoints/eomt_dinov3_v11_unfreeze2/`; smoke and intermediate EoMT checkpoints should be removed after export.
+
+### V12 Continue Training
+
+V12 continues from V11 best at the same `512x512` resolution:
+
+```powershell
+$env:PYTHONPATH="src"
+conda run -n gpu_env python .\scripts\train_eomt_dinov3.py --model-id .\outputs\checkpoints\eomt_dinov3_v11_unfreeze2\best --output-dir .\outputs\checkpoints\eomt_dinov3_v12_continue_unfreeze2_lr1e5 --max-steps 3000 --eval-every 500 --early-stop-patience 4 --batch-size 1 --grad-accum 8 --lr 1e-5 --unfreeze-last-layers 2
+conda run -n gpu_env python .\scripts\predict_eomt_test.py --checkpoint .\outputs\checkpoints\eomt_dinov3_v12_continue_unfreeze2_lr1e5\best --output-dir .\outputs\predictions\eomt_dinov3_v12_continue_unfreeze2_lr1e5_fixed_preprocess
+conda run -n gpu_env python .\scripts\export_submission.py --prediction-dir .\outputs\predictions\eomt_dinov3_v12_continue_unfreeze2_lr1e5_fixed_preprocess --output-path .\outputs\submissions\submission_exp_v12_eomt_dinov3_continue_lr1e5_fixed_preprocess.csv
+```
+
+Current V12 result:
+
+- local validation: `mIoU=0.8002` at step `2000`
+- merged candidate output: [submission_exp_v12_eomt_dinov3_continue_lr1e5_fixed_preprocess_with_convnext_small_320.csv](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/submissions/submission_exp_v12_eomt_dinov3_continue_lr1e5_fixed_preprocess_with_convnext_small_320.csv)
+- training curve: [training_curve.png](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/analysis/eomt_dinov3_v12_continue_unfreeze2_lr1e5/training_curve.png)
+- Kaggle public score: `0.88602`
+
+### V15 Layer-Wise LR Candidate
+
+V15 is the current best training-side public result:
+
+- checkpoint: `outputs/checkpoints/eomt_dinov3_v15_layerlr_cosine_unfreeze4/best`
+- training change: last-4-layer unfreezing with layer-wise learning rates, warmup, and cosine decay
+- local validation: `mIoU=0.8020`
+- merged candidate output: [submission_exp_v15_eomt_dinov3_layerlr_cosine_unfreeze4_fixed_preprocess_with_convnext_small_320.csv](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/submissions/submission_exp_v15_eomt_dinov3_layerlr_cosine_unfreeze4_fixed_preprocess_with_convnext_small_320.csv)
+- Kaggle public score: `0.88857`
+
+### V16 TTA + Multi-Scale Inference
+
+V16 reuses the V15 best checkpoint and only changes the inference path. It stays a single model (no ensembling), which is the configuration that fits the course report.
+
+```powershell
+$env:PYTHONPATH="src"
+conda run -n gpu_env python .\scripts\predict_eomt_tta.py --checkpoint .\outputs\checkpoints\eomt_dinov3_v15_layerlr_cosine_unfreeze4\best --split test --output-dir .\outputs\predictions\eomt_dinov3_v16_tta_ms496_512_528_noflip --scales 496 512 528 --no-hflip
+conda run -n gpu_env python .\scripts\export_submission.py --prediction-dir .\outputs\predictions\eomt_dinov3_v16_tta_ms496_512_528_noflip --output-path .\outputs\submissions\submission_exp_v16_eomt_dinov3_tta_ms496_512_528_noflip.csv --classification-fill 0
+```
+
+Then merge classification rows with the ConvNeXt-small classification CSV to produce the leaderboard submission.
+
+Recipe rationale:
+
+- multi-scale averaging at `{496, 512, 528}` improved validation `mIoU` from `0.8020` to `0.8030`
+- wider scale windows or horizontal flip both regressed locally, because EoMT-DINOv3 has a hard-coded `32×32` token grid and certain classes (e.g. `diningtable`) have strong left-right context priors that flip TTA breaks
+
+Current V16 result:
+
+- local validation: `mIoU=0.8030` (primary 512x512 protocol) / `0.8049` (original image size)
+- merged candidate output: [submission_exp_v16_eomt_dinov3_tta_ms496_512_528_noflip_with_convnext_small_320.csv](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/submissions/submission_exp_v16_eomt_dinov3_tta_ms496_512_528_noflip_with_convnext_small_320.csv)
+- Kaggle public score: `0.88882` (current best, `+0.00025` over V15)
+
+### V17 Merge-Val Fine-Tune (Smaller Validation Ratio)
+
+Because the segmentation `train/val` split is project-defined (not assignment-defined), V17 lowers the local validation ratio to free up training data for a final fine-tune. The old `0.15` split is preserved in `training_v15split.txt` / `validation_v15split.txt`; the new `0.05` split moves 75 images from validation into training.
+
+```powershell
+$env:PYTHONPATH="src"
+conda run -n gpu_env python .\scripts\resplit_segman_ga2.py --train-csv .\..\kul-computer-vision-ga-2-2026\train\train_set.csv --val-ratio 0.05
+conda run -n gpu_env python .\scripts\train_eomt_dinov3.py --model-id .\outputs\checkpoints\eomt_dinov3_v15_layerlr_cosine_unfreeze4\best --output-dir .\outputs\checkpoints\eomt_dinov3_v17_merge_val_lr1e5 --max-steps 2000 --eval-every 100 --early-stop-patience 8 --batch-size 1 --grad-accum 8 --lr 1e-5 --unfreeze-last-layers 2
+conda run -n gpu_env python .\scripts\predict_eomt_tta.py --checkpoint .\outputs\checkpoints\eomt_dinov3_v17_merge_val_lr1e5\best --split test --output-dir .\outputs\predictions\eomt_dinov3_v17_tta_ms496_512_528_noflip --scales 496 512 528 --no-hflip
+```
+
+Fair comparison on the new 37 val with `ms{496,512,528}` no-flip TTA:
+
+- V15 best (V16 base): `mIoU=0.7859`
+- V17 best: `mIoU=0.7930` (`+0.0071`, the strongest training-side delta since V12 -> V14)
+
+Current V17 artifacts:
+
+- checkpoint: `outputs/checkpoints/eomt_dinov3_v17_merge_val_lr1e5/best`
+- merged candidate: [submission_exp_v17_merge_val_tta_ms496_512_528_noflip_with_convnext_small_320.csv](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/submissions/submission_exp_v17_merge_val_tta_ms496_512_528_noflip_with_convnext_small_320.csv)
+- Kaggle public score: `0.89139` (current best, `+0.00257` over V16, largest single-step Kaggle gain since V11 -> V12)
+
+### Sliding-Window Inference (Negative Result, internal only)
+
+Sliding-window inference was attempted to avoid the perspective distortion that the V11 fine-tuning pipeline introduces by warping every image to `512x512`. Each window is fed at exactly `512x512`, so EoMT's hard-coded `32x32` token grid is satisfied without monkey-patching.
+
+```powershell
+$env:PYTHONPATH="src"
+conda run -n gpu_env python .\scripts\predict_eomt_sliding_window.py --checkpoint .\outputs\checkpoints\eomt_dinov3_v15_layerlr_cosine_unfreeze4\best --split validation --output-dir .\outputs\predictions\sw_v15_w512_s256_noflip --window-size 512 --stride 256
+```
+
+Validation results (V15 best checkpoint):
+
+- V16 TTA reference: primary `mIoU=0.8030`, original-size `mIoU=0.8049`
+- sliding window `w=512, s=256`: primary `mIoU=0.7941`, original-size `mIoU=0.7968`
+- sliding window `w=512, s=128`: primary `mIoU=0.7952`, original-size `mIoU=0.7979`
+
+The regression is dominated by `diningtable` collapsing from `0.779` to `0.575`, matching the failure mode of horizontal-flip TTA. The interpretation is that the fine-tuned model has learned strong "image fits one 512 square" priors from the V11 warp preprocessing, and aspect-preserving sliding-window crops are out-of-distribution for the segmentation head.
+
+No Kaggle submission was generated. V16 remains the recommended segmentation submission.
 
 ## Cityscapes External Generalization
 

@@ -616,6 +616,128 @@ Build a maintainable `Semantic segmentation` workspace that supports:
   - continue V11 from the current best checkpoint because validation mIoU was still increasing at step 3000
   - test a slightly higher training/export resolution only if memory permits; resolution is promising because the current model is trained on square-warped `512x512` inputs, which can blur small objects
   - keep any next run controlled: same fixed preprocessing, same ConvNeXt-small classification source, best/last checkpoint retention only
+
+## Phase 29 Result: V12 EoMT Continue Training
+
+- Status: executed; Kaggle upload pending.
+- Goal: test whether continuing V11 at the same official `512x512` resolution improves over the current best.
+- Configuration:
+  - initialization: `outputs/checkpoints/eomt_dinov3_v11_unfreeze2/best`
+  - output: `outputs/checkpoints/eomt_dinov3_v12_continue_unfreeze2_lr1e5`
+  - learning rate: `1e-5`
+  - max steps: `3000`
+  - validation every `500` steps
+  - trainable scope: heads plus last 2 Transformer layers
+  - preprocessing: fixed V11 path, manual `512x512` warp before EoMT processor
+- Result:
+  - best validation mIoU: `0.8002` at step `2000`
+  - final validation mIoU: `0.7954` at step `3000`
+  - curve peaked before the final checkpoint, so the best checkpoint is the correct export source
+- Generated artifacts:
+  - `outputs/submissions/submission_exp_v12_eomt_dinov3_continue_lr1e5_fixed_preprocess.csv`
+  - `outputs/submissions/submission_exp_v12_eomt_dinov3_continue_lr1e5_fixed_preprocess_with_convnext_small_320.csv`
+  - `outputs/analysis/eomt_dinov3_v12_continue_unfreeze2_lr1e5/training_curve.png`
+  - `outputs/analysis/eomt_dinov3_v12_continue_unfreeze2_lr1e5/training_curve_summary.md`
+- Recommendation:
+  - submit the V12 merged candidate to Kaggle
+  - expect possible but modest gain because local validation improved by less than 1 point
+- Kaggle result:
+  - public score: `0.88602`
+  - improvement over V11 corrected: `+0.00260`
+- Curve interpretation:
+  - validation peaked at step `2000`, then declined by step `3000`
+  - this suggests V12 reached a shallow optimum under the current `lr=1e-5` setup
+  - if another training-only run is attempted, prefer shorter continuation with lower learning rate rather than simply extending V12
+- Next candidate:
+  - initialize from V12 best
+  - keep `512x512` and fixed preprocessing unchanged
+  - reduce learning rate to `5e-6`
+  - run only `1000-1500` steps
+  - validate every `250-500` steps
+  - stop immediately if mIoU does not beat `0.8002`
+
+## Phase 30 Result: V13 Low-LR Smoke Comparison
+
+- Status: executed; Kaggle upload pending for the better candidate.
+- Compared configurations:
+  - `unfreeze_last_layers=2`, `lr=5e-6`
+  - `unfreeze_last_layers=4`, `lr=5e-6`
+- Matched-step validation comparison:
+  - step 1: both `0.8002`
+  - step 250: unfreeze-2 `0.7931`, unfreeze-4 `0.7900`
+  - step 500: unfreeze-2 `0.8011`, unfreeze-4 `0.7998`
+  - step 750: unfreeze-2 `0.8011`, unfreeze-4 `0.8000`
+  - step 1000: unfreeze-2 `0.8012`, unfreeze-4 `0.8005`
+- Decision:
+  - do not continue the unfreeze-4 branch
+  - unfreeze-2 is consistently better at matched validation steps and uses fewer trainable parameters
+- Generated candidate:
+  - `outputs/submissions/submission_exp_v13_eomt_dinov3_unfreeze2_lr5e6_fixed_preprocess_with_convnext_small_320.csv`
+- Recommendation:
+  - submit V13 only if another Kaggle attempt is acceptable
+  - expected improvement over V12 is likely marginal because local validation improved by only about `0.0011`
+
+## Phase 31 Result: V14 Continue V13 Until Early Stop
+
+- Status: executed; Kaggle upload pending.
+- Configuration:
+  - initialized from `outputs/checkpoints/eomt_dinov3_v13_smoke_unfreeze2_lr5e6/best`
+  - kept `512x512` fixed preprocessing
+  - kept `unfreeze_last_layers=2`
+  - learning rate: `5e-6`
+  - validation every `250` steps
+  - early-stop patience: `4`
+- Result:
+  - best validation mIoU: `0.8019` at step `1000`
+  - early stopped at step `2000`
+  - gain over V13: about `+0.0007`
+- Generated candidate:
+  - `outputs/submissions/submission_exp_v14_eomt_dinov3_unfreeze2_lr5e6_earlystop_fixed_preprocess_with_convnext_small_320.csv`
+- Decision:
+  - same-config low-learning-rate continuation is essentially saturated
+  - if V14 does not improve meaningfully on Kaggle, stop this training line
+  - next meaningful direction should be inference-time work or a controlled resolution smoke, not more 512 continuation
+- Kaggle result:
+  - public score: `0.88830`
+  - new best public result
+- Updated decision:
+  - V14 improved, but only through tiny mask corrections
+  - do not continue the exact same low-learning-rate training line unless no other option remains
+  - prioritize inference-time robustness or controlled resolution experiments next
+
+## Phase 32 Result: V15 Layer-Wise LR + Cosine Scheduler
+
+- Status: executed; Kaggle upload pending.
+- Goal: test whether unfreezing 4 layers becomes useful when the additional backbone layers use smaller learning rates and cosine decay.
+- Training-script change:
+  - added parameter-group support for heads and individual unfrozen backbone layers
+  - added warmup + cosine learning-rate schedule
+- Configuration:
+  - initialization: `outputs/checkpoints/eomt_dinov3_v14_continue_unfreeze2_lr5e6_earlystop/best`
+  - output: `outputs/checkpoints/eomt_dinov3_v15_layerlr_cosine_unfreeze4`
+  - head/mask lr: `5e-6`
+  - deepest backbone lr: `2e-6`
+  - backbone layer lr decay: `0.5`
+  - unfrozen layers: last `4`
+  - warmup steps: `150`
+  - cosine min lr ratio: `0.1`
+  - early-stop patience: `5`
+- Result:
+  - best validation mIoU: `0.8020` at step `500`
+  - early stopped at step `1750`
+  - improvement over V14 local validation is only about `+0.0001`
+- Generated candidate:
+  - `outputs/submissions/submission_exp_v15_eomt_dinov3_layerlr_cosine_unfreeze4_fixed_preprocess_with_convnext_small_320.csv`
+- Decision:
+  - V15 is safe to submit, but the expected Kaggle gain is uncertain and likely small
+  - layer-wise LR was technically sound, but not a major breakthrough under the current split
+- Kaggle result:
+  - public score: `0.88857`
+  - gain over V14: `+0.00027`
+- Updated decision:
+  - V15 is the current best public result
+  - the training-side gain is now extremely small
+  - next improvement attempt should not be another same-resolution continuation; prioritize TTA or resolution/sliding-window inference
 - Evidence sources:
   - official EoMT repository and DINOv3 model zoo
   - Hugging Face EoMT-DINOv3 model card
