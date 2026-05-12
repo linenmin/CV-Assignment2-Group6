@@ -580,3 +580,116 @@
   - the result is strong evidence for real-world domain shift
   - large/common road objects transfer much better than small or rare overlap classes
   - the result should be reported as an external-domain robustness check, not as a full VOC-20 metric
+
+### 2026-05-12 (EoMT-DINOv3 Candidate Planning)
+
+- User questioned whether SegMAN is still the best direction and asked for a stronger model-family candidate.
+- Researched current EoMT-DINOv3 evidence from official and secondary sources:
+  - official EoMT repository
+  - official EoMT DINOv3 model zoo
+  - Hugging Face model card for `tue-mps/eomt-dinov3-ade-semantic-large-512`
+  - Hugging Face Transformers EoMT-DINOv3 documentation
+  - LightlyTrain semantic segmentation benchmark notes
+- Key planning result:
+  - EoMT-DINOv3-L reports ADE20K semantic `59.5 mIoU`, clearly above SegMAN-B's official `52.6 mIoU`
+  - this makes it a valid next high-value experiment if another multi-hour training run is acceptable
+- Key risk recorded:
+  - DINOv3 EoMT official weights are delta weights relative to original DINOv3 weights
+  - implementation must begin with a checkpoint loading and one-image inference smoke test
+- Updated persistent planning files:
+  - `task_plan.md`
+  - `findings.md`
+  - `progress.md`
+- Current status:
+  - no environment changes made
+  - no code cloned
+  - no training started
+  - waiting for user confirmation before executing the EoMT-DINOv3 plan
+
+### 2026-05-12 (EoMT-DINOv3 V11 Execution)
+
+- Reused the existing Windows `gpu_env` instead of creating a new environment.
+  - Python: `3.12.3`
+  - Torch: `2.5.1+cu121`
+  - Transformers: `5.4.0`
+  - CUDA visible: yes
+  - GPU: RTX 4060 Laptop GPU
+  - reported memory: about `8188 MiB`
+- Added EoMT execution scripts:
+  - `scripts/eomt_smoke_test.py`
+  - `scripts/train_eomt_dinov3.py`
+  - `scripts/predict_eomt_test.py`
+- Smoke test result:
+  - model: `tue-mps/eomt-dinov3-ade-semantic-large-512`
+  - checkpoint loaded successfully from Hugging Face
+  - one-image CUDA inference completed
+  - peak inference memory: about `1684 MB`
+- Training stage 1:
+  - output: `outputs/checkpoints/eomt_dinov3_v11_head_mask`
+  - trainable parameters: about `3.17M`
+  - scope: classification head plus mask head
+  - result: validation `mIoU=0.5715`
+  - interpretation: insufficient versus SegMAN-B
+- Training stage 2:
+  - initialized from stage 1 best checkpoint
+  - output: `outputs/checkpoints/eomt_dinov3_v11_unfreeze2`
+  - trainable parameters: about `28.37M`
+  - scope: classification head, mask head, and last 2 Transformer layers
+  - max steps: `3000`
+  - best step: `3000`
+  - best validation `mIoU=0.7926`
+  - comparison: above SegMAN-B local validation `mIoU=0.7720`
+- Exported submissions:
+  - segmentation-only: `outputs/submissions/submission_exp_v11_eomt_dinov3_unfreeze2.csv`
+  - initial merged draft used classification rows from the V10 final submission
+  - user provided the intended ConvNeXt-small classification file: `outputs/submissions/submission_classification_convnext_small_320.csv`
+  - comparison showed `214` of `750` classification rows differ from the V10 classification source
+  - regenerated the recommended merged candidate: `outputs/submissions/submission_exp_v11_eomt_dinov3_unfreeze2_with_convnext_small_320.csv`
+- Cleanup:
+  - removed EoMT smoke and intermediate checkpoint directories
+  - retained only the final EoMT run's `best` and `last` directories
+- Current recommendation:
+  - upload `submission_exp_v11_eomt_dinov3_unfreeze2_with_convnext_small_320.csv` to Kaggle
+  - do not treat the local improvement as final proof until public score is known
+
+### 2026-05-12 (V11 Kaggle Drop Root Cause)
+
+- Kaggle results exposed a V11 export bug:
+  - `submission_exp_v11_eomt_dinov3_unfreeze2_with_classification.csv`: `0.62898`
+  - `submission_exp_v11_eomt_dinov3_unfreeze2_with_convnext_small_320.csv`: `0.64761`
+- The classification source was not the main issue.
+  - ConvNeXt-small classification differs from the reused V10 classification in `214 / 750` rows.
+  - Switching classification improved the score slightly, but the score remained far below V10.
+- Root cause:
+  - training and validation manually warped every image to `512x512` before the Hugging Face EoMT processor
+  - the original V11 test export fed original-aspect-ratio images directly into the processor
+  - this created a train/inference preprocessing mismatch
+- Evidence:
+  - EoMT checkpoint evaluated through the original broken inference path had foreground validation `mIoU≈0.3376`
+  - using the training-matched inference path, manual `512x512` warp followed by nearest-neighbor resize back to the original size, restored foreground validation `mIoU≈0.7864`
+- Fix:
+  - updated `scripts/predict_eomt_test.py` to manually resize images to `512x512` before processor inference
+  - resize the discrete predicted mask back to original image size with nearest-neighbor interpolation
+  - regenerated predictions under `outputs/predictions/eomt_dinov3_v11_unfreeze2_fixed_preprocess`
+  - regenerated segmentation-only CSV: `outputs/submissions/submission_exp_v11_eomt_dinov3_unfreeze2_fixed_preprocess.csv`
+  - regenerated merged ConvNeXt-small CSV: `outputs/submissions/submission_exp_v11_eomt_dinov3_unfreeze2_fixed_preprocess_with_convnext_small_320.csv`
+- Current recommendation:
+  - submit `submission_exp_v11_eomt_dinov3_unfreeze2_fixed_preprocess_with_convnext_small_320.csv`
+  - ignore the earlier V11 CSVs for model comparison because they used mismatched preprocessing
+
+### 2026-05-12 (V11 Corrected Kaggle Result)
+
+- Corrected V11 submission result:
+  - file: `outputs/submissions/submission_exp_v11_eomt_dinov3_unfreeze2_fixed_preprocess_with_convnext_small_320.csv`
+  - Kaggle public score: `0.88342`
+- Interpretation:
+  - the preprocessing fix resolved the apparent EoMT failure
+  - V11 now exceeds the previous V10 final merged score `0.85725`
+  - the gain is large enough to keep EoMT-DINOv3 as the current best segmentation direction
+- Training-curve observation:
+  - V11 unfreeze-2 stage validation mIoU rose from `0.5715` at step 1 to `0.7926` at step 3000
+  - the curve did not clearly plateau by step 3000
+  - a follow-up run could reasonably continue from the current best checkpoint with a lower learning rate and the same fixed preprocessing
+- Generated training-curve artifacts:
+  - `outputs/analysis/eomt_dinov3_v11_unfreeze2/training_curve.png`
+  - `outputs/analysis/eomt_dinov3_v11_unfreeze2/training_curve_summary.md`

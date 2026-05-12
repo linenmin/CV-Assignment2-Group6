@@ -213,6 +213,55 @@ Current best tracked outputs:
 - segmentation-only: [submission_exp_v10_segman_b_iter25000.csv](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/submissions/submission_exp_v10_segman_b_iter25000.csv)
 - merged final submission: [submission_exp_v10_segman_b_iter25000_with_classification.csv](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/submissions/submission_exp_v10_segman_b_iter25000_with_classification.csv)
 
+## EoMT-DINOv3 V11 Candidate
+
+EoMT-DINOv3 uses the Hugging Face Transformers implementation instead of the old MMSegmentation 0.30 SegMAN stack. The current local route uses the existing Windows `gpu_env`.
+
+Run the smoke test:
+
+```powershell
+$env:PYTHONPATH="src"
+conda run -n gpu_env python .\scripts\eomt_smoke_test.py
+```
+
+Train the V11 two-stage candidate:
+
+```powershell
+$env:PYTHONPATH="src"
+conda run -n gpu_env python .\scripts\train_eomt_dinov3.py --output-dir .\outputs\checkpoints\eomt_dinov3_v11_head_mask --max-steps 6000 --eval-every 500 --early-stop-patience 6 --batch-size 1 --grad-accum 8 --lr 1e-4 --unfreeze-last-layers 0
+conda run -n gpu_env python .\scripts\train_eomt_dinov3.py --model-id .\outputs\checkpoints\eomt_dinov3_v11_head_mask\best --output-dir .\outputs\checkpoints\eomt_dinov3_v11_unfreeze2 --max-steps 3000 --eval-every 500 --early-stop-patience 4 --batch-size 1 --grad-accum 8 --lr 2e-5 --unfreeze-last-layers 2
+```
+
+Export the V11 test predictions and CSV:
+
+```powershell
+$env:PYTHONPATH="src"
+conda run -n gpu_env python .\scripts\predict_eomt_test.py --checkpoint .\outputs\checkpoints\eomt_dinov3_v11_unfreeze2\best --output-dir .\outputs\predictions\eomt_dinov3_v11_unfreeze2
+conda run -n gpu_env python .\scripts\export_submission.py --prediction-dir .\outputs\predictions\eomt_dinov3_v11_unfreeze2 --output-path .\outputs\submissions\submission_exp_v11_eomt_dinov3_unfreeze2.csv
+```
+
+Current V11 result:
+
+- model: `tue-mps/eomt-dinov3-ade-semantic-large-512`
+- strategy: train head/mask first, then unfreeze the last 2 Transformer layers
+- local validation: `mIoU=0.7926`
+- comparison: SegMAN-B V10 local validation was `mIoU=0.7720`
+- segmentation-only output: [submission_exp_v11_eomt_dinov3_unfreeze2.csv](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/submissions/submission_exp_v11_eomt_dinov3_unfreeze2.csv)
+- corrected merged candidate output: [submission_exp_v11_eomt_dinov3_unfreeze2_fixed_preprocess_with_convnext_small_320.csv](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/submissions/submission_exp_v11_eomt_dinov3_unfreeze2_fixed_preprocess_with_convnext_small_320.csv)
+- classification source: [submission_classification_convnext_small_320.csv](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/submissions/submission_classification_convnext_small_320.csv)
+- Kaggle public score: `0.88342`
+- training curve: [training_curve.png](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/analysis/eomt_dinov3_v11_unfreeze2/training_curve.png)
+- training summary: [training_curve_summary.md](D:/BaiduNetdiskWorkspace/Leuven/8th/Computer%20Vision/assignment/Group2/Semantic%20segmentation/outputs/analysis/eomt_dinov3_v11_unfreeze2/training_curve_summary.md)
+
+Important V11 preprocessing note:
+
+- training warped images to `512x512` before the EoMT processor
+- inference must do the same warp before the processor
+- after prediction, resize the discrete semantic mask back to the original image size with nearest-neighbor interpolation
+- earlier V11 CSVs without `fixed_preprocess` used mismatched preprocessing and should not be used for model comparison
+
+Keep only `best` and `last` under `outputs/checkpoints/eomt_dinov3_v11_unfreeze2/`; smoke and intermediate EoMT checkpoints should be removed after export.
+
 ## Cityscapes External Generalization
 
 Cityscapes is planned as a no-training external domain-shift check for the final report. It will evaluate only VOC-overlap classes such as `person`, `car`, `bus`, `bicycle`, `motorbike`, and `train`.

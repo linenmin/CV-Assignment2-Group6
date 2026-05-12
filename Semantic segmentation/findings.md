@@ -404,3 +404,60 @@
   - the model learned useful object appearance for large, common street-scene categories
   - the sharp failures on `train`, `bicycle`, and `motorbike` show that the VOC/Kaggle result should not be framed as real-world deployment readiness
   - this Cityscapes result is useful precisely because it exposes domain-shift limitations rather than producing another leaderboard-style number
+
+## EoMT-DINOv3 Research Findings
+
+- EoMT is a CVPR 2025 Highlight model family whose core idea is to use a plain ViT with segmentation queries, avoiding the heavier adapter/decoder stacks used by many earlier high-performing segmentation systems.
+- The official EoMT repository now includes DINOv3 support and reports:
+  - ADE20K semantic segmentation: EoMT-L, `512x512`, `59.5 mIoU`
+  - COCO panoptic segmentation: EoMT-L, `1280x1280`, `58.9 PQ`
+  - COCO instance segmentation: EoMT-L, `1280x1280`, `49.9 mAP`
+- Hugging Face hosts the ADE20K semantic checkpoint:
+  - model id: `tue-mps/eomt-dinov3-ade-semantic-large-512`
+  - task: semantic segmentation
+  - backbone: DINOv3 ViT-L/16
+  - input: `512x512`
+  - size: about `0.3B` parameters
+- Hugging Face Transformers documentation says EoMT-DINOv3 was released in 2025 and added to Transformers in 2026, with a dedicated `EomtDinov3ForUniversalSegmentation` implementation.
+- LightlyTrain independently reports an EoMT+DINOv3 semantic segmentation result on ADE20K around `59.1 mIoU`, close to the official EoMT-DINOv3 `59.5 mIoU` number.
+- The most important engineering warning is from the official EoMT DINOv3 model zoo:
+  - DINOv3 EoMT weights are deltas with respect to original DINOv3 weights
+  - users need access to the original DINOv3 weights before using these models
+  - therefore, the first implementation step must be checkpoint loading validation, not full training
+- Compared with SegMAN-B:
+  - SegMAN-B official ADE20K result: `52.6 mIoU`
+  - EoMT-DINOv3-L official ADE20K result: `59.5 mIoU`
+  - this is a sufficiently large public benchmark gap to justify a model-family switch if one more expensive experiment is allowed
+- Compared with SegMAN-L:
+  - SegMAN-L only improves slightly over SegMAN-B in public ADE20K results
+  - EoMT-DINOv3 is a better next gamble than scaling SegMAN within the same family
+- Practical risk assessment:
+  - EoMT-DINOv3-L is larger than SegMAN-B and may be tight on RTX 4060 16GB
+  - training must start with `512x512`, mixed precision, small batch size, and gradient accumulation
+  - if one-image forward or short smoke training does not fit, stop early rather than spending hours debugging a doomed run
+- Recommended next action:
+  - set up an isolated WSL2 `eomt` environment and run a strict checkpoint loading plus one-image inference smoke test
+  - only after that passes should GA2 dataset adaptation and training be implemented
+- Execution update:
+  - Windows `gpu_env` was sufficient for EoMT-DINOv3 because it already had Torch CUDA, Transformers with `EomtDinov3ForUniversalSegmentation`, Lightning, timm, safetensors, and pycocotools.
+  - WSL `segman` and WSL `torch` environments were not used because both were missing Transformers and would require extra package changes.
+  - The machine reports about `8188 MiB` GPU memory, not 16GB, so the training strategy used batch size `1`, mixed precision, and gradient accumulation.
+  - The checkpoint downloaded and loaded without manual Hugging Face intervention.
+  - Head/mask-only tuning was not enough by itself: validation `mIoU=0.5715`.
+  - Unfreezing the last 2 Transformer layers made the experiment competitive: validation `mIoU=0.7926`, above SegMAN-B's `0.7720`.
+  - The improvement suggests EoMT-DINOv3 is not just a stronger public ADE20K model; it can also adapt to the GA2/VOC split when a small part of the backbone is fine-tuned.
+  - The final judgment still requires Kaggle upload because the project has already seen local-validation gains that did not always transfer to the hidden public split.
+- Post-submission debugging finding:
+  - the first V11 exports used a preprocessing path that did not match training
+  - training manually warped images to `512x512` before the processor, while the original test exporter passed original-aspect-ratio images directly to the processor
+  - this made the model look good under the training-script validation path but poor under Kaggle-style original-size inference
+  - independent validation confirmed the mismatch: original broken inference foreground `mIoU≈0.3376`, fixed training-matched inference foreground `mIoU≈0.7864`
+  - the correct EoMT inference path is now: resize image to `512x512`, run processor/model, decode a `512x512` semantic mask, then resize the discrete mask back to the original image size with nearest-neighbor interpolation
+  - the corrected V11 merged submission reached Kaggle public score `0.88342`, above the previous V10 final score `0.85725`
+  - the V11 training curve was still improving at the final recorded step, so the model is probably not fully saturated
+- Sources checked:
+  - https://github.com/tue-mps/eomt
+  - https://github.com/tue-mps/eomt/blob/master/model_zoo/dinov3.md
+  - https://huggingface.co/tue-mps/eomt-dinov3-ade-semantic-large-512
+  - https://huggingface.co/docs/transformers/v5.7.0/en/model_doc/eomt_dinov3
+  - https://docs.lightly.ai/train/stable/semantic_segmentation.html

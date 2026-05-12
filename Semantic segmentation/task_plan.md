@@ -544,3 +544,80 @@ Build a maintainable `Semantic segmentation` workspace that supports:
   - the model transfers reasonably on large/common street objects such as `car`, `person`, and `bus`
   - it fails badly on rare or visually/domain-shifted overlap classes such as `train`, `bicycle`, and `motorbike`
   - this supports the report argument that high VOC/Kaggle performance does not imply deployment-ready real-world robustness
+
+## Phase 28 Result: EoMT-DINOv3 Model-Family Upgrade Candidate
+
+- Status: executed; Kaggle upload pending user review.
+- Goal: evaluate whether replacing SegMAN-B with EoMT-DINOv3 is worth one additional expensive training run.
+- Motivation:
+  - current best segmentation-only Kaggle result is SegMAN-B V10: `0.42682`
+  - official SegMAN-B ADE20K result is `52.6 mIoU`
+  - official EoMT-DINOv3 EoMT-L ADE20K semantic result is `59.5 mIoU` at `512x512`
+  - the gap is large enough to justify a model-family change rather than another small SegMAN hyperparameter tweak
+- Candidate checkpoint:
+  - primary: `tue-mps/eomt-dinov3-ade-semantic-large-512`
+  - task: ADE20K semantic segmentation
+  - backbone: DINOv3 ViT-L/16
+  - model size: about `0.3B` parameters
+- Main caveat:
+  - official EoMT repository states DINOv3 EoMT weights are deltas with respect to original DINOv3 weights
+  - before training, run a strict loading smoke test to confirm the Hugging Face checkpoint path can be loaded locally without manual DINOv3 access issues
+- Proposed execution plan after confirmation:
+  - create an isolated WSL2 Conda environment, likely `eomt`, separate from the existing `segman` environment
+  - clone or reuse the official `tue-mps/eomt` codebase under `external/EoMT`
+  - download/cache the ADE20K semantic EoMT-DINOv3-L 512 checkpoint
+  - run an inference smoke test on one GA2 validation image
+  - implement GA2/VOC dataset adapter and class-head replacement, skipping the ADE20K classification head
+  - train a single high-value run with conservative settings for RTX 4060 16GB:
+    - input size: start at `512x512`
+    - mixed precision: enabled
+    - batch size: determined by smoke test, expected `1-2`
+    - gradient accumulation: use to approximate a larger effective batch
+    - pretrained initialization: ADE20K EoMT-DINOv3-L semantic checkpoint
+    - early stopping: validation `mIoU`
+    - checkpoint retention: best plus last only
+  - export segmentation-only `submission.csv` with placeholder classification, then optionally merge teammate classification if segmentation score is promising
+- Decision gate:
+  - do not continue if the checkpoint cannot be loaded cleanly or if a one-image forward pass exceeds practical 16GB VRAM limits
+  - submit to Kaggle only if local validation or qualitative prediction looks competitive with SegMAN-B
+- Execution result:
+  - reused Windows `gpu_env`; no new WSL environment was required
+  - smoke test loaded `tue-mps/eomt-dinov3-ade-semantic-large-512` successfully
+  - one-image CUDA inference worked at `512x512`
+  - peak inference memory was about `1684 MB`
+  - first head/mask-only training stage reached validation `mIoU=0.5715`
+  - second stage unfroze the last 2 Transformer layers and reached validation `mIoU=0.7926`
+  - this beats the SegMAN-B local validation reference `mIoU=0.7720`
+- Generated artifacts:
+  - training script: `scripts/train_eomt_dinov3.py`
+  - smoke script: `scripts/eomt_smoke_test.py`
+  - test prediction script: `scripts/predict_eomt_test.py`
+  - final checkpoint directory: `outputs/checkpoints/eomt_dinov3_v11_unfreeze2`
+  - segmentation-only submission: `outputs/submissions/submission_exp_v11_eomt_dinov3_unfreeze2.csv`
+  - merged submission with teammate ConvNeXt classification: `outputs/submissions/submission_exp_v11_eomt_dinov3_unfreeze2_with_convnext_small_320.csv`
+  - classification source: `outputs/submissions/submission_classification_convnext_small_320.csv`
+- Storage cleanup:
+  - removed EoMT smoke/intermediate checkpoint directories
+  - retained only the final run's `best` and `last` checkpoint directories
+- Submission recommendation:
+  - upload the merged V11 ConvNeXt-small candidate because local validation improved over SegMAN-B and it uses the intended classification source
+  - expect the leaderboard result to be the decisive check because EoMT's local gain may not transfer perfectly to the hidden Kaggle split
+- Post-submission correction:
+  - the first V11 CSVs were invalid model comparisons because test inference did not match training preprocessing
+  - bad Kaggle results:
+    - `submission_exp_v11_eomt_dinov3_unfreeze2_with_classification.csv`: `0.62898`
+    - `submission_exp_v11_eomt_dinov3_unfreeze2_with_convnext_small_320.csv`: `0.64761`
+  - root cause: training warped images to `512x512` before EoMT processor, but the test exporter initially used original-aspect-ratio images directly
+  - fixed exporter: `scripts/predict_eomt_test.py`
+  - corrected candidate: `outputs/submissions/submission_exp_v11_eomt_dinov3_unfreeze2_fixed_preprocess_with_convnext_small_320.csv`
+  - corrected candidate Kaggle public score: `0.88342`
+  - conclusion: EoMT-DINOv3 V11 is now the best public result and beats the previous V10 final score `0.85725`
+- Next high-value improvement candidates:
+  - continue V11 from the current best checkpoint because validation mIoU was still increasing at step 3000
+  - test a slightly higher training/export resolution only if memory permits; resolution is promising because the current model is trained on square-warped `512x512` inputs, which can blur small objects
+  - keep any next run controlled: same fixed preprocessing, same ConvNeXt-small classification source, best/last checkpoint retention only
+- Evidence sources:
+  - official EoMT repository and DINOv3 model zoo
+  - Hugging Face EoMT-DINOv3 model card
+  - Hugging Face Transformers EoMT-DINOv3 documentation
+  - LightlyTrain EoMT-DINOv3 ADE20K benchmark notes
