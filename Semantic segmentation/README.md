@@ -37,18 +37,24 @@ The current best segmentation model is **V17**, EoMT-DINOv3 fine-tuned on a 712/
 
 Checkpoint files are larger than what GitHub will accept, so they are shared via Google Drive instead of Git. The current production share point is V17.
 
-Google Drive folder (replace this URL after creating the new share):
+Google Drive folder:
 
 ```text
-TODO: paste the V17 Google Drive folder URL here once it is created
+https://drive.google.com/drive/u/1/folders/1ImiIyTvxtMVIlrptKXfl3w3qF5CBdPCG
 ```
+
+Inside the folder, the V17 weights live under the `eomt_dinov3_v17_checkpoint/` subdirectory.
 
 Required Drive permission:
 
 - general access: `Anyone with the link`
 - role: `Viewer`
 
-Folder layout to mirror locally after download:
+Download steps:
+
+1. Open the Drive folder above and enter `eomt_dinov3_v17_checkpoint/`
+2. Download all four files inside it (`config.json`, `metrics.json`, `model.safetensors`, `preprocessor_config.json`)
+3. Place them under the following local path so the inference scripts find them without any `--checkpoint` change:
 
 ```text
 outputs/checkpoints/eomt_dinov3_v17_merge_val_lr1e5/best/
