@@ -20,6 +20,11 @@ This file records adversarial-attack results separately from the main semantic-s
 | V7 | V8 SegFormer-B5 | Feature-ASPP generator | Yes | 68.975346 | 60.354332 | 8.621014 | Best trainable attack so far; adds feature-level loss. |
 | V8 | V17 EoMT-DINOv3 | Feature-ASPP generator | Yes | 79.232563 | 79.599480 | -0.366917 | V7-style targeted-background + feature loss does not transfer to V17. |
 | V9 | V17 EoMT-DINOv3 | CE-margin Feature-ASPP generator | Yes | 79.232563 | 79.576007 | -0.343444 | Direct CE + margin objective still fails to reduce V17 global mIoU. |
+| V10 FGSM 2/255 | V17 EoMT-DINOv3 | FGSM white-box | No | 79.232563 | 49.506473 | 29.726090 | Direct gradient baseline confirms V17 is attackable. |
+| V10 FGSM 4/255 | V17 EoMT-DINOv3 | FGSM white-box | No | 79.232563 | 45.792824 | 33.439740 | Strong one-step attack on V17. |
+| V10 PGD 4/255 | V17 EoMT-DINOv3 | PGD white-box, 10 steps | No | 79.232563 | 4.777270 | 74.455294 | Very strong V17 white-box diagnostic; not trainable. |
+| V11 | V17 EoMT-DINOv3 | PGD-distilled Feature-ASPP generator | Yes | 79.232563 | 79.243165 | -0.010602 | PGD final-delta distillation produces too little effective perturbation. |
+| V12 | V17 EoMT-DINOv3 | query-level Feature-ASPP generator | Yes | 79.232563 | 79.997189 | -0.764625 | Query-level EoMT objective still fails to reduce global mIoU. |
 
 ## Key Findings
 
@@ -41,6 +46,14 @@ This file records adversarial-attack results separately from the main semantic-s
   - V8 targeted-background + feature loss gives `-0.366917` mIoU drop.
   - V9 untargeted CE + margin + feature loss gives `-0.343444` mIoU drop.
   - Negative drops mean attacked mIoU is slightly higher than clean mIoU on the 37-image V17 validation split.
+- V10 confirms that V17 itself is not immune to white-box attacks:
+  - FGSM 4/255 reduces V17 mIoU from `79.232563` to `45.792824`.
+  - PGD 4/255 with 10 steps reduces V17 mIoU to `4.777270`.
+  - Therefore, the failure of V8/V9/V11/V12 is a trainable-generator/objective bottleneck, not proof that V17 is generally robust.
+- V11 and V12 are negative trainable-generator attempts on V17:
+  - V11 PGD-distilled generator gives `-0.010602` mIoU drop.
+  - V12 query-level generator gives `-0.764625` mIoU drop.
+  - Both keep the image-space `eps=4/255` perturbation budget.
 - The V17 result should be interpreted carefully:
   - V17 appears substantially more robust than V8 SegFormer-B5 under these trainable generator attacks.
   - The 37-image validation split is small, so per-class damage can be offset by small improvements elsewhere.
@@ -155,6 +168,46 @@ Top affected classes:
 
 V9 keeps the Feature-ASPP generator but changes the objective to untargeted CE plus a correct-vs-wrong margin loss, with feature deviation only as an auxiliary term. This more direct objective still does not reduce global V17 mIoU: `79.232563` clean vs. `79.576007` attacked.
 
+### Attack V10
+
+V10 is a direct white-box diagnostic on V17 EoMT-DINOv3, not a trainable adversarial model.
+
+| Condition | Clean mIoU | Attack mIoU | mIoU drop | max delta | mean delta |
+|---|---:|---:|---:|---:|---:|
+| FGSM 2/255 | 79.232563 | 49.506473 | 29.726090 | 2.0 | 1.984618 |
+| FGSM 4/255 | 79.232563 | 45.792824 | 33.439740 | 4.0 | 3.957107 |
+| PGD 4/255, 10 steps | 79.232563 | 4.777270 | 74.455294 | 4.0 | 2.305559 |
+
+V10 is important because it proves V17 can be attacked when the perturbation is optimized per image. This separates target-model robustness from trainable-generator weakness.
+
+### Attack V11
+
+Top affected classes:
+
+| Class | Clean IoU | Attack IoU | IoU drop |
+|---|---:|---:|---:|
+| pottedplant | 36.828596 | 36.789139 | 0.039457 |
+| bottle | 80.975120 | 80.944800 | 0.030320 |
+| horse | 88.991211 | 88.967874 | 0.023337 |
+| person | 92.460652 | 92.450478 | 0.010174 |
+| boat | 70.750845 | 70.743825 | 0.007020 |
+
+V11 tries to distill PGD into a reusable Feature-ASPP generator. It fails globally: `79.232563` clean vs. `79.243165` attacked. The learned perturbation has very small mean magnitude (`0.094721` pixel), so the generator does not reproduce the strong PGD attack.
+
+### Attack V12
+
+Top affected classes:
+
+| Class | Clean IoU | Attack IoU | IoU drop |
+|---|---:|---:|---:|
+| bicycle | 27.638337 | 25.193608 | 2.444729 |
+| bottle | 80.975120 | 79.929822 | 1.045298 |
+| tvmonitor | 89.671692 | 88.688258 | 0.983434 |
+| dog | 37.691163 | 37.175043 | 0.516119 |
+| cow | 85.336040 | 84.904602 | 0.431439 |
+
+V12 attacks EoMT's query outputs more directly, including query no-object, foreground-class, mask-suppression, entropy, dense CE, and dense margin losses. It still does not reduce global V17 mIoU: `79.232563` clean vs. `79.997189` attacked.
+
 ## Current Conclusion
 
 For report writing, the most defensible story is:
@@ -163,5 +216,6 @@ For report writing, the most defensible story is:
 2. V1 and V3 show basic trainable adversarial generators are possible but weak.
 3. V5 to V7 show a systematic trainable-generator design progression.
 4. V7 should be used as the main trainable adversarial model result.
-5. V8 and V9 should be reported as negative but informative attempts against V17 EoMT-DINOv3.
-6. Before designing another trainable V17 generator, run a V17 FGSM/PGD sanity check to verify whether V17 is attackable under direct per-image white-box optimization at the same perturbation budget.
+5. V8, V9, V11, and V12 should be reported as negative but informative trainable-generator attempts against V17 EoMT-DINOv3.
+6. V10 should be reported as the V17 white-box diagnostic showing that V17 is attackable under direct per-image FGSM/PGD.
+7. The next trainable V17 attempt should use PGD as teacher supervision rather than relying only on dense or query-level generator losses.

@@ -9,7 +9,8 @@ This file tracks implementation progress for adversarial-attack notebooks separa
 - Main target used for the strongest trainable attacks: V8 SegFormer-B5, `best_mIoU_iter_11000.pth`.
 - V4 SegMAN-B attack was designed but not completed because of Colab Python 3.12 dependency incompatibility.
 - Latest target tested: V17 EoMT-DINOv3, Hugging Face checkpoint format (`model.safetensors`).
-- Attack V8 and V9 did not reduce V17 global mIoU; V17 appears robust to the current trainable Feature-ASPP generator family.
+- Attack V8, V9, V11, and V12 did not reduce V17 global mIoU; V17 appears robust to the current trainable Feature-ASPP generator family.
+- Attack V10 confirmed V17 is strongly attackable by direct FGSM/PGD, so the current bottleneck is reusable trainable-generator design rather than target-model immunity.
 
 ## Attack V1
 
@@ -241,14 +242,119 @@ This file tracks implementation progress for adversarial-attack notebooks separa
   - switching from targeted-background to direct CE + margin loss still does not reduce V17 global mIoU.
   - this suggests the issue is not only the V8 objective; V17 may require a different attack family or a stronger diagnostic baseline.
 
+## Attack V10
+
+- Notebook: `attack_v10_fgsm_pgd_eomt_v17_colab.ipynb`
+- Target: V17 EoMT-DINOv3
+- Checkpoint format:
+  - Hugging Face-style folder
+  - `config.json`
+  - `preprocessor_config.json`
+  - `model.safetensors`
+  - `metrics.json`
+- Attack type: FGSM and PGD white-box attacks
+- Trainable: no
+- Perturbation budget:
+  - FGSM `eps=2/255`
+  - FGSM `eps=4/255`
+  - PGD `eps=4/255`, `10` steps
+- Validation split:
+  - V17 `712/37` split
+  - `37` validation samples
+- Result:
+
+| Condition | mIoU | mIoU drop | max delta | mean delta |
+|---|---:|---:|---:|---:|
+| clean | 79.232563 | 0.000000 | 0.0 | 0.000000 |
+| fgsm_eps2_255 | 49.506473 | 29.726090 | 2.0 | 1.984618 |
+| fgsm_eps4_255 | 45.792824 | 33.439740 | 4.0 | 3.957107 |
+| pgd_eps4_255_steps10 | 4.777270 | 74.455294 | 4.0 | 2.305559 |
+
+- Interpretation:
+  - V17 is strongly attackable under direct per-image white-box optimization.
+  - V10 is not a trainable adversarial model, but it is the key diagnostic proving V17 is not immune to adversarial perturbations.
+
+## Attack V11
+
+- Notebook: `attack_v11_pgd_distilled_generator_eomt_v17_colab.ipynb`
+- Target: V17 EoMT-DINOv3
+- Attack type: PGD-distilled Feature-ASPP generator
+- Trainable: yes
+- Perturbation budget: `eps=4/255`
+- Main objective:
+  - imitate PGD final delta
+  - preserve image-space perturbation budget
+- Environment:
+  - V17 fixed Colab stack
+  - `numpy==1.26.4`
+  - `scipy==1.13.1`
+  - `scikit-learn==1.5.2`
+  - `pandas==2.2.2`
+  - `pillow==11.3.0`
+- Data:
+  - V17 `712/37` split
+  - tar.gz/folder cache support
+- Output directory:
+  - `outputs/attacks/attack_v11_pgd_distilled_generator_eomt_v17`
+- Result:
+  - clean mIoU: `79.232563`
+  - attack mIoU: `79.243165`
+  - mIoU drop: `-0.010602`
+  - max delta: `3.809509`
+  - mean delta: `0.094721`
+- Interpretation:
+  - simply distilling PGD's final perturbation is not enough.
+  - the learned delta is too small and does not reproduce PGD's destructive effect.
+
+## Attack V12
+
+- Notebook: `attack_v12_query_level_generator_eomt_v17_colab.ipynb`
+- Target: V17 EoMT-DINOv3
+- Attack type: query-level Feature-ASPP generator
+- Trainable: yes
+- Perturbation budget: `eps=4/255`
+- Main objective:
+  - dense CE loss
+  - dense margin loss
+  - query no-object loss
+  - query foreground-class suppression
+  - query mask suppression
+  - query entropy loss
+- Environment:
+  - V17 fixed Colab stack
+  - explicit uninstall/reinstall for `numpy`, `scipy`, `scikit-learn`, `pandas`, and `pillow`
+- Data:
+  - V17 `712/37` split
+  - tar.gz cache support
+- Output directory:
+  - `outputs/attacks/attack_v12_query_level_generator_eomt_v17`
+- Drive backup directory:
+  - `MyDrive/CV_Assignment_Outputs/adversarial_attack_v12_query_level_eomt_v17`
+- Result:
+  - clean mIoU: `79.232563`
+  - attack mIoU: `79.997189`
+  - mIoU drop: `-0.764625`
+  - max delta: `4.0`
+  - mean delta: `1.782573`
+- Per-class local degradation:
+  - bicycle: `2.444729`
+  - bottle: `1.045298`
+  - tvmonitor: `0.983434`
+  - dog: `0.516119`
+  - cow: `0.431439`
+- Interpretation:
+  - query-level losses affect some classes locally but still fail globally.
+  - V12 reinforces that V17 requires a stronger trainable attack strategy than the current Feature-ASPP objective family.
+
 ## Next Steps
 
 - Preserve V7 as the current main trainable adversarial-attack result.
-- Preserve V8 and V9 as negative but useful V17 robustness experiments.
-- Recommended next diagnostic step:
-  - run FGSM/PGD directly on V17 EoMT-DINOv3 at `eps=4/255`.
-  - If PGD also fails, V17 is genuinely robust under the tested budget.
-  - If PGD succeeds, the current trainable generator/objective is the bottleneck.
+- Preserve V8, V9, V11, and V12 as negative but useful V17 trainable-generator experiments.
+- Preserve V10 as the direct white-box diagnostic proving V17 can be attacked.
+- Recommended next experiment:
+  - train a PGD-guided Feature-ASPP generator on V17.
+  - Use PGD as teacher supervision instead of only dense/query-level losses.
+  - Keep the fixed V17 Colab stack and tar.gz cache workflow.
 - Other possible follow-up experiments:
   - evaluate V17 attacks on a larger validation subset instead of only the 37-image split;
   - design an EoMT query-level attack objective;

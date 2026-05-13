@@ -45,6 +45,8 @@ Used in:
 - Attack V7: Feature-ASPP generator
 - Attack V8: Feature-ASPP generator adapted to V17 EoMT-DINOv3
 - Attack V9: CE-margin Feature-ASPP generator adapted to V17 EoMT-DINOv3
+- Attack V11: PGD-distilled Feature-ASPP generator adapted to V17 EoMT-DINOv3
+- Attack V12: query-level Feature-ASPP generator adapted to V17 EoMT-DINOv3
 
 ### Non-Trainable Attacks
 
@@ -53,6 +55,7 @@ Non-trainable attacks directly optimize each input image using gradients, withou
 Used in:
 
 - Attack V2: FGSM and PGD
+- Attack V10: FGSM and PGD on V17 EoMT-DINOv3
 
 FGSM and PGD are very strong white-box baselines, but they are not trainable adversarial models.
 
@@ -127,6 +130,74 @@ margin = correct_class_score - strongest_wrong_class_score
 
 The generator minimizes this margin, so the strongest wrong class can overtake the correct class. V9 also keeps feature deviation as a low-weight auxiliary term.
 
+### Direct V17 FGSM / PGD
+
+Used in Attack V10.
+
+Attack V10 directly optimizes each input image against V17 EoMT-DINOv3:
+
+```text
+FGSM: one gradient-sign step
+PGD: iterative projected gradient steps
+```
+
+This is not a trainable adversarial model, but it is an essential diagnostic. It shows whether the frozen V17 target can be attacked at all under the same `eps=4/255` budget.
+
+V10 result:
+
+```text
+clean mIoU: 79.232563
+FGSM 4/255 mIoU: 45.792824
+PGD 4/255 steps10 mIoU: 4.777270
+```
+
+Therefore V17 is attackable under direct per-image white-box optimization. The weaker V8/V9/V11/V12 results should be interpreted as limitations of the reusable trainable generator designs.
+
+### PGD Final-Delta Distillation
+
+Used in Attack V11.
+
+The idea is:
+
+```text
+1. run PGD to produce a strong teacher perturbation
+2. train a Feature-ASPP generator to imitate that final perturbation
+```
+
+This remains a trainable-generator approach because the final attack is produced by a learned generator. However, V11 failed because the learned perturbation stayed too weak:
+
+```text
+mean_delta_pixel: 0.094721
+mIoU_drop: -0.010602
+```
+
+This suggests that simply imitating the final PGD delta is not enough for V17.
+
+### EoMT Query-Level Objective
+
+Used in Attack V12.
+
+EoMT predicts segmentation through query class logits and query mask logits. V12 therefore attacks the query structure more explicitly:
+
+```text
+query no-object loss
+query foreground-class suppression
+query mask suppression over GT foreground
+query entropy loss
+dense CE loss
+dense margin loss
+```
+
+The goal is to disrupt query-to-object assignment, not only the final dense semantic map. V12 still fails globally:
+
+```text
+clean mIoU: 79.232563
+attack mIoU: 79.997189
+mIoU_drop: -0.764625
+```
+
+This suggests that query-level losses alone are not enough for the current Feature-ASPP generator on V17.
+
 ## Model Progression
 
 ### Attack V1
@@ -200,6 +271,52 @@ The generator minimizes this margin, so the strongest wrong class can overtake t
   - direct CE + margin objective still does not reduce global V17 mIoU.
   - this makes V17 a useful robustness case and suggests that the current trainable generator family is not sufficient for the EoMT target.
 
+### Attack V10
+
+- Purpose: verify whether V17 is attackable under direct white-box optimization.
+- Method:
+  - FGSM 2/255
+  - FGSM 4/255
+  - PGD 4/255, 10 steps
+- Result:
+  - FGSM 4/255 mIoU drop: `33.439740`
+  - PGD 4/255 mIoU drop: `74.455294`
+- Interpretation:
+  - V17 is highly attackable by direct per-image PGD.
+  - V8/V9 failure is not because the target is impossible to attack.
+
+### Attack V11
+
+- Purpose: convert strong PGD behavior into a trainable generator.
+- Method:
+  - Feature-ASPP generator
+  - PGD final-delta distillation
+  - V17 fixed environment stack
+  - V17 `712/37` split
+- Result:
+  - clean mIoU `79.232563`
+  - attack mIoU `79.243165`
+  - mIoU drop `-0.010602`
+- Interpretation:
+  - the final-delta distillation signal is too weak.
+  - the generator learns very small perturbations and does not reproduce PGD's destructive effect.
+
+### Attack V12
+
+- Purpose: attack EoMT's query mechanism more directly.
+- Method:
+  - Feature-ASPP generator
+  - dense CE and margin losses
+  - query no-object, foreground-class, mask-suppression, and entropy losses
+  - V17 tar.gz cache support
+- Result:
+  - clean mIoU `79.232563`
+  - attack mIoU `79.997189`
+  - mIoU drop `-0.764625`
+- Interpretation:
+  - query-level losses damage a few classes locally, but do not reduce global mIoU.
+  - the current generator still cannot exploit V17 the way direct PGD can.
+
 ## Reporting Guidance
 
 Recommended report framing:
@@ -210,16 +327,21 @@ Recommended report framing:
   - V5 changes generator architecture to ResNet.
   - V6 changes generator architecture to multi-scale ASPP.
   - V7 changes attack objective to output plus feature-level attack.
-- Include Attack V8 and V9 as negative V17 experiments:
+- Include Attack V8, V9, V11, and V12 as negative V17 trainable-generator experiments:
   - V8 shows that V7's targeted-background + feature objective does not transfer to EoMT-DINOv3.
   - V9 shows that even a direct CE + margin objective does not reduce global mIoU under the same `eps=4/255` budget.
-  - These results support the claim that V17 is more robust than the previous SegFormer-B5 target under the tested trainable attacks.
+- V11 shows that naive PGD final-delta distillation does not preserve PGD's attack strength.
+- V12 shows that query-level EoMT losses are still insufficient for the current generator.
+- Include Attack V10 as the V17 white-box diagnostic:
+  - it proves V17 is attackable by FGSM/PGD.
+  - it justifies the next direction: PGD-guided trainable generator training.
 
 ## Known Caveats
 
 - V2 PGD is much stronger than trainable attacks because it optimizes perturbations per image.
 - Trainable generators are harder because one generator must generalize across validation images.
 - V4 was not a model failure; it was an environment compatibility blocker.
-- V8 and V9 are evaluated on the V17 37-image validation split, so small per-class drops can be offset by improvements elsewhere.
-- A V17 PGD/FGSM sanity check is needed before concluding that V17 is broadly robust; current evidence only shows the tested trainable generator family is weak against V17.
+- V8, V9, V11, and V12 are evaluated on the V17 37-image validation split, so small per-class drops can be offset by improvements elsewhere.
+- Attack V10 completed the V17 PGD/FGSM sanity check and showed V17 is strongly vulnerable to direct per-image PGD.
+- The next open question is how to transfer PGD's strength into a reusable trainable generator.
 - Some output CSV files may only exist in Colab/Drive unless explicitly copied back locally. The local notebooks still preserve the displayed results.
