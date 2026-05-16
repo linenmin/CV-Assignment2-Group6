@@ -111,6 +111,8 @@ Kaggle requires one row per `{idx}_classification` and one row per `{idx}_segmen
 | v2 | `efficientnet_b3_320` | EfficientNet-B3 | AsymmetricLoss | 320 + TTA + Stage3 | **0.8599** | 0.42813 | 0.85626 |
 | v3 | `convnext_tiny_320` | ConvNeXt-Tiny | AsymmetricLoss | 320 + TTA + Stage3 | **0.8933** | **0.43673** | **0.87346** |
 | v4 | `convnext_small_320` | ConvNeXt-Small | AsymmetricLoss | 320 + TTA + Stage3 | **0.8995** | **0.44905** | **0.89810** |
+| v5 | `convnext_base_320` | ConvNeXt-Base | AsymmetricLoss | 320 + TTA + Stage3 | **0.9111** | 0.43743 | 0.87486 |
+| v6 | `efficientnet_v2_s_320` | EfficientNet-V2-S | AsymmetricLoss | 320 + TTA + Stage3 | **0.8807** | 0.43967 | 0.87934 |
 
 **About the 0.81610 score**: this is the Kaggle public score from a single complete submission containing **all 1500 rows** (750 classification + 750 segmentation). It is **not** the sum of two separate scores. Kaggle computes one Dice score across all rows together; classification-only submissions (missing segmentation rows) receive 0 for those rows, yielding a lower total.
 
@@ -131,12 +133,19 @@ latest complete submission using this classifier and
 `submission_exp_v10_segman_b_iter25000.csv` scored **0.87588** overall.
 `DEFAULT_EXPERIMENT` is now `convnext_small_320`.
 
-**Next ConvNeXt experiments**: `torchvision 0.26` provides ImageNet-1K weights
-for ConvNeXt Tiny/Small/Base/Large. The repo now registers
-`convnext_small_320`, `convnext_base_320`, and `convnext_large_320`; Small is
-confirmed best so far, so only try Base next if GPU time is worthwhile. Large
-uses batch size 2 on the local 8 GB RTX 4060 Laptop GPU
-and may be slower or more overfit-prone on this 750-image dataset.
+**ConvNeXt-Base result**: `convnext_base_320` scored **0.43743** on Kaggle
+display, equivalent to **0.87486** adjusted classification Dice. val mAP
+(0.9111) is the highest of all single models, but the larger model over-fits
+on 750 training images — Kaggle score is lower than `convnext_small_320`.
+
+**EfficientNet-V2-S result**: `efficientnet_v2_s_320` scored **0.43967** on
+Kaggle display, equivalent to **0.87934** adjusted classification Dice. This
+makes it the second-best classification model after `convnext_small_320`,
+despite its lower val mAP (0.8807). It excels at `pottedplant` (AP 0.947).
+
+**ConvNeXt-Small remains best**: all follow-up experiments (Base, V2-S,
+ensemble) confirm `convnext_small_320` (0.44905 / 0.89810) as the top
+single-model classifier. Larger backbones over-fit on this 750-image dataset.
 
 ## Planning Files
 

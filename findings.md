@@ -45,17 +45,17 @@ val mAP 来自各实验目录下的 `evaluation_summary.csv`（使用 `best_mode
 | v2 | `efficientnet_b3_320` | EfficientNet-B3 | AsymmetricLoss | 320+TTA+S3 | **0.8599** | 0.42813 | 0.85626 |
 | v3 | `convnext_tiny_320` | ConvNeXt-Tiny | AsymmetricLoss | 320+TTA+S3 | **0.8933** | **0.43673** | **0.87346** |
 | v4 | `convnext_small_320` | ConvNeXt-Small | AsymmetricLoss | 320+TTA+S3 | **0.8995** | **0.44905** | **0.89810** |
-| v5 | `convnext_base_320` | ConvNeXt-Base | AsymmetricLoss | 320+TTA+S3 | **0.9111** | —（见注²） | —（见注²） |
-| v6 | `efficientnet_v2_s_320` | EfficientNet-V2-S | AsymmetricLoss | 320+TTA+S3 | **0.8807** | —（见注²） | —（见注²） |
+| v5 | `convnext_base_320` | ConvNeXt-Base | AsymmetricLoss | 320+TTA+S3 | **0.9111** | 0.43743 | 0.87486 |
+| v6 | `efficientnet_v2_s_320` | EfficientNet-V2-S | AsymmetricLoss | 320+TTA+S3 | **0.8807** | 0.43967 | 0.87934 |
 
 注¹：Kaggle 显示分数需×2 得到真实分类 Dice（因提交含 1500 行，750 行为分割占位）。
 当前最佳分类模型：`convnext_small_320`，分类 Dice = **0.89810**。当前最佳完整提交总分：
 **0.87588**（`convnext_small_320` + `submission_exp_v10_segman_b_iter25000.csv`）。
 
-注²：v5/v6 均未单独测试纯分类提交，仅有完整提交分数（含分割v10）：
-`convnext_base_320` **0.86425**（val mAP 高但大模型过拟合，低于 Small）；
-`efficientnet_v2_s_320` **0.86649**（val mAP 介于 v2/v3 之间，完整提交优于 Base）。
-两者均低于 `convnext_small_320`（0.87588）。**当前最佳提交模型仍为 `convnext_small_320`**。
+注²（原始完整提交分数供参考）：
+`convnext_base_320` 完整提交 **0.86425**；`efficientnet_v2_s_320` 完整提交 **0.86649**。
+两者均低于 `convnext_small_320` 完整提交（0.87588）。
+**当前最佳提交模型仍为 `convnext_small_320`（分类 Dice 0.89810）。**
 
 ### 逐类 AP 对比（五个实验，best_model.pth）
 
@@ -90,7 +90,7 @@ val mAP 来自各实验目录下的 `evaluation_summary.csv`（使用 `best_mode
 - **sheep**：ConvNeXt-Base 达到 1.000，改善最大；EfficientNet-V2-S（0.888）处于中游
 - **cat / chair**：EfficientNet-V2-S 新最高（cat 1.000、chair 0.853），ConvNeXt-Base 的 cat 0.996 不再是最高
 - **架构间弱点互补**：EfficientNet-V2-S 擅长 pottedplant，ConvNeXt-Base 擅长 sheep/diningtable，提示 ensemble 可以填补各自弱点
-- **val mAP vs Kaggle 泛化**：Base（0.9111）> Small（0.8995）> V2-S（0.8807），但完整提交：Small（0.87588）> V2-S（0.86649）> Base（0.86425）；更大模型 val mAP 更高，但测试集泛化更差
+- **val mAP vs Kaggle 泛化**：Base（0.9111）> Small（0.8995）> V2-S（0.8807），但分类 Dice：Small（**0.89810**）> V2-S（**0.87934**）> Base（**0.87486**）；更大模型 val mAP 更高，但测试集泛化更差；完整提交顺序一致（Small 0.87588 > V2-S 0.86649 > Base 0.86425）
 
 ### Val mAP vs Kaggle Dice 的根本差距
 - val mAP = 0.801（AUC指标，阈值无关）
