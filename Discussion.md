@@ -1,155 +1,109 @@
-# Discussion
 
-## Backbone and Transfer Learning
+段落 1 ：data augmentation和data description
 
-The main constraint in the image classification task is the small scale of the
-training set. The available training split contains 749 labelled images, and
-each image has on average only 1.43 positive class labels. Training a deep
-convolutional network from scratch would therefore be severely underdetermined:
-the model would need to learn both low-level visual filters and high-level class
-semantics from only a few hundred examples. For this reason, we relied on
-ImageNet-pretrained backbones and fine-tuned them for the PASCAL VOC multi-label
-setting.
+Prior to training, we carried out a brief descriptive inspection into the training dataset,
+which showed an imbalanced class distribution, with the most common label _person_
+appearing 207 times and least common label _sheep_ appearing only 27 times. In addition,
+certain classes, such as _diningtable_ and _person_ , are found to be severely mislabeled,
+where multiple false negatives were included in the training dataset. Moreover, we noted
+that the images provided in the training set were in various sizes. To tackle the said
+problems, we applied a data augmentation pipeline that includes resizing,
+_RandomHorizontalFlip, RandomRotation, ColorJitter,_ and _RandomErasing_ , with the
+latter four methods found by previous research to help artificially diversify the training
+distribution and discouraged the model from relying on incidental texture or colour cues.
 
-This choice follows the transfer learning principles discussed in the course.
-Early convolutional layers learn generic edge, colour, texture and shape
-features, while later layers become increasingly task-specific. Since ImageNet
-contains many object categories that overlap conceptually with PASCAL VOC, such
-as person, cat, dog, bicycle, car and aeroplane, the pretrained representations
-provide a useful starting point. We then replaced the original classifier with a
-20-dimensional multi-label head and fine-tuned the network using sigmoid outputs
-instead of a softmax, because multiple objects can be present in the same image.
 
-Our experiments show a clear benefit from stronger pretrained backbones and
-higher input resolution. ResNet-50 at 224 x 224 reached a validation mAP of
-approximately 0.818 after the loss and training improvements. EfficientNet-B3 at
-320 x 320 improved this to about 0.860. ConvNeXt-Tiny at 320 x 320 further
-improved the validation mAP to 0.893 and obtained a Kaggle displayed score of
-0.43673, corresponding to an adjusted classification Dice of 0.87346 under our
-classification-only comparison convention. A later ConvNeXt-Small experiment
-improved both the local validation mAP and the Kaggle score: it reached
-validation mAP 0.8995 and a Kaggle displayed classification score of 0.44905,
-corresponding to an adjusted classification Dice of 0.89810. The complete
-submission that combined ConvNeXt-Small classification with the v10
-segmentation output obtained an overall Kaggle score of 0.87588.
+段落 2 ：backbone的选择，transfer learning，可以学到的东西
 
-## Augmentation and Training Strategy
+Upon choosing the backbone of the training architecture, we noted that the fundamental
+constraint for the task lies in the small scale of training data. The training set has only 749
+labelled images with on average 1.43 positive class labels per image, which makes
+training a deep convolutional network from scratch severely underdetermined. Under
+such a condition, we opted for a model that brings stronger inductive bias rather than
+learning the whole entire representation from data. We then decided that
+ImageNet-pretrained backbones are particularly suitable for this task. Early convolutional
+layers learn generic edge, colour, texture and shape, while later layers become
+increasingly task-specific. Since this task includes multi-label classification, as discussed
+in the lectures, we replaced the original classifier with a 20-dimensional multi-label head
+and fine-tuned the network using sigmoid outputs instead of softmax, because multiple
+objects can be present in the same image.
 
-The dataset is both small and imbalanced. The most common class, person, appears
-207 times, while rare classes such as sheep and cow appear only 27 and 30 times.
-Several other classes, including bus, bicycle and train, have around 40 positive
-examples. This makes the classifier vulnerable to overfitting and to learning
-class-specific shortcuts from the small training set.
+Following the transfer learning method discussed in the lectures, we decided to train the
+model in 3 stages: stage 1 freezes the backbone and trains only the new classification
+head, stage 2 fine-tunes the whole network, and stage 3 re-trains on all available data,
+trading validation set for more training data. We trained ResNet-50 as our baseline, which
+acquired an mAP of 0.818 and Kaggle score of 0.391. One of its major limits lies in its
 
-To reduce this risk, we used a moderate augmentation pipeline consisting of
-random horizontal flips, random rotations, colour jitter and random erasing.
-These transformations preserve the semantic labels while changing pose, colour,
-illumination and local visibility. They are especially relevant for PASCAL VOC,
-where objects can appear at different scales, positions and backgrounds. We did
-not use MixUp in the final pipeline, because the multi-label setting and noisy
-labels already make the interpretation of soft targets less direct.
+small size of kernels, which are only 3×3. This limits the richness of the class
+representations the head can exploit. Indeed, our experiments showed that a larger kernel
+size can be greatly helpful, with the ConvNeXt family (7×7) acquiring much higher
+scores. Within the ConvNeXt family, mAP score progressed as the size of the model
+increased, from Tiny (0.893 mAP) to small (0.900) to Base (0.911).
 
-The final training procedure used three stages. First, we froze the backbone and
-trained only the classification head. Second, we unfroze the full network and
-fine-tuned it with a smaller learning rate. Third, we reloaded the best
-validation checkpoint and trained on all available labelled images. This last
-stage deliberately sacrifices the validation split in exchange for using all
-training examples before test prediction. It is useful for the final Kaggle
-submission, but it also means that the final checkpoint no longer has an
-independent validation estimate. For analysis, we therefore report validation
-mAP from the best Stage 2 checkpoint.
+We also learned that in machine learning, bigger is not always better. Of all the models
+we tried, ConvNeXt-Base achieved the highest local validation mAP (0.911), yet obtained
+a lower kaggle score (0.437) than the smaller scale ConvNeXt-Small (0.449), which is the
+strongest of all models. The training loss history showed that ConvNeXt-Base’s training
+loss decreased monotonically while validation loss deteriorated. As pointed out in the
+lecture when discussing regularisation, this happens when the model has more parameters
+than training data could constrain, and test performance would decline even as training
+performance improves.
+（这里还可以插入convnext base的学习history图片)
 
-## Loss Function and Noisy Labels
+In a post-hoc experiment, we trained a Vision Transformer (ViT-B/16) on the training set.
+Although we anticipated that the dice score would be poor due to ViT’s inability to
+generalise caused by overfitting in a small training dataset, we were surprised to find that
+the model acquired an mAP score of only 0.787, lowest of all models. Such poor
+performance could be due to its lack of inductive bias: ViT splits the images into 16×
+patches and flattens them in a sequence. Space relationships can only be learned through
+self-attention, which is obviously unachievable on such a small training set.
 
-A key difficulty in this assignment is that absence from the annotation table
-does not always mean visual absence from the image. For example, people,
-dining tables, bottles or plants may appear in the background without being
-annotated as positive labels. Standard binary cross-entropy treats every
-unlabelled class as a true negative, so it can penalise the model for detecting
-objects that are visually present but missing from the labels.
 
-To address this, we used AsymmetricLoss instead of standard BCE. Its negative
-focal term strongly down-weights easy negative examples, while the clipping term
-reduces the contribution of likely false negatives. This matches the structure
-of the VOC task: positive labels should remain informative, but some negative
-labels are uncertain. The improvement is supported by the experiments, although
-not as a perfectly isolated ablation. The original ResNet-50 pipeline with
-NegativeSmoothBCE obtained a Kaggle display score of 0.38084. After switching to
-AsymmetricLoss and improving the training/prediction pipeline, the ResNet-50
-experiment reached 0.39165. Stronger backbones with the same ASL-based training
-strategy then improved further: EfficientNet-B3 reached 0.42813 and
-ConvNeXt-Tiny reached 0.43673 on the Kaggle display score.
+段落 3 ：loss function的选择如何影响了我们的实验结果，以及这和训练集有什么关
+系
 
-## mAP, Dice and Thresholds
+In designing the loss function, we took in consideration the data annotation
+incompleteness we noticed from the dataset, that is, objects often appear in images
+without being labelled, e.g. _person_ and _diningtable_. Since standard binary cross-entropy
+treats every absent label as a true negative, there would be such a supervision noise that
+penalises the model for predicting classes that are visually present but unannotated. To
+avoid such supervision noises, we instead adopted AsymmetricLoss (Ridnik et al., ICCV
+2021), which introduces an asymmetrical focal weighting scheme, where a higher penalty
+discount is applied to easy negative samples while positive samples remain unweighted.
+This improvement is supported by our experiments, with ResNet-50 backbone with
+NegativeSmoothBCE scoring 0.38084 and ResNet-50 with ASL scoring 0.39165.
 
-We used validation mAP to compare model ranking quality, but Kaggle evaluates a
-Dice score on binarised predictions. These metrics answer different questions.
-mAP measures whether positives are ranked above negatives over all possible
-thresholds, while Dice/F1 depends on one selected threshold per class. A model
-can have high mAP and still perform poorly on Kaggle if the thresholds are badly
-calibrated.
 
-For this reason, we performed per-class threshold search on the validation set.
-This is closer to the Kaggle objective, because the classification output is a
-binary vector that is run-length encoded. The threshold search is especially
-important for imbalanced classes: rare classes often need different decision
-thresholds from frequent ones. In real applications this distinction also
-matters. A retrieval system might care more about ranking quality, while an
-automatic tagging system or a safety-critical detector needs calibrated binary
-decisions and must explicitly manage false positives and false negatives.
+段落 4 ：adversarial attack
 
-## Per-Class Behaviour and Failure Cases
+For the adversarial attack task, We implemented a targeted white-box adversarial attack
+against the frozen ConvNeXt-Small classifier. The goal was to force the model to predict
+the presence of _aeroplane_ in validation images where the ground-truth label is absent,
+keeping all classifier parameters frozen and modifying only pixel values.The mean L∞
+perturbation norm was 0.00687 on [0, 1], corresponding to less than 1.7 intensity units on
+a 0–255 scale. In addition, the adversarial image is perceptually indistinguishable from
+the original. While the success rate reached 100%, this has to be interpreted in context,
+since this is a white-box attack with full access to weights and gradients. In a black-box
+setting, perturbations may not transfer because gradients are specific to the model.
 
-The per-class results show that the model performs best on visually distinctive
-object classes. For ConvNeXt-Small, classes such as bicycle, bus, cow, bird and
-train reached AP values close to 1.0 on the validation split. These classes tend
-to have distinctive global shapes and backgrounds, which makes them easier for a
-classification backbone to identify.
 
-The weakest classes were diningtable, pottedplant, sofa, bottle and sheep.
-Diningtable remained the hardest class, with AP around 0.557 for
-ConvNeXt-Small. This is likely caused by a combination of label noise and visual
-ambiguity: tables often appear as partially visible background objects, and
-their appearance changes heavily depending on viewpoint and occlusion. Bottles
-and potted plants are small objects, so resizing the full image to 320 x 320 can
-still remove important details. Sofas and chairs can be confused with each
-other or with other indoor furniture. Sheep is rare in the training data, with
-only 27 positive examples, so the classifier has fewer opportunities to learn
-robust variations.
+## 段落 5 ：与现实生活的联系，不足
 
-Possible improvements would therefore not only involve larger backbones. For
-small objects, higher input resolution, object crops or detection-style
-pretraining could help. For noisy classes such as diningtable, manual inspection
-or semi-supervised relabelling could reduce false-negative supervision. For rare
-classes, class-balanced sampling or targeted augmentation may help, although
-they would need to be validated carefully to avoid overfitting.
+Admittedly, several limitations exist in our approach to classification that deserve explicit
+acknowledgment. First of all, all of our decisions, including model selection, threshold
+tuning, ensemble weights, were made using the same 150-image validation set. If more
+time is allowed, K-fold cross-validation would produce more stable estimates and reduce
+cumulative overfitting. Second, our 320×320 square resize distorts non-square VOC
+images and reduces small objects further. We would like to try and see if
+aspect-ratio-preserving padding at 448×448 would help in identifying smaller objects.
+Apparently, with such an accuracy rate on small objects (0.782 mAP for _bottle_ and 0.
+for _pottedplant_ ), probably owing to small objects taking up very few pixels, the model is
+not suitable for fields that require high accuracy. Finally, the class _diningtable_ performs
+consistently worst across all models and was not improved by emsembling. This is due to
+its systematic false annotation in the training set, and could be resolved by re-annotation
+or a noise-correcting semi-supervised algorithm, if more time is allowed.
 
-## Real-World Relevance and Limitations
 
-The transfer learning approach is practical and effective, but it also has
-limitations. ImageNet pretraining transfers useful visual features, yet the
-model remains tied to the distribution of the training set. PASCAL VOC images
-are natural photographs with a limited set of 20 object classes. A classifier
-trained on this data may fail under domain shift, for example on medical images,
-surveillance footage, low-light scenes, unusual camera angles or objects from
-non-Western environments. This is a dataset bias issue rather than only a model
-capacity issue.
+## REFERENCES？
 
-The model is also not suitable for safety-critical deployment without further
-calibration and testing. A high Kaggle score does not guarantee reliable
-behaviour on rare cases. Missing a small bottle, plant or person can be
-acceptable in a benchmark, but not in applications such as robotics, driving or
-industrial inspection. In those settings, the cost of different mistakes must be
-defined explicitly, and the threshold should be chosen based on the application
-rather than only validation F1.
 
-Finally, increasing model size has diminishing returns on this dataset.
-ConvNeXt-Small improved over ConvNeXt-Tiny, but it also overfit quickly: its
-best validation loss occurred early in Stage 2, while later epochs continued to
-reduce training loss but worsened validation loss. ConvNeXt-Base and
-ConvNeXt-Large are technically feasible on stronger GPUs, but the small dataset
-means they may improve throughput or representation capacity without improving
-generalisation. If more time were available, the most useful next steps would
-be to run a carefully controlled threshold comparison, inspect actual
-false-positive and false-negative examples visually, and test whether larger
-ConvNeXt variants improve Kaggle performance rather than only validation mAP.
