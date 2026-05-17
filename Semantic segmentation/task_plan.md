@@ -743,3 +743,42 @@ Build a maintainable `Semantic segmentation` workspace that supports:
   - Hugging Face EoMT-DINOv3 model card
   - Hugging Face Transformers EoMT-DINOv3 documentation
   - LightlyTrain EoMT-DINOv3 ADE20K benchmark notes
+
+## Phase 33 Plan: V17 Cityscapes External Generalization Re-Run
+
+- Goal: re-do the Cityscapes external-domain evaluation with the current best segmentation model (`V17 EoMT-DINOv3`) so that Section 2.4's "real-world deployment readiness" discussion is grounded in the latest model, not the obsolete V10 SegMAN-B run.
+- Why this matters for the report:
+  - PDF Section 2.4 explicitly asks "Are they ready to be deployed in a 'real world' setting?"
+  - the V10 Cityscapes number (`overlap mIoU=0.3484`) was useful when SegMAN-B was the best model, but the report should pair the current best Kaggle model with its current external-domain performance
+  - changing model family (SegMAN -> EoMT) was the largest gain on Kaggle so far, so we expect a meaningful Cityscapes change as well; quantifying the gap is itself a finding
+- Implementation:
+  - reuse `src/ga2_seg/cityscapes_generalization.py` helpers (label mapping, IoU bookkeeping, visualisation)
+  - new entrypoint `scripts/evaluate_cityscapes_generalization_eomt.py` that plugs in the V16/V17 EoMT inference path (multi-scale `ms{496,512,528}` no flip, dynamic `model.grid_size`, Mask2Former-style soft semantic averaging)
+  - keep the same 500-image Cityscapes `val` subset and overlap-class mapping (`person, car, bus, train, motorbike, bicycle`) so the V10/V17 numbers are directly comparable
+
+## Phase 33 Result
+
+- V17 Cityscapes evaluation completed successfully on Windows in `gpu_env` directly against the external drive (`G:\Datasets\...`).
+- Configuration:
+  - checkpoint: `outputs/checkpoints/eomt_dinov3_v17_merge_val_lr1e5/best`
+  - inference: `scales=[496, 512, 528], ref=512, hflip=False` (V16 TTA recipe)
+  - 500 Cityscapes validation samples
+  - script: `scripts/evaluate_cityscapes_generalization_eomt.py`
+- Overall result:
+  - `V17 overlap mIoU = 0.4253` (V10 SegMAN-B was `0.3484`, delta `+0.0769`)
+- Per-class IoU on overlap classes:
+  - `car`: `0.8728` (V10 `0.8249`, `+0.0479`)
+  - `person`: `0.5685` (V10 `0.5241`, `+0.0444`)
+  - `bus`: `0.5264` (V10 `0.5092`, `+0.0172`)
+  - `motorbike`: `0.4389` (V10 `0.1874`, **`+0.2515`**, the largest per-class jump)
+  - `bicycle`: `0.1375` (V10 `0.0382`, `+0.0993`)
+  - `train`: `0.0079` (V10 `0.0066`, essentially still zero)
+- Interpretation for the report:
+  - V17 improves Cityscapes external generalization by `+0.077` overlap mIoU on top of the V10 SegMAN baseline; the largest gains are on the small/thin classes (`motorbike`, `bicycle`) that also dragged the GA2 validation score down
+  - `train` IoU stays near zero: VOC trains and Cityscapes street-scene trains are perspective- and scale-mismatched enough that the model has effectively no recognition capability
+  - the absolute number (`0.4253`) is still far below the GA2 Kaggle score (`0.89139`), so the "the model is good in lab but degrades sharply under domain shift" reflection from Phase 27 remains true; V17 narrows the gap rather than closing it
+  - this is a strictly better reference for Section 2.4 than the V10 number, because (a) it matches the model actually shipped to Kaggle, (b) it highlights which classes are recovered by the model-family change and which (the genuinely OOD `train`) are not
+- Generated artifacts (under `outputs/cityscapes_generalization/eomt_dinov3_v17_tta_ms496_512_528_noflip/`):
+  - `metrics.csv`
+  - `summary.md`
+  - 12 qualitative comparison visualisations in `visualizations/`

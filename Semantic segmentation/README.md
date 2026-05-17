@@ -447,7 +447,7 @@ outputs/cityscapes_generalization/segman_b_iter25000/summary.md
 outputs/cityscapes_generalization/segman_b_iter25000/visualizations/
 ```
 
-Current SegMAN-B result on Cityscapes `val`:
+Current SegMAN-B result on Cityscapes `val` (Phase 27 reference, V10 model):
 
 - samples: `500`
 - metric: overlap-class `mIoU`
@@ -455,4 +455,28 @@ Current SegMAN-B result on Cityscapes `val`:
 - strongest classes: `car=0.8249`, `person=0.5241`, `bus=0.5092`
 - weakest classes: `train=0.0066`, `bicycle=0.0382`, `motorbike=0.1874`
 
-This result should be used as external-domain evidence in the final discussion, not as a direct comparison against VOC validation or Kaggle.
+### EoMT-DINOv3 V17 Cityscapes (current model, primary reference)
+
+Re-run with the V17 checkpoint and the V16 multi-scale TTA inference path:
+
+```powershell
+$env:PYTHONPATH="src"
+conda run -n gpu_env python .\scripts\evaluate_cityscapes_generalization_eomt.py --left-img-root "G:\Datasets\leftImg8bit_trainvaltest" --gt-fine-root "G:\Datasets\gtFine_trainvaltest" --output-dir .\outputs\cityscapes_generalization\eomt_dinov3_v17_tta_ms496_512_528_noflip
+```
+
+Output directory: `outputs/cityscapes_generalization/eomt_dinov3_v17_tta_ms496_512_528_noflip/`
+
+Result on Cityscapes `val`:
+
+- samples: `500`
+- metric: overlap-class `mIoU`
+- score: `0.4253` (`+0.0769` over V10 SegMAN-B)
+- per-class IoU:
+  - `car=0.8728` (V10 `0.8249`)
+  - `person=0.5685` (V10 `0.5241`)
+  - `bus=0.5264` (V10 `0.5092`)
+  - `motorbike=0.4389` (V10 `0.1874`, largest single-class jump)
+  - `bicycle=0.1375` (V10 `0.0382`)
+  - `train=0.0079` (V10 `0.0066`, still effectively zero)
+
+Use V17 as the primary external-domain reference in Section 2.4. Keep V10 only as a model-family comparison ("changing model family from SegMAN-B to EoMT-DINOv3 also improves cross-domain transfer, especially on small / thin classes"). The absolute V17 number (`0.4253`) remains far below the GA2 Kaggle score (`0.89139`), so the deployment-readiness conclusion from Phase 27 still stands: high closed-benchmark accuracy is not a proxy for cross-domain robustness.

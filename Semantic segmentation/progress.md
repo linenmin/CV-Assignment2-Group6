@@ -927,6 +927,39 @@
   - the realised local-to-Kaggle transfer ratio is `0.00257 / 0.0071 ≈ 0.36x`, slightly above the recent `~0.25x` band, which is consistent with the gain being a real training signal rather than 37-val noise
   - this validates the strategic insight that the 112-image val was being held out at the cost of training data, with no assignment-defined reason to do so
 
+### 2026-05-17 (V17 Cityscapes External Generalization Re-Run)
+
+- Goal: refresh the Cityscapes external-domain evaluation (originally done in Phase 27 against V10 SegMAN-B) so that PDF Section 2.4's deployment-readiness discussion is grounded in the V17 EoMT-DINOv3 model that is actually shipped to Kaggle.
+- Implementation:
+  - new script `scripts/evaluate_cityscapes_generalization_eomt.py`
+  - reuses helpers in `src/ga2_seg/cityscapes_generalization.py` (label mapping, IoU bookkeeping, visualisation)
+  - plugs in the V16/V17 EoMT inference path: `ms{496,512,528}` no flip, fixed `512x512` warp preprocessing, dynamic `model.grid_size`, Mask2Former-style soft semantic averaging
+  - runs on Windows in `gpu_env` directly against `G:\Datasets\leftImg8bit_trainvaltest` / `G:\Datasets\gtFine_trainvaltest`
+- Configuration:
+  - checkpoint: `outputs/checkpoints/eomt_dinov3_v17_merge_val_lr1e5/best`
+  - split: `val`, samples: `500`
+  - device: `cuda:0`, AMP enabled
+- Result:
+  - V17 overlap-class mIoU: `0.4253`
+  - V10 SegMAN-B reference (Phase 27): `0.3484`
+  - delta: `+0.0769`
+- Per-class IoU comparison:
+  - `car`: `0.8249 -> 0.8728` (`+0.0479`)
+  - `person`: `0.5241 -> 0.5685` (`+0.0444`)
+  - `bus`: `0.5092 -> 0.5264` (`+0.0172`)
+  - `motorbike`: `0.1874 -> 0.4389` (`+0.2515`, largest single-class jump)
+  - `bicycle`: `0.0382 -> 0.1375` (`+0.0993`)
+  - `train`: `0.0066 -> 0.0079` (still effectively zero)
+- Interpretation:
+  - V17 is materially better than V10 under domain shift, especially on the small / thin classes that were also the weakest on GA2 validation
+  - `train` remains a hard failure case: street-scene Cityscapes trains do not match the VOC train concept the model learned
+  - V17 narrows but does not close the lab-vs-domain-shift gap: GA2 Kaggle `0.89139` vs Cityscapes overlap mIoU `0.4253`
+- Generated artifacts under `outputs/cityscapes_generalization/eomt_dinov3_v17_tta_ms496_512_528_noflip/`:
+  - `metrics.csv`
+  - `summary.md`
+  - 12 qualitative comparison images in `visualizations/`
+- Old V10 SegMAN-B Cityscapes results in `outputs/cityscapes_generalization/segman_b_iter25000/` were kept on disk so the V10 vs V17 comparison is reproducible from artifacts.
+
 ### 2026-05-12 (Sliding-Window Negative Result, internal only)
 
 - Goal: investigate whether sliding-window inference at the trained `512x512` resolution can recover the cost of the V11 full-image-warp preprocessing, particularly for small or thin classes like `bicycle` and `chair`.
