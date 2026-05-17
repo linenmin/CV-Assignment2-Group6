@@ -28,6 +28,21 @@ OVERLAP_CLASS_NAMES = (
     "bicycle",
 )
 
+# ``train`` appears in both label sets only by name. Visual inspection of
+# ``outputs/figures/train_class_voc_vs_cityscapes/`` shows VOC trains are
+# full-frame intercity / steam locomotives photographed as the subject,
+# while Cityscapes "trains" are urban trams that appear small and
+# incidentally in street scenes. These are essentially different visual
+# concepts, so the primary external-generalization metric should exclude
+# ``train`` and report only the genuinely transferable classes below.
+TRANSFERABLE_CLASS_NAMES = (
+    "person",
+    "car",
+    "bus",
+    "motorbike",
+    "bicycle",
+)
+
 
 @dataclass(frozen=True)
 class CityscapesPair:

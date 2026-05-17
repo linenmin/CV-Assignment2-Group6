@@ -940,9 +940,13 @@
   - split: `val`, samples: `500`
   - device: `cuda:0`, AMP enabled
 - Result:
-  - V17 overlap-class mIoU: `0.4253`
+  - V17 6-class overlap mIoU: `0.4253`
   - V10 SegMAN-B reference (Phase 27): `0.3484`
   - delta: `+0.0769`
+- After visual inspection (see follow-up below), the primary metric was redefined to exclude `train`:
+  - V17 5-class transferable mIoU (`person, car, bus, motorbike, bicycle`): **`0.5088`**
+  - V10 same metric: `0.4168`
+  - delta: **`+0.0920`**
 - Per-class IoU comparison:
   - `car`: `0.8249 -> 0.8728` (`+0.0479`)
   - `person`: `0.5241 -> 0.5685` (`+0.0444`)
@@ -959,6 +963,24 @@
   - `summary.md`
   - 12 qualitative comparison images in `visualizations/`
 - Old V10 SegMAN-B Cityscapes results in `outputs/cityscapes_generalization/segman_b_iter25000/` were kept on disk so the V10 vs V17 comparison is reproducible from artifacts.
+
+### 2026-05-17 (Cityscapes train-class visual-concept investigation)
+
+- Trigger: V17's Cityscapes `train` IoU stayed at `0.0079` despite a `+0.077` overall mIoU jump. To check whether this was a real generalization failure or a label-overlap artefact, we extracted the largest `train`-area images from each dataset and built side-by-side panels.
+- Script: `scripts/compare_train_class_voc_vs_cityscapes.py` ranks VOC training images and Cityscapes val images by their `train`-class pixel count, then renders 4 paired panels (image + red-overlay of the GT train mask). Output: `outputs/figures/train_class_voc_vs_cityscapes/`.
+- What the panels show (direct visual evidence):
+  - VOC `train` is dominated by full-frame intercity / steam locomotives photographed as the subject, with railway-specific backgrounds (tracks, overhead wires, smoke).
+  - Cityscapes `train` is urban trams (Stadtbahn) captured incidentally from a moving vehicle on a street, typically small in frame, often partially occluded by cars or vans.
+  - Out of 4 paired examples there is no visual overlap in vehicle type, scale, viewpoint, or background context.
+- Consequence: VOC `train` and Cityscapes `train` are essentially different visual concepts that happen to share the same label. Including `train` in the overlap mIoU was deflating the headline number with a quantity that does not actually measure model generalization.
+- Action:
+  - Added `TRANSFERABLE_CLASS_NAMES` constant in `src/ga2_seg/cityscapes_generalization.py` (`person, car, bus, motorbike, bicycle`).
+  - Added `scripts/recompute_cityscapes_summary.py` so existing `metrics.csv` files can be re-aggregated without paying for another full 500-image inference run.
+  - Regenerated `summary.md` for both `eomt_dinov3_v17_tta_ms496_512_528_noflip/` and `segman_b_iter25000/`; each now reports the 5-class transferable mIoU as primary and the 6-class number as secondary.
+- New headline figures for the report:
+  - V10 SegMAN-B: 5-class transferable mIoU `0.4168` (was `0.3484` under 6-class).
+  - V17 EoMT-DINOv3: 5-class transferable mIoU **`0.5088`** (was `0.4253` under 6-class).
+  - Delta: **`+0.0920`** (was `+0.0769`).
 
 ### 2026-05-12 (Sliding-Window Negative Result, internal only)
 

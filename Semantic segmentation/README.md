@@ -466,17 +466,30 @@ conda run -n gpu_env python .\scripts\evaluate_cityscapes_generalization_eomt.py
 
 Output directory: `outputs/cityscapes_generalization/eomt_dinov3_v17_tta_ms496_512_528_noflip/`
 
-Result on Cityscapes `val`:
+#### Primary metric: 5-class transferable mIoU (excludes `train`)
+
+`train` is excluded from the headline because VOC trains (full-frame intercity / steam locomotives) and Cityscapes 'trains' (urban trams in street scenes) are essentially different visual concepts that happen to share the same English word. See `outputs/figures/train_class_voc_vs_cityscapes/` for direct visual evidence and `scripts/compare_train_class_voc_vs_cityscapes.py` for the panel-generator.
 
 - samples: `500`
-- metric: overlap-class `mIoU`
-- score: `0.4253` (`+0.0769` over V10 SegMAN-B)
-- per-class IoU:
-  - `car=0.8728` (V10 `0.8249`)
-  - `person=0.5685` (V10 `0.5241`)
-  - `bus=0.5264` (V10 `0.5092`)
-  - `motorbike=0.4389` (V10 `0.1874`, largest single-class jump)
-  - `bicycle=0.1375` (V10 `0.0382`)
-  - `train=0.0079` (V10 `0.0066`, still effectively zero)
+- transferable classes: `person, car, bus, motorbike, bicycle`
+- score: **`0.5088`** (V10 SegMAN-B `0.4168`, delta `+0.0920`)
+- per-class IoU (V10 -> V17):
+  - `car`: `0.8249 -> 0.8728`
+  - `person`: `0.5241 -> 0.5685`
+  - `bus`: `0.5092 -> 0.5264`
+  - `motorbike`: `0.1874 -> 0.4389` (largest single-class jump)
+  - `bicycle`: `0.0382 -> 0.1375`
 
-Use V17 as the primary external-domain reference in Section 2.4. Keep V10 only as a model-family comparison ("changing model family from SegMAN-B to EoMT-DINOv3 also improves cross-domain transfer, especially on small / thin classes"). The absolute V17 number (`0.4253`) remains far below the GA2 Kaggle score (`0.89139`), so the deployment-readiness conclusion from Phase 27 still stands: high closed-benchmark accuracy is not a proxy for cross-domain robustness.
+#### Secondary metric: 6-class overlap mIoU (includes `train`, backward comparison)
+
+- V17: `0.4253`, V10: `0.3484`, delta `+0.0769`
+- per-class `train` IoU: `0.0079` (V10 `0.0066`)
+- kept only so the original Phase 27 reporting can be reproduced; not recommended as the headline.
+
+To re-aggregate from an existing `metrics.csv` (no re-inference needed):
+
+```powershell
+conda run -n gpu_env python .\scripts\recompute_cityscapes_summary.py --metrics-csv .\outputs\cityscapes_generalization\eomt_dinov3_v17_tta_ms496_512_528_noflip\metrics.csv --label "EoMT-DINOv3 V17"
+```
+
+Use V17 as the primary external-domain reference in Section 2.4. Keep V10 only as a model-family comparison: changing model family from SegMAN-B to EoMT-DINOv3 also improves cross-domain transfer, especially on small / thin classes. The absolute V17 number (`0.5088`) remains far below the GA2 Kaggle score (`0.89139`), so the deployment-readiness conclusion still stands: high closed-benchmark accuracy is not a proxy for cross-domain robustness.

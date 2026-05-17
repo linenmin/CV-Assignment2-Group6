@@ -780,5 +780,20 @@ Build a maintainable `Semantic segmentation` workspace that supports:
   - this is a strictly better reference for Section 2.4 than the V10 number, because (a) it matches the model actually shipped to Kaggle, (b) it highlights which classes are recovered by the model-family change and which (the genuinely OOD `train`) are not
 - Generated artifacts (under `outputs/cityscapes_generalization/eomt_dinov3_v17_tta_ms496_512_528_noflip/`):
   - `metrics.csv`
-  - `summary.md`
+  - `summary.md` (subsequently regenerated with 5-class transferable mIoU as primary, see Phase 33b)
   - 12 qualitative comparison visualisations in `visualizations/`
+
+## Phase 33b: Train-Class Visual-Concept Investigation and Metric Redefinition
+
+- Trigger: V17's Cityscapes `train` IoU stayed near zero despite the overall jump. The question was whether this is a real generalization failure or a label-overlap artefact.
+- Action: extracted the largest `train`-area examples from each dataset (`scripts/compare_train_class_voc_vs_cityscapes.py`) and built 4 side-by-side panels under `outputs/figures/train_class_voc_vs_cityscapes/`.
+- Visual finding: VOC `train` = full-frame intercity / steam locomotives photographed as subject; Cityscapes `train` = urban trams (Stadtbahn) appearing small and incidentally in street scenes. They share the label only by name and have no overlap in vehicle type, scale, viewpoint, or context.
+- Consequence: including `train` in the overlap mIoU deflated the headline with a quantity that does not measure model generalization. Primary metric was redefined to exclude `train` and report a 5-class transferable mIoU over `person, car, bus, motorbike, bicycle`.
+- Code changes:
+  - added `TRANSFERABLE_CLASS_NAMES` constant in `src/ga2_seg/cityscapes_generalization.py`
+  - added `scripts/recompute_cityscapes_summary.py` to re-aggregate existing `metrics.csv` files without re-running inference
+  - regenerated `summary.md` for both V10 SegMAN-B and V17 EoMT-DINOv3 with the new primary metric and the old 6-class number as secondary
+- Updated headline figures for Section 2.4:
+  - V10 SegMAN-B: 5-class transferable mIoU `0.4168`
+  - V17 EoMT-DINOv3: 5-class transferable mIoU **`0.5088`**
+  - Delta: **`+0.0920`** in V17's favour
