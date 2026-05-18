@@ -855,3 +855,30 @@ python "Image classification/06_predict.py" --experiment convnext_small_320 \
 - per-class 权重搜索在 150 张 val 样本上过拟合明显；全局权重更保守但仍不如 Small 单模型。
 - **决策：`convnext_small_320` 仍为当前最佳分类模型（0.87588）。Ensemble 路径暂时不如单模型。**
 - 若继续尝试，建议改用 5-fold OOF 阈值 + 固定全局权重以减少 val 过拟合。
+---
+
+## Session: 2026-05-18 - From-scratch classification baseline
+
+### Status
+In progress. Code support and wrappers are complete; full training/evaluation has not been run yet.
+
+### Work Completed
+- Read `CV_GA2.pdf` and confirmed Section 2.1 encourages comparing a model trained from scratch with a model using transferred weights and fine-tuning.
+- Decided to use `convnext_small_320_scratch` as the fair baseline against the current best `convnext_small_320`.
+- Updated `Image classification/shared.py` with `ExperimentConfig.pretrained`, `ExperimentConfig.freeze_backbone_stage1`, and the `convnext_small_320_scratch` config.
+- Updated `Image classification/04_train.py` so model initialization uses `config.pretrained` and scratch Stage 1 trains the full network instead of freezing a random backbone.
+- Added wrappers and README under `Image classification/experiments/convnext_small_320_scratch/`.
+- Updated `README.md`, `Image classification/experiments/README.md`, and `Image classification/structure.txt`.
+
+### Verification
+- `py_compile` passed for the modified training/config files and new wrappers.
+- `04_train.py --help` and `run_pipeline.py --help` include `convnext_small_320_scratch`.
+- Smoke forward pass succeeded: output shape `(1, 20)`, `pretrained=False`, `freeze_backbone_stage1=False`, about 49.9M trainable parameters.
+
+### Next Command
+```powershell
+C:\Users\31667\.conda\envs\biometrics\python.exe "Image classification/run_pipeline.py" --experiment convnext_small_320_scratch --skip-explore
+```
+
+### Notes
+- `CV_GA2.pdf` is modified in the working tree but was not changed as part of this implementation.

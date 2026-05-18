@@ -329,3 +329,39 @@
   - `vit_b_16_224`：主线实验，torchvision ViT-B/16 ImageNet-1K 预训练权重，224 x 224 输入，batch size 8。
   - `vit_l_16_224`：可选重模型实验，batch size 2，更适合 Colab Pro 或更强 GPU。
 - ViT 先使用 224 输入，是为了保持 torchvision 预训练 positional embedding 的原生尺寸；如果 B/16 有希望，再单独实现 320 输入的 positional embedding 插值实验。
+---
+
+## Phase 8: From-scratch classification baseline
+- **Status:** in_progress
+
+### Goal
+Satisfy the classification-task requirement in `CV_GA2.pdf` by adding a model trained from random initialization and comparing it with the current best transfer-learning model, `convnext_small_320`.
+
+### Plan
+- [x] Confirm PDF requirement and choose a fair baseline design.
+- [x] Add configuration support for pretrained vs scratch initialization.
+- [x] Add `convnext_small_320_scratch` experiment config.
+- [x] Update training so scratch models do not freeze a random backbone in Stage 1.
+- [x] Add train/evaluate/predict wrappers and README for the scratch experiment.
+- [x] Smoke test config, CLI registration, and model forward pass.
+- [ ] Run full training:
+  `C:\Users\31667\.conda\envs\biometrics\python.exe "Image classification/run_pipeline.py" --experiment convnext_small_320_scratch --skip-explore`
+- [ ] Run/confirm evaluation outputs:
+  `output/image_classification/convnext_small_320_scratch/metrics/evaluation_summary.csv`
+- [ ] Generate prediction/submission CSV.
+- [ ] Record val mAP and, if submitted, Kaggle score in `README.md`, `findings.md`, and `progress.md`.
+- [ ] Add a short report/notebook discussion comparing scratch vs transfer learning.
+
+### Current Implementation
+- `Image classification/shared.py`: added `pretrained`, `freeze_backbone_stage1`, and `convnext_small_320_scratch`.
+- `Image classification/04_train.py`: uses `config.pretrained`; Stage 1 can be full-network warmup.
+- `Image classification/experiments/convnext_small_320_scratch/`: new wrappers and experiment README.
+
+### Verification
+- `py_compile` passed.
+- `04_train.py --help` and `run_pipeline.py --help` list `convnext_small_320_scratch`.
+- Random-initialized ConvNeXt-Small forward pass returns `(1, 20)`.
+
+### Risks
+- Scratch ConvNeXt-Small has about 49.9M trainable parameters and may overfit or converge slowly on 750 images.
+- If local GPU time is too high, use this implementation as the code baseline and consider a lighter `resnet50_224_scratch` follow-up only if needed.

@@ -578,3 +578,33 @@ python "Image classification/06_predict.py" --experiment convnext_small_320 \
 - pottedplant/aeroplane/cat 全部由 V2-S 主导的融合策略在测试集上未能泛化：这些类别在 150 张 val 样本上的权重差异被放大，测试集上并不稳定。
 - **结论**：对于 750 张训练图的规模，per-class 权重搜索（每类独立选最优权重）自由度过高，验证样本太少，难以可靠估计。全局权重（75% Small + 25% V2-S，val mAP 0.9144）更保守，但得分仍低于 Small 单模型。
 - **下一步建议**：若要继续尝试 ensemble，考虑固定全局权重（如 0.7 Small + 0.3 V2-S）并用 5-fold OOF 阈值替代 150 张 val 搜索阈值，以减少过拟合。
+---
+
+## 2026-05-18 From-scratch Classification Baseline
+
+### Assignment Requirement
+`CV_GA2.pdf` Section 2.1 explicitly encourages trying two classification model types:
+- train all parameters from scratch;
+- transfer weights from another model and fine-tune.
+
+The current best classifier, `convnext_small_320`, belongs to the second category because it uses ImageNet-1K pretrained ConvNeXt-Small weights.
+
+### Design Decision
+Use `convnext_small_320_scratch` as the from-scratch baseline. This isolates the effect of transfer learning because it keeps the same:
+- ConvNeXt-Small architecture;
+- 320 x 320 input;
+- AsymmetricLoss;
+- train/val split;
+- per-class threshold search;
+- TTA prediction path.
+
+Only initialization and Stage 1 behavior differ:
+- `pretrained=False`;
+- no frozen-backbone head-only stage;
+- Stage 1 is a full-network warmup.
+
+### Expected Interpretation
+The scratch model is not expected to beat `convnext_small_320`. With only about 750 training images, the useful result is the comparison itself: if scratch performance is worse, it supports the report argument that ImageNet transfer learning provides important low-level and mid-level visual features and improves generalization on this small VOC subset.
+
+### Current Status
+Implementation and smoke verification are complete. Full training/evaluation/submission generation is still pending.

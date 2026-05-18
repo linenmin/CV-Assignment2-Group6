@@ -37,6 +37,7 @@ KUL H02A5a 计算机视觉，组队作业 2。成员：Kaixi Yao, Enmin Lin, Tai
 | v2 | `efficientnet_b3_320` | EfficientNet-B3 | AsymmetricLoss | 320 + TTA | 0.860 | 0.428 | 0.856 |
 | v3 | `convnext_tiny_320` | ConvNeXt-Tiny | AsymmetricLoss | 320 + TTA | 0.893 | 0.437 | 0.873 |
 | v4 | `convnext_small_320` | ConvNeXt-Small | AsymmetricLoss | 320 + TTA | **0.900** | **0.449** | **0.898** |
+| v4-scratch | `convnext_small_320_scratch` | ConvNeXt-Small | AsymmetricLoss | 320 + TTA | pending | pending | pending |
 | v5 | `convnext_base_320` | ConvNeXt-Base | AsymmetricLoss | 320 + TTA | 0.911 | 0.437 | 0.875 |
 | v6 | `efficientnet_v2_s_320` | EfficientNet-V2-S | AsymmetricLoss | 320 + TTA | 0.881 | 0.440 | 0.879 |
 | — | `convnext_large_320` | ConvNeXt-Large | AsymmetricLoss | 320 + TTA | 0.874 | —¹ | —¹ |
@@ -231,6 +232,7 @@ Image classification/
     efficientnet_b3_320/
     convnext_tiny_320/
     convnext_small_320/        # ← 当前最佳
+    convnext_small_320_scratch/ # from-scratch baseline
     convnext_base_320/
     convnext_large_320/
     convnext_small_320_pad_sampler/

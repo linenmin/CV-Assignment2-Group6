@@ -61,6 +61,8 @@ class ExperimentConfig:
     weight_decay: float = 1e-4
     val_split: float = 0.2
     random_seed: int = 42
+    pretrained: bool = True
+    freeze_backbone_stage1: bool = True
     loss_name: str = "asymmetric"
     threshold: float = 0.5
     transform_mode: str = "resize"
@@ -164,6 +166,22 @@ EXPERIMENTS = {
         batch_size=8,
         eval_batch_size=16,
     ),
+    "convnext_small_320_scratch": ExperimentConfig(
+        name="convnext_small_320_scratch",
+        backbone="convnext_small",
+        img_size=320,
+        batch_size=8,
+        eval_batch_size=16,
+        pretrained=False,
+        freeze_backbone_stage1=False,
+        stage1_epochs=10,
+        stage1_lr=1e-4,
+        stage2_epochs=40,
+        stage2_lr=5e-5,
+        stage3_epochs=5,
+        stage3_lr=2e-5,
+        early_stop_patience=8,
+    ),
     "convnext_small_320_pad_sampler": ExperimentConfig(
         name="convnext_small_320_pad_sampler",
         backbone="convnext_small",
@@ -260,9 +278,10 @@ def ensure_experiment_dirs(config: ExperimentConfig) -> None:
 
 
 def describe_experiment(config: ExperimentConfig) -> str:
+    init = "pretrained" if config.pretrained else "scratch"
     return (
         f"{config.name} | backbone={config.backbone} | "
-        f"img_size={config.img_size} | batch_size={config.batch_size}"
+        f"img_size={config.img_size} | batch_size={config.batch_size} | init={init}"
     )
 
 

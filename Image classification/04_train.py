@@ -222,14 +222,21 @@ def main(config: ExperimentConfig | None = None):
     model = MultiLabelClassifier(
         backbone=config.backbone,
         num_classes=len(LABELS),
-        pretrained=True,
+        pretrained=config.pretrained,
     ).to(device)
     criterion = build_criterion(config)
     history = []
     best_val_loss = float("inf")
 
-    print(f"\n=== Stage 1: train head only ({config.backbone}, frozen) ===")
-    model.freeze_backbone()
+    init = "ImageNet pretrained weights" if config.pretrained else "random initialization"
+    print(f"Initialization: {init}")
+
+    if config.freeze_backbone_stage1:
+        print(f"\n=== Stage 1: train head only ({config.backbone}, frozen) ===")
+        model.freeze_backbone()
+    else:
+        print(f"\n=== Stage 1: full-network warmup ({config.backbone}, unfrozen) ===")
+        model.unfreeze_backbone()
     print(f"Trainable params: {model.trainable_params():,}")
     best_val_loss = train_stage(
         model,

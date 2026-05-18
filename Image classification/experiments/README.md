@@ -16,6 +16,10 @@ experiments/
     train.py
     evaluate.py
     predict.py
+  convnext_small_320_scratch/
+    train.py
+    evaluate.py
+    predict.py
   convnext_small_320_pad_sampler/
     train.py
     evaluate.py
@@ -77,6 +81,9 @@ python "Image classification/run_pipeline.py" --experiment convnext_tiny_320
 
 python "Image classification/experiments/convnext_small_320/train.py"
 python "Image classification/run_pipeline.py" --experiment convnext_small_320
+
+python "Image classification/experiments/convnext_small_320_scratch/train.py"
+python "Image classification/run_pipeline.py" --experiment convnext_small_320_scratch
 
 python "Image classification/experiments/convnext_small_320_pad_sampler/train.py"
 python "Image classification/run_pipeline.py" --experiment convnext_small_320_pad_sampler
