@@ -1,0 +1,17 @@
+version,date,model_family,pivot,val_split,val_miou,kaggle_seg_dice,kaggle_joint_dice
+V1,2026-04-21,SegNeXt-S,baseline (MMSeg + ADE20K-init),637/112,62.46,0.72562,
+V2,2026-04-21,SegNeXt-S,rare-class oversampling,637/112,60.29,0.71660,
+V3,2026-04-22,SegNeXt-S,region-rebalance auxiliary head,637/112,62.54,0.72022,
+V4,2026-04-23,SegNeXt-S,hard-pixel sampler (OHEM),637/112,63.90,0.70474,
+V5,2026-04-23,SegNeXt-S,composite loss (CE + Dice),637/112,63.62,0.71106,
+V6,2026-04-24,SegFormer-B2,model family swap,637/112,63.46,0.74696,
+V7,2026-04-24,SegFormer-B3,backbone scale-up,637/112,64.72,0.76168,
+V8,2026-04-24,SegFormer-B5,backbone scale-up,637/112,68.97,0.77134,
+V9,2026-04-24,SegFormer ensemble,hard-vote V6+V7+V8,637/112,,0.78128,
+V10,2026-04-25,SegMAN-B,model family swap (CVPR 2025),637/112,77.20,0.85364,0.85725
+V11,2026-05-12,EoMT-DINOv3-L,model family + DINOv3 pretrain,637/112,79.26,0.86884,0.88342
+V12,2026-05-12,EoMT-DINOv3-L,training continuation (lr=1e-5),637/112,80.02,0.87404,0.88602
+V14,2026-05-12,EoMT-DINOv3-L,low-LR continuation + early stop,637/112,80.19,0.87860,0.88830
+V15,2026-05-12,EoMT-DINOv3-L,layer-wise LR + cosine + unfreeze-4,637/112,80.20,0.87914,0.88857
+V16,2026-05-12,EoMT-DINOv3-L,inference TTA (multi-scale 496/512/528),637/112,80.30,0.87964,0.88882
+V17,2026-05-12,EoMT-DINOv3-L,training-data expansion (712/37 split),712/37,79.30,0.88478,0.89139

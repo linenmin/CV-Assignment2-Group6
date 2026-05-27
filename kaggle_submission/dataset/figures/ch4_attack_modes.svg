@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 580" style="max-width:100%;height:auto;font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif">
+  <defs>
+    <marker id="ch4-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#374151"/>
+    </marker>
+    <marker id="ch4-arrow-bp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b45309"/>
+    </marker>
+    <marker id="ch4-arrow-pgd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f7a5a"/>
+    </marker>
+    <filter id="ch4-shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <rect width="1680" height="580" fill="#ffffff"/>
+
+  <text x="840" y="40" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">
+    Two attack modes on the same frozen V17 EoMT-DINOv3 segmenter
+  </text>
+
+  <g font-size="15" fill="#374151">
+    <rect x="425" y="65" width="20" height="20" fill="#3a6da9" rx="3"/>
+    <text x="455" y="81">frozen model (no gradient updates)</text>
+    <rect x="800" y="65" width="20" height="20" fill="#d97c2e" rx="3"/>
+    <text x="830" y="81">trained parameters</text>
+    <rect x="1015" y="65" width="20" height="20" fill="#4f9d4f" rx="3"/>
+    <text x="1045" y="81">per-step update target</text>
+  </g>
+
+  <!-- =================== Subgraph A: trainable generator =================== -->
+  <g>
+    <rect x="20" y="120" width="800" height="440" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="420" y="160" text-anchor="middle" font-size="19" font-weight="700" fill="#0f172a">
+      A. Trainable universal generator (PDF Figure 3)
+    </text>
+    <text x="420" y="185" text-anchor="middle" font-size="14" font-style="italic" fill="#475569">
+      one shared θ optimised across the training distribution
+    </text>
+
+    <!-- x input indicator -->
+    <text x="60" y="285" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">x</text>
+    <line x1="75" y1="280" x2="115" y2="280" stroke="#374151" stroke-width="2.2" marker-end="url(#ch4-arrow)"/>
+
+    <!-- Top row: Generator → δ → x+δ -->
+    <g filter="url(#ch4-shadow)">
+      <rect x="115" y="230" width="180" height="100" rx="12" fill="#d97c2e"/>
+      <text x="205" y="270" text-anchor="middle" font-size="17" font-weight="600" fill="#ffffff">Generator G(x; θ)</text>
+      <text x="205" y="295" text-anchor="middle" font-size="14" fill="#fef3c7">CNN / U-Net / Transformer</text>
+      <text x="205" y="313" text-anchor="middle" font-size="14" fill="#fef3c7">trained adversary</text>
+    </g>
+    <line x1="295" y1="280" x2="335" y2="280" stroke="#374151" stroke-width="2.2" marker-end="url(#ch4-arrow)"/>
+
+    <g filter="url(#ch4-shadow)">
+      <rect x="335" y="230" width="130" height="100" rx="12" fill="#ffffff" stroke="#d97c2e" stroke-width="2"/>
+      <text x="400" y="270" text-anchor="middle" font-size="17" font-weight="600" fill="#0f172a">δ</text>
+      <text x="400" y="295" text-anchor="middle" font-size="14" fill="#475569">‖δ‖∞ ≤ ε</text>
+      <text x="400" y="313" text-anchor="middle" font-size="14" fill="#475569">perturbation</text>
+    </g>
+    <line x1="465" y1="280" x2="505" y2="280" stroke="#374151" stroke-width="2.2" marker-end="url(#ch4-arrow)"/>
+
+    <g filter="url(#ch4-shadow)">
+      <rect x="505" y="230" width="140" height="100" rx="12" fill="#ffffff" stroke="#3a6da9" stroke-width="2"/>
+      <text x="575" y="270" text-anchor="middle" font-size="17" font-weight="600" fill="#0f172a">x + δ</text>
+      <text x="575" y="295" text-anchor="middle" font-size="14" fill="#475569">adversarial</text>
+      <text x="575" y="313" text-anchor="middle" font-size="14" fill="#475569">input</text>
+    </g>
+
+    <!-- x+δ → right → down → into V17 right edge -->
+    <line x1="645" y1="280" x2="780" y2="280" stroke="#374151" stroke-width="2.2"/>
+    <line x1="780" y1="280" x2="780" y2="410" stroke="#374151" stroke-width="2.2"/>
+    <line x1="780" y1="410" x2="745" y2="410" stroke="#374151" stroke-width="2.2" marker-end="url(#ch4-arrow)"/>
+
+    <!-- Bottom row: L_adv ← V17 -->
+    <g filter="url(#ch4-shadow)">
+      <rect x="515" y="370" width="225" height="80" rx="12" fill="#3a6da9"/>
+      <text x="627" y="402" text-anchor="middle" font-size="17" font-weight="600" fill="#ffffff">V17 EoMT-DINOv3</text>
+      <text x="627" y="424" text-anchor="middle" font-size="14" fill="#dbeafe">forward pass only — frozen</text>
+    </g>
+    <line x1="515" y1="410" x2="475" y2="410" stroke="#374151" stroke-width="2.2" marker-end="url(#ch4-arrow)"/>
+
+    <g filter="url(#ch4-shadow)">
+      <rect x="285" y="370" width="190" height="80" rx="12" fill="#ffffff" stroke="#374151" stroke-width="1.5"/>
+      <text x="380" y="402" text-anchor="middle" font-size="17" font-weight="600" fill="#0f172a">L_adv vs target mask</text>
+      <text x="380" y="424" text-anchor="middle" font-size="14" fill="#475569">CE / Dice / CosPGD-style</text>
+    </g>
+
+    <!-- Orange dashed backprop loop: from L_adv top center → up through gap → into Generator bottom center.
+         The path stays inside the gap between the top row (ends y=330) and bottom row (starts y=370) so it
+         never crosses the x input label or the solid forward arrows. -->
+    <path d="M 380 370 L 380 352 L 205 352 L 205 332" fill="none" stroke="#b45309" stroke-width="2.4" stroke-dasharray="7,5" marker-end="url(#ch4-arrow-bp)"/>
+    <text x="220" y="500" font-size="13" font-style="italic" fill="#b45309">
+      backprop updates θ once per epoch over the whole training set
+    </text>
+  </g>
+
+  <!-- =================== Subgraph B: per-image PGD (symmetric to A) =================== -->
+  <g>
+    <rect x="860" y="120" width="800" height="440" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="1260" y="160" text-anchor="middle" font-size="19" font-weight="700" fill="#0f172a">
+      B. Per-image PGD (gradient-fit per test image)
+    </text>
+    <text x="1260" y="185" text-anchor="middle" font-size="14" font-style="italic" fill="#475569">
+      fresh δ optimised from zero for every single image
+    </text>
+
+    <!-- x input indicator -->
+    <text x="900" y="285" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">x</text>
+    <line x1="915" y1="280" x2="955" y2="280" stroke="#374151" stroke-width="2.2" marker-end="url(#ch4-arrow)"/>
+
+    <!-- Top row: δ → x+δ.  δ slot uses the same anchor as Generator in A. -->
+    <g filter="url(#ch4-shadow)">
+      <rect x="955" y="230" width="180" height="100" rx="12" fill="#4f9d4f"/>
+      <text x="1045" y="270" text-anchor="middle" font-size="17" font-weight="600" fill="#ffffff">δ</text>
+      <text x="1045" y="295" text-anchor="middle" font-size="14" fill="#e8f5e9">initialised at 0</text>
+      <text x="1045" y="313" text-anchor="middle" font-size="14" fill="#e8f5e9">‖δ‖∞ ≤ ε</text>
+    </g>
+
+    <line x1="1135" y1="280" x2="1175" y2="280" stroke="#374151" stroke-width="2.2" marker-end="url(#ch4-arrow)"/>
+
+    <g filter="url(#ch4-shadow)">
+      <rect x="1175" y="230" width="140" height="100" rx="12" fill="#ffffff" stroke="#3a6da9" stroke-width="2"/>
+      <text x="1245" y="270" text-anchor="middle" font-size="17" font-weight="600" fill="#0f172a">x + δ</text>
+      <text x="1245" y="295" text-anchor="middle" font-size="14" fill="#475569">adversarial</text>
+      <text x="1245" y="313" text-anchor="middle" font-size="14" fill="#475569">input</text>
+    </g>
+
+    <!-- x+δ → right → down → into V17 right edge -->
+    <line x1="1315" y1="280" x2="1620" y2="280" stroke="#374151" stroke-width="2.2"/>
+    <line x1="1620" y1="280" x2="1620" y2="410" stroke="#374151" stroke-width="2.2"/>
+    <line x1="1620" y1="410" x2="1585" y2="410" stroke="#374151" stroke-width="2.2" marker-end="url(#ch4-arrow)"/>
+
+    <!-- Bottom row: V17 (right), L_adv (left of V17) -->
+    <g filter="url(#ch4-shadow)">
+      <rect x="1355" y="370" width="225" height="80" rx="12" fill="#3a6da9"/>
+      <text x="1467" y="402" text-anchor="middle" font-size="17" font-weight="600" fill="#ffffff">V17 EoMT-DINOv3</text>
+      <text x="1467" y="424" text-anchor="middle" font-size="14" fill="#dbeafe">forward pass only — frozen</text>
+    </g>
+    <line x1="1355" y1="410" x2="1315" y2="410" stroke="#374151" stroke-width="2.2" marker-end="url(#ch4-arrow)"/>
+
+    <g filter="url(#ch4-shadow)">
+      <rect x="1125" y="370" width="190" height="80" rx="12" fill="#ffffff" stroke="#374151" stroke-width="1.5"/>
+      <text x="1220" y="402" text-anchor="middle" font-size="17" font-weight="600" fill="#0f172a">L_adv vs target mask</text>
+      <text x="1220" y="424" text-anchor="middle" font-size="14" fill="#475569">CosPGD / PGD</text>
+    </g>
+
+    <!-- Green dashed PGD inner-loop: from L_adv top center → up through gap → into δ bottom center. -->
+    <path d="M 1220 370 L 1220 352 L 1045 352 L 1045 332" fill="none" stroke="#1f7a5a" stroke-width="2.4" stroke-dasharray="7,5" marker-end="url(#ch4-arrow-pgd)"/>
+    <text x="1060" y="500" font-size="13" font-style="italic" fill="#1f7a5a">
+      PGD inner loop: δ ← clip( δ + α · sign(∇δ L) ), 20 steps per image
+    </text>
+  </g>
+</svg>

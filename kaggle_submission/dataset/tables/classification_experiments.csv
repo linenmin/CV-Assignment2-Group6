@@ -1,0 +1,9 @@
+experiment_name,backbone,loss,input_size,val_mAP,kaggle_dice,notes
+resnet50_224,ResNet-50,AsymmetricLoss,224,0.818,0.783,torchvision ImageNet-1K baseline
+efficientnet_b3_320,EfficientNet-B3,AsymmetricLoss,320,0.860,0.856,mid-range backbone
+convnext_tiny_320,ConvNeXt-Tiny,AsymmetricLoss,320,0.893,0.873,7x7 kernels start to pay off
+convnext_small_320,ConvNeXt-Small,AsymmetricLoss,320,0.900,0.898,chosen for final submission
+convnext_base_320,ConvNeXt-Base,AsymmetricLoss,320,0.911,0.875,higher val but overfits Kaggle
+convnextv2_tiny_320,ConvNeXt V2-Tiny,AsymmetricLoss,320,0.888,0.878,architectural refresh
+efficientnet_v2_s_320,EfficientNet-V2-S,AsymmetricLoss,320,0.881,0.879,alternative midweight
+vit_b_16_224,ViT-B/16,AsymmetricLoss,224,0.787,,not submitted: pruned at val stage; low inductive bias on 749-image set

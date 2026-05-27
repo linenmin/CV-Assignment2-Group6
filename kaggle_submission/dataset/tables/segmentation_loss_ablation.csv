@@ -1,0 +1,4 @@
+version,loss,val_miou,kaggle_seg_dice
+V1,CE (baseline),62.46,0.72562
+V4,OHEM (hard-pixel sampler),63.90,0.70474
+V5,CE + Dice (composite loss),63.62,0.71106

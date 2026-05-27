@@ -1,1 +1,37 @@
+# Competition data — provided by Kaggle, do NOT commit to the repo
 kul-computer-vision-ga-2-2026/
+
+# Local model weights — distributed via the Kaggle dataset
+# (kaggle.com/datasets/enminlin/kul-cv-ga2-group6-dataset)
+kaggle_submission/dataset/weights/
+kaggle_submission/dataset/predictions/
+
+# Packaged Kaggle-dataset zip (rebuilt on demand from dataset/)
+kaggle_submission/outputs/*.zip
+
+# Local-only review and render artefacts
+kaggle_submission/plan/review_assets/
+kaggle_submission/plan/second_review_assets/
+kaggle_submission/plan/scripts/from_scratch_baseline/results/
+kaggle_submission/plan/scripts/bce_baseline/results/
+
+# Per-track work trees (kept on their own branches for history)
+Image\ classification/
+Semantic\ segmentation/
+Adversarial\ attacks/
+
+# Per-team development tooling
+.agents/
+AGENTS.md
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/

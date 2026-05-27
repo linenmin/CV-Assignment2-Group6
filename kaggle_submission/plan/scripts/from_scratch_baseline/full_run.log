@@ -1,0 +1,34 @@
+Device: cuda
+Train size: 599 | Val size: 150
+ConvNeXt-Tiny from scratch | total params: 28,222,580
+ep 1/25 train_loss=0.2136 val_loss=0.1476 val_mAP=0.1222 best=0.1222@1 (22.3s)
+ep 2/25 train_loss=0.1554 val_loss=0.0967 val_mAP=0.1263 best=0.1263@2 (21.6s)
+ep 3/25 train_loss=0.0997 val_loss=0.0838 val_mAP=0.1279 best=0.1279@3 (20.8s)
+ep 4/25 train_loss=0.0859 val_loss=0.0841 val_mAP=0.1415 best=0.1415@4 (21.8s)
+ep 5/25 train_loss=0.0854 val_loss=0.0873 val_mAP=0.1257 best=0.1415@4 (21.5s)
+ep 6/25 train_loss=0.0873 val_loss=0.0861 val_mAP=0.1292 best=0.1415@4 (21.3s)
+ep 7/25 train_loss=0.0876 val_loss=0.0877 val_mAP=0.1362 best=0.1415@4 (21.8s)
+ep 8/25 train_loss=0.0888 val_loss=0.0869 val_mAP=0.1547 best=0.1547@8 (22.8s)
+ep 9/25 train_loss=0.0870 val_loss=0.0875 val_mAP=0.1496 best=0.1547@8 (22.5s)
+ep10/25 train_loss=0.0878 val_loss=0.0871 val_mAP=0.1399 best=0.1547@8 (22.1s)
+ep11/25 train_loss=0.0870 val_loss=0.0869 val_mAP=0.1607 best=0.1607@11 (21.5s)
+ep12/25 train_loss=0.0872 val_loss=0.0869 val_mAP=0.1636 best=0.1636@12 (21.2s)
+ep13/25 train_loss=0.0857 val_loss=0.0871 val_mAP=0.1747 best=0.1747@13 (20.9s)
+ep14/25 train_loss=0.0871 val_loss=0.0854 val_mAP=0.1828 best=0.1828@14 (21.6s)
+ep15/25 train_loss=0.0857 val_loss=0.0853 val_mAP=0.1882 best=0.1882@15 (22.1s)
+ep16/25 train_loss=0.0856 val_loss=0.0842 val_mAP=0.1931 best=0.1931@16 (21.1s)
+ep17/25 train_loss=0.0854 val_loss=0.0853 val_mAP=0.1891 best=0.1931@16 (21.1s)
+ep18/25 train_loss=0.0851 val_loss=0.0853 val_mAP=0.1962 best=0.1962@18 (22.2s)
+ep19/25 train_loss=0.0849 val_loss=0.0854 val_mAP=0.1932 best=0.1962@18 (21.1s)
+ep20/25 train_loss=0.0861 val_loss=0.0847 val_mAP=0.1909 best=0.1962@18 (20.6s)
+ep21/25 train_loss=0.0841 val_loss=0.0841 val_mAP=0.1959 best=0.1962@18 (20.3s)
+ep22/25 train_loss=0.0840 val_loss=0.0846 val_mAP=0.2015 best=0.2015@22 (20.5s)
+ep23/25 train_loss=0.0842 val_loss=0.0847 val_mAP=0.2021 best=0.2021@23 (20.5s)
+ep24/25 train_loss=0.0846 val_loss=0.0848 val_mAP=0.2026 best=0.2026@24 (20.4s)
+ep25/25 train_loss=0.0852 val_loss=0.0848 val_mAP=0.2009 best=0.2026@24 (20.4s)
+Saved: D:\BaiduNetdiskWorkspace\Leuven\8th\Computer Vision\assignment\Group2\kaggle_submission\plan\scripts\from_scratch_baseline\results\training_history_from_scratch.csv
+Saved: D:\BaiduNetdiskWorkspace\Leuven\8th\Computer Vision\assignment\Group2\kaggle_submission\plan\scripts\from_scratch_baseline\results\per_class_ap_from_scratch.csv
+
+Summary: D:\BaiduNetdiskWorkspace\Leuven\8th\Computer Vision\assignment\Group2\kaggle_submission\plan\scripts\from_scratch_baseline\results\summary.json
+  best_val_mAP = 0.2026 (epoch 24)
+  gap vs fine-tuned ConvNeXt-Small = 0.6974

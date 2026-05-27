@@ -1,0 +1,3 @@
+attack,target_class,epsilon_normalized,pixel_linf_mean,steps,num_samples,clean_target_prob,adv_target_prob,attack_success_rate
+FGSM,aeroplane,0.03,0.00687,1,64,0.0740,0.4381,0.2656
+PGD,aeroplane,0.03,0.00687,10,64,0.0740,0.9834,1.0000

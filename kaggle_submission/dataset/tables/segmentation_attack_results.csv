@@ -1,0 +1,3 @@
+attack,target_mode,method,epsilon_pixel,pixel_linf_mean,steps,num_samples,clean_miou,adv_miou,miou_drop,prediction_change_rate,target_region_match_rate
+Untargeted CosPGD,untargeted,CosPGD-inspired,6.0,3.260781339696936,20,37,79.23256325453387,0.073266119386351,79.15929713514753,0.9958091942039696,
+Targeted PGD,non-person foreground to person,PGD,6.0,3.232547,20,25,81.464364,5.277,76.187364,0.182571,0.982375
